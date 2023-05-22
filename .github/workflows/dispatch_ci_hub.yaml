@@ -16,5 +16,5 @@ jobs:
         with:
           token: ${{ secrets.DISPATCH_TOKEN }}
           event-type: trigger_ci_hub
-          repository: crowdsecurity/hub
+          repository: pendekar/hub
           client-payload: '{"version": "${{ steps.keydb.outputs.release }}"}'
