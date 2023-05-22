@@ -12,7 +12,7 @@ jobs:
       - id: keydb
         uses: pozetroninc/github-action-get-latest-release@master
         with:
-          owner: crowdsecurity
+          owner: asians-cloud
           repo: crowdsec
           excludes: prerelease, draft
       - name: Repository Dispatch
@@ -20,5 +20,5 @@ jobs:
         with:
           token: ${{ secrets.DISPATCH_TOKEN }}
           event-type: delete_branch
-          repository: crowdsecurity/hub
+          repository: pendekar/hub
           client-payload: '{"version": "${{ steps.keydb.outputs.release }}"}'
