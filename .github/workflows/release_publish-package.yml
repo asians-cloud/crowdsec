@@ -57,10 +57,10 @@ jobs:
     - id: fetch_prerelease_version
       uses: pozetroninc/github-action-get-latest-release@master
       with:
-        repository: crowdsecurity/crowdsec
+        repository: asians-cloud/crowdsec
         excludes: draft
     - name: download tarball
-      run: wget -qO - https://github.com/crowdsecurity/crowdsec/releases/download/${{ steps.fetch_prerelease_version.outputs.release }}/${{ matrix.tarball.name }}.tgz | tar xvzf -
+      run: wget -qO - https://github.com/asians-cloud/crowdsec/releases/download/${{ steps.fetch_prerelease_version.outputs.release }}/${{ matrix.tarball.name }}.tgz | tar xvzf -
     - name: "Force machineid"
       run: |
           sudo chmod +w /etc/machine-id
