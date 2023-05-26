@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 	tomb "gopkg.in/tomb.v2"
 )

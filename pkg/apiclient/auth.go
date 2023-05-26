@@ -14,8 +14,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

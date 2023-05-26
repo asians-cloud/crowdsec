@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/bouncer"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/bouncer"
 )
 
 // BouncerCreate is the builder for creating a Bouncer entity.

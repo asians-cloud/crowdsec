@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/enescakir/emoji"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

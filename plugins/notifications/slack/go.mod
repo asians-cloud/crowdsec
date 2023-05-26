@@ -1,11 +1,11 @@
-module github.com/crowdsecurity/slack-plugin
+module github.com/asians-cloud/slack-plugin
 
 go 1.20
 
-replace github.com/crowdsecurity/crowdsec => ../../../
+replace github.com/asians-cloud/crowdsec => ../../../
 
 require (
-	github.com/crowdsecurity/crowdsec v1.5.0
+	github.com/asians-cloud/crowdsec v1.5.0
 	github.com/hashicorp/go-hclog v1.0.0
 	github.com/hashicorp/go-plugin v1.4.2
 	github.com/slack-go/slack v0.9.2

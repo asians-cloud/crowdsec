@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 	"github.com/pkg/errors"
 )
 

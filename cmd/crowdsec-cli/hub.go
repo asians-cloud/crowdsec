@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 )
 
 func NewHubCmd() *cobra.Command {
@@ -79,7 +79,7 @@ func NewHubUpdateCmd() *cobra.Command {
 		Use:   "update",
 		Short: "Fetch available configs from hub",
 		Long: `
-Fetches the [.index.json](https://github.com/crowdsecurity/hub/blob/master/.index.json) file from hub, containing the list of available configs.
+Fetches the [.index.json](https://github.com/asians-cloud/hub/blob/master/.index.json) file from hub, containing the list of available configs.
 `,
 		Args:              cobra.ExactArgs(0),
 		DisableAutoGenTag: true,

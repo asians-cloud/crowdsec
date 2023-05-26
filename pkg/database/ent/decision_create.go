@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/alert"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/decision"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/alert"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/decision"
 )
 
 // DecisionCreate is the builder for creating a Decision entity.

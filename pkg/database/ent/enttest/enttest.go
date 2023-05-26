@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	// required by schema hooks.
-	_ "github.com/crowdsecurity/crowdsec/pkg/database/ent/runtime"
+	_ "github.com/asians-cloud/crowdsec/pkg/database/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/migrate"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/migrate"
 )
 
 type (

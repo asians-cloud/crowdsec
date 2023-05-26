@@ -9,9 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csstring"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
-	"github.com/crowdsecurity/crowdsec/pkg/yamlpatch"
+	"github.com/asians-cloud/crowdsec/pkg/csstring"
+	"github.com/asians-cloud/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/yamlpatch"
 )
 
 // defaultConfigDir is the base path to all configuration files, to be overridden in the Makefile */

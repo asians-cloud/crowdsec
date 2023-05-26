@@ -23,10 +23,10 @@ import (
 
 	"github.com/umahmood/haversine"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cache"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/cache"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 
 	"github.com/wasilibs/go-re2"
 )

@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 // Meta holds the schema definition for the Meta entity.

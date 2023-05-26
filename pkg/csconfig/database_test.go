@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/stretchr/testify/assert"
 )
 

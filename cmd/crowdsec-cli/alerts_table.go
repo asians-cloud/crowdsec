@@ -9,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 func alertsTable(out io.Writer, alerts *models.GetAlertsResponse, printMachine bool) {

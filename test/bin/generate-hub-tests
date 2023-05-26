@@ -14,7 +14,7 @@ cscli() {
 "${TEST_DIR}/instance-data" load
 
 hubdir="${LOCAL_DIR}/hub-tests"
-git clone --depth 1 https://github.com/crowdsecurity/hub.git "${hubdir}" >/dev/null 2>&1 || (cd "${hubdir}"; git pull)
+git clone --depth 1 https://github.com/asians-cloud/hub.git "${hubdir}" >/dev/null 2>&1 || (cd "${hubdir}"; git pull)
 
 HUBTESTS_BATS="${TEST_DIR}/dyn-bats/hub.bats"
 

@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/crowdsecurity/crowdsec/pkg/database/ent/runtime.go
+// The schema-stitching logic is generated in github.com/asians-cloud/crowdsec/pkg/database/ent/runtime.go
 
 const (
 	Version = "v0.11.3"                                         // Version of ent codegen.

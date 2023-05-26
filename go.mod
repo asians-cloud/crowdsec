@@ -12,9 +12,9 @@ require (
 	github.com/aws/aws-sdk-go v1.42.25
 	github.com/buger/jsonparser v1.1.1
 	github.com/c-robinson/iplib v1.0.3
-	github.com/crowdsecurity/dlog v0.0.0-20170105205344-4fb5f8204f26
-	github.com/crowdsecurity/grokky v0.2.1
-	github.com/crowdsecurity/machineid v1.0.2
+	github.com/asians-cloud/dlog v0.0.0-20170105205344-4fb5f8204f26
+	github.com/asians-cloud/grokky v0.2.1
+	github.com/asians-cloud/machineid v1.0.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dghubble/sling v1.3.0
 	github.com/docker/docker v20.10.24+incompatible
@@ -195,4 +195,4 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 )
 
-replace golang.org/x/time/rate => github.com/crowdsecurity/crowdsec/pkg/time/rate v0.0.0
+replace golang.org/x/time/rate => github.com/asians-cloud/crowdsec/pkg/time/rate v0.0.0

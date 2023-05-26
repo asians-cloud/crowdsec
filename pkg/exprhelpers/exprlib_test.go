@@ -13,11 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cstest"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 var (

@@ -5,14 +5,14 @@ package ent
 import (
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/alert"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/bouncer"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/configitem"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/decision"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/event"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/machine"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/meta"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/schema"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/alert"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/bouncer"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/configitem"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/decision"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/event"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/machine"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/meta"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

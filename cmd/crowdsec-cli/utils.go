@@ -21,9 +21,9 @@ import (
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 const MaxDistance = 7

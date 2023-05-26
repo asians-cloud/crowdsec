@@ -11,12 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/alert"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/decision"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/event"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/machine"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/meta"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/predicate"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/alert"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/decision"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/event"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/machine"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/meta"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/predicate"
 )
 
 // AlertUpdate is the builder for updating Alert entities.

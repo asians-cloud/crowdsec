@@ -3,8 +3,8 @@ package parser
 import (
 	"time"
 
-	expr "github.com/crowdsecurity/crowdsec/pkg/exprhelpers"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	expr "github.com/asians-cloud/crowdsec/pkg/exprhelpers"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 )
 

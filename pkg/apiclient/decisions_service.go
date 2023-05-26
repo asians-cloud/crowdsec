@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/modelscapi"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/modelscapi"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	qs "github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

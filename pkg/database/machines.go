@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-openapi/strfmt"
 
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/machine"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/machine"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )

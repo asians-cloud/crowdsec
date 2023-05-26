@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/crowdsecurity/crowdsec/pkg/protobufs"
+	"github.com/asians-cloud/crowdsec/pkg/protobufs"
 	"github.com/hashicorp/go-hclog"
 	plugin "github.com/hashicorp/go-plugin"
 	mail "github.com/xhit/go-simple-mail/v2"

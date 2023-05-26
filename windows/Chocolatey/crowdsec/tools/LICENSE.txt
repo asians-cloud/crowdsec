@@ -1,5 +1,5 @@
 ﻿
-From: https://github.com/crowdsecurity/crowdsec/blob/master/LICENSE
+From: https://github.com/asians-cloud/crowdsec/blob/master/LICENSE
 
 LICENSE
 

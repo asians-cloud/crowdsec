@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/crowdsecurity/crowdsec/pkg/hubtest"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/hubtest"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 func runExplain(cmd *cobra.Command, args []string) error {

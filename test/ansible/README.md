@@ -31,7 +31,7 @@ installation and run the tests, or run the playbooks separately to iterate while
 The tasks use the following environment variables. They must be exported or
 ansible won't be able to see them.
 
-- `TEST_SUITE_GIT` (default "https://github.com/crowdsecurity/crowdsec"),
+- `TEST_SUITE_GIT` (default "https://github.com/asians-cloud/crowdsec"),
   `TEST_SUITE_VERSION` (default "master"): repo URL and branch/tag/commit of
   the crowdsec sources containing the test fixture and scripts.
 

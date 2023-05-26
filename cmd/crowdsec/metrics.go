@@ -9,15 +9,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
-	v1 "github.com/crowdsecurity/crowdsec/pkg/apiserver/controllers/v1"
-	"github.com/crowdsecurity/crowdsec/pkg/cache"
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/exprhelpers"
-	leaky "github.com/crowdsecurity/crowdsec/pkg/leakybucket"
-	"github.com/crowdsecurity/crowdsec/pkg/parser"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	v1 "github.com/asians-cloud/crowdsec/pkg/apiserver/controllers/v1"
+	"github.com/asians-cloud/crowdsec/pkg/cache"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
+	leaky "github.com/asians-cloud/crowdsec/pkg/leakybucket"
+	"github.com/asians-cloud/crowdsec/pkg/parser"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 /*prometheus*/

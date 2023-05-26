@@ -26,7 +26,7 @@
     sources_dest_dir: "{{ ansible_env.HOME }}/crowdsec"
     sources_git_repo: >-
       {{ lookup('ansible.builtin.env', 'TEST_SUITE_GIT')
-      | default('https://github.com/crowdsecurity/crowdsec', True) }}
+      | default('https://github.com/asians-cloud/crowdsec', True) }}
     sources_git_version: >-
       {{ lookup('ansible.builtin.env', 'TEST_SUITE_VERSION')
       | default('master', True) }}

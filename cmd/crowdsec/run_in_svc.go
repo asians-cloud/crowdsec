@@ -10,10 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/writer"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 func StartRunSvc() error {

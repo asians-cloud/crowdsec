@@ -4,8 +4,8 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/crowdsecurity/crowdsec/pkg/exprhelpers"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 var helpers = template.FuncMap{

@@ -19,11 +19,11 @@ import (
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/csstring"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/protobufs"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csstring"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/protobufs"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 var pluginMutex sync.Mutex

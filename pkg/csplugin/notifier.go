@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/crowdsecurity/crowdsec/pkg/protobufs"
+	"github.com/asians-cloud/crowdsec/pkg/protobufs"
 	plugin "github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 )

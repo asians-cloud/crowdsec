@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/tomb.v2"
 
-	fileacquisition "github.com/crowdsecurity/crowdsec/pkg/acquisition/modules/file"
-	"github.com/crowdsecurity/crowdsec/pkg/cstest"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	fileacquisition "github.com/asians-cloud/crowdsec/pkg/acquisition/modules/file"
+	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 func TestBadConfiguration(t *testing.T) {

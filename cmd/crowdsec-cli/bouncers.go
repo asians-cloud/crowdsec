@@ -12,9 +12,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	middlewares "github.com/crowdsecurity/crowdsec/pkg/apiserver/middlewares/v1"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	middlewares "github.com/asians-cloud/crowdsec/pkg/apiserver/middlewares/v1"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 func getBouncers(out io.Writer, dbClient *database.Client) error {

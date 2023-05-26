@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/configitem"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/configitem"
 	"github.com/pkg/errors"
 )
 

@@ -5,7 +5,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 func decisionsTable(out io.Writer, alerts *models.GetAlertsResponse, printMachine bool) {

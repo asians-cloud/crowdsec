@@ -9,17 +9,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/alert"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/bouncer"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/decision"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/event"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/machine"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/meta"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/predicate"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/alert"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/bouncer"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/decision"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/event"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/machine"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/meta"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/predicate"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -1157,7 +1157,7 @@ func (c *Client) DeleteAlertWithFilter(filter map[string][]string) (int, error) 
 }
 
 func (c *Client) FlushOrphans() {
-	/* While it has only been linked to some very corner-case bug : https://github.com/crowdsecurity/crowdsec/issues/778 */
+	/* While it has only been linked to some very corner-case bug : https://github.com/asians-cloud/crowdsec/issues/778 */
 	/* We want to take care of orphaned events for which the parent alert/decision has been deleted */
 
 	events_count, err := c.Ent.Event.Delete().Where(event.Not(event.HasOwner())).Exec(c.CTX)

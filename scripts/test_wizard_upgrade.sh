@@ -69,7 +69,7 @@ function init
 
 
     echo "[*] Install firewall bouncer"
-    wget https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/${BOUNCER_VERSION}/cs-firewall-bouncer.tgz
+    wget https://github.com/asians-cloud/cs-firewall-bouncer/releases/download/${BOUNCER_VERSION}/cs-firewall-bouncer.tgz
     tar xzvf cs-firewall-bouncer.tgz
     cd cs-firewall-bouncer-${BOUNCER_VERSION}/
     (echo "iptables" | sudo ./install.sh) || (echo "Unable to install cs-firewall-bouncer" && exit 1)

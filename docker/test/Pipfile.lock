@@ -303,7 +303,7 @@
             "version": "==7.2.2"
         },
         "pytest-cs": {
-            "git": "https://github.com/crowdsecurity/pytest-cs.git",
+            "git": "https://github.com/asians-cloud/pytest-cs.git",
             "ref": "8c49bd8072672c49855a7991a5900858b3ebb777"
         },
         "pytest-datadir": {

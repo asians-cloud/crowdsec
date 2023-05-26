@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/antonmedv/expr/vm"
-	"github.com/crowdsecurity/grokky"
+	"github.com/asians-cloud/grokky"
 )
 
 // Used mostly for statics

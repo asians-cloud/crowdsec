@@ -19,9 +19,9 @@ import (
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/configuration"
-	"github.com/crowdsecurity/crowdsec/pkg/parser"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
+	"github.com/asians-cloud/crowdsec/pkg/parser"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 var openedStreams = prometheus.NewGaugeVec(

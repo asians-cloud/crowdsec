@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/alexliesenfeld/health"
-	v1 "github.com/crowdsecurity/crowdsec/pkg/apiserver/controllers/v1"
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/csplugin"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	v1 "github.com/asians-cloud/crowdsec/pkg/apiserver/controllers/v1"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csplugin"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )

@@ -1,17 +1,17 @@
 
 <p align="center">
-<img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/crowdsec_logo.png" alt="CrowdSec" title="CrowdSec" width="400" height="260"/>
+<img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/crowdsec_logo.png" alt="CrowdSec" title="CrowdSec" width="400" height="260"/>
 </p>
 </br>
 </br>
 </br>
 <p align="center">
-<img src="https://github.com/crowdsecurity/crowdsec/actions/workflows/go-tests.yml/badge.svg">
-<img src="https://github.com/crowdsecurity/crowdsec/actions/workflows/bats.yml/badge.svg">
+<img src="https://github.com/asians-cloud/crowdsec/actions/workflows/go-tests.yml/badge.svg">
+<img src="https://github.com/asians-cloud/crowdsec/actions/workflows/bats.yml/badge.svg">
 <a href="https://codecov.io/gh/crowdsecurity/crowdsec">
   <img src="https://codecov.io/gh/crowdsecurity/crowdsec/branch/master/graph/badge.svg?token=CQGSPNY3PT"/>
 </a>
-<img src="https://goreportcard.com/badge/github.com/crowdsecurity/crowdsec">
+<img src="https://goreportcard.com/badge/github.com/asians-cloud/crowdsec">
 <img src="https://img.shields.io/github/license/crowdsecurity/crowdsec">
 <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AlteredCoder/ed74e50c43e3b17bdfc4d93149f23d37/raw/crowdsec_parsers_badge.json">
 <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AlteredCoder/ed74e50c43e3b17bdfc4d93149f23d37/raw/crowdsec_scenarios_badge.json">
@@ -68,7 +68,7 @@ sudo pkg install crowdsec
 ### From source
 
 ```sh
-wget https://github.com/crowdsecurity/crowdsec/releases/latest/download/crowdsec-release.tgz
+wget https://github.com/asians-cloud/crowdsec/releases/latest/download/crowdsec-release.tgz
 tar xzvf crowdsec-release.tgz
 cd crowdsec-v* && sudo ./wizard.sh -i
 ```
@@ -80,7 +80,7 @@ Crowdsec is an open-source, lightweight software, detecting peers with aggressiv
 The architecture is as follows :
 
 <p align="center">
- <img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/crowdsec_architecture.png" alt="CrowdSec" title="CrowdSec"/>
+ <img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/crowdsec_architecture.png" alt="CrowdSec" title="CrowdSec"/>
 </p>
 
 Once an unwanted behavior is detected, deal with it through a [bouncer](https://hub.crowdsec.net/browse/#bouncers). The aggressive IP, scenario triggered and timestamp are sent for curation, to avoid poisoning & false positives. (This can be disabled). If verified, this IP is then redistributed to all CrowdSec users running the same scenario.
@@ -103,7 +103,7 @@ Crowdsec is available for various platforms :
 
  - [Use our debian repositories](https://doc.crowdsec.net/docs/getting_started/install_crowdsec) or the [official debian packages](https://packages.debian.org/search?keywords=crowdsec&searchon=names&suite=stable&section=all)
  - An [image](https://hub.docker.com/r/crowdsecurity/crowdsec) is available for docker
- - [Prebuilt release packages](https://github.com/crowdsecurity/crowdsec/releases) are also available (suitable for `amd64`)
+ - [Prebuilt release packages](https://github.com/asians-cloud/crowdsec/releases) are also available (suitable for `amd64`)
  - You can as well [build it from source](https://doc.crowdsec.net/docs/user_guides/building)
 
 Or look directly at [installation documentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec) for other methods and platforms.
@@ -114,35 +114,35 @@ Or look directly at [installation documentation](https://doc.crowdsec.net/docs/g
 
 <details open>
   <summary>Initial configuration is automated, providing functional out-of-the-box setup</summary>
-  <img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/crowdsec_install.gif?raw=true">
+  <img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/crowdsec_install.gif?raw=true">
 </details>
 
 ### Out of the box detection
 
 <details>
   <summary>Baseline detection is effective out-of-the-box, no fine-tuning required (click to expand)</summary>
-  <img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/out-of-the-box-protection.gif?raw=true">
+  <img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/out-of-the-box-protection.gif?raw=true">
 </details>
 
 ### Easy bouncer deployment
 
 <details>
   <summary>It's trivial to add bouncers to enforce decisions of crowdsec (click to expand)</summary>
-  <img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/blocker-installation.gif?raw=true">
+  <img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/blocker-installation.gif?raw=true">
 </details>
 
 ### Easy dashboard access
 
 <details>
   <summary>It's easy to deploy a metabase interface to view your data simply with cscli (click to expand)</summary>
-  <img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/cscli-metabase.gif?raw=true">
+  <img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/cscli-metabase.gif?raw=true">
 </details>
 
 ### Hot & Cold logs
 
 <details>
   <summary>Process cold logs, for forensic, tests and chasing false positives & false negatives (click to expand)</summary>
-  <img src="https://github.com/crowdsecurity/crowdsec-docs/blob/main/crowdsec-docs/static/img/forensic-mode.gif?raw=true">
+  <img src="https://github.com/asians-cloud/crowdsec-docs/blob/main/crowdsec-docs/static/img/forensic-mode.gif?raw=true">
 </details>
 
 
@@ -157,6 +157,6 @@ This repository contains the code for the two main components of crowdsec :
 
 If you wish to contribute to the core of crowdsec, you are welcome to open a PR in this repository.
 
-If you wish to add a new parser, scenario or collection, please open a PR in the [hub repository](https://github.com/crowdsecurity/hub).
+If you wish to add a new parser, scenario or collection, please open a PR in the [hub repository](https://github.com/asians-cloud/hub).
 
-If you wish to contribute to the documentation, please open a PR in the [documentation repository](http://github.com/crowdsecurity/crowdsec-docs).
+If you wish to contribute to the documentation, please open a PR in the [documentation repository](http://github.com/asians-cloud/crowdsec-docs).

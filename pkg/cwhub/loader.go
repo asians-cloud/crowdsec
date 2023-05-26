@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"

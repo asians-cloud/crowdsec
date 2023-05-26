@@ -6,7 +6,7 @@ import (
 	"github.com/aquasecurity/table"
 	"github.com/enescakir/emoji"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 )
 
 func cmdConsoleStatusTable(out io.Writer, csConfig csconfig.Config) {

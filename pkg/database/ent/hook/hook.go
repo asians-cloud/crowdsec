@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 )
 
 // The AlertFunc type is an adapter to allow the use of ordinary

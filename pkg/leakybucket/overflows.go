@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/crowdsecurity/crowdsec/pkg/alertcontext"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/alertcontext"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"

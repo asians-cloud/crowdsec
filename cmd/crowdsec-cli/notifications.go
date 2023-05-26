@@ -20,11 +20,11 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/tomb.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/apiclient"
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/csplugin"
-	"github.com/crowdsecurity/crowdsec/pkg/csprofiles"
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/apiclient"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csplugin"
+	"github.com/asians-cloud/crowdsec/pkg/csprofiles"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 )
 
 

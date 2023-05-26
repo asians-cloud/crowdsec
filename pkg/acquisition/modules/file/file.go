@@ -22,8 +22,8 @@ import (
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/configuration"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 var linesRead = prometheus.NewCounterVec(
@@ -308,7 +308,7 @@ func (f *FileSource) StreamingAcquisition(out chan types.Event, t *tomb.Tomb) er
 			continue
 		}
 
-		//cf. https://github.com/crowdsecurity/crowdsec/issues/1168
+		//cf. https://github.com/asians-cloud/crowdsec/issues/1168
 		//do not rely on stat, reclose file immediately as it's opened by Tail
 		fd, err := os.Open(file)
 		if err != nil {
@@ -400,7 +400,7 @@ func (f *FileSource) monitorNewFiles(out chan types.Event, t *tomb.Tomb) error {
 					logger.Debugf("Already tailing file %s, not creating a new tail", event.Name)
 					break
 				}
-				//cf. https://github.com/crowdsecurity/crowdsec/issues/1168
+				//cf. https://github.com/asians-cloud/crowdsec/issues/1168
 				//do not rely on stat, reclose file immediately as it's opened by Tail
 				fd, err := os.Open(event.Name)
 				if err != nil {

@@ -3,7 +3,7 @@ package exprhelpers
 import (
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cticlient"
+	"github.com/asians-cloud/crowdsec/pkg/cticlient"
 )
 
 type exprCustomFunc struct {

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cticlient"
+	"github.com/asians-cloud/crowdsec/pkg/cticlient"
 )
 
 func intPtr(i int) *int {

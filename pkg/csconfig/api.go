@@ -13,9 +13,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/apiclient"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
-	"github.com/crowdsecurity/crowdsec/pkg/yamlpatch"
+	"github.com/asians-cloud/crowdsec/pkg/apiclient"
+	"github.com/asians-cloud/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/yamlpatch"
 )
 
 type APICfg struct {

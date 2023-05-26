@@ -16,7 +16,7 @@ import (
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )

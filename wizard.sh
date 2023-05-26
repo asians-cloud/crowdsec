@@ -569,7 +569,7 @@ function show_link {
     echo ""
     echo "  - Documentation : https://doc.crowdsec.net/docs/getting_started/crowdsec_tour"
     echo "  - Crowdsec Hub  : https://hub.crowdsec.net/ "
-    echo "  - Open issues   : https://github.com/crowdsecurity/crowdsec/issues"
+    echo "  - Open issues   : https://github.com/asians-cloud/crowdsec/issues"
     echo ""
     echo "Useful commands to start with Crowdsec:"
     echo ""

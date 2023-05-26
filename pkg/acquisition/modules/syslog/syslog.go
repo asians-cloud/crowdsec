@@ -12,11 +12,11 @@ import (
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/configuration"
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/modules/syslog/internal/parser/rfc3164"
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/modules/syslog/internal/parser/rfc5424"
-	syslogserver "github.com/crowdsecurity/crowdsec/pkg/acquisition/modules/syslog/internal/server"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/modules/syslog/internal/parser/rfc3164"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/modules/syslog/internal/parser/rfc5424"
+	syslogserver "github.com/asians-cloud/crowdsec/pkg/acquisition/modules/syslog/internal/server"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 type SyslogConfiguration struct {

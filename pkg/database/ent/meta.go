@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/alert"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/meta"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/alert"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/meta"
 )
 
 // Meta is the model entity for the Meta schema.

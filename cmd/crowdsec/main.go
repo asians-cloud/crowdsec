@@ -13,15 +13,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition"
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/csplugin"
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
-	"github.com/crowdsecurity/crowdsec/pkg/leakybucket"
-	"github.com/crowdsecurity/crowdsec/pkg/parser"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csplugin"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/leakybucket"
+	"github.com/asians-cloud/crowdsec/pkg/parser"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 var (

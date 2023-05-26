@@ -1,6 +1,6 @@
 package v1
 
-import "github.com/crowdsecurity/crowdsec/pkg/database"
+import "github.com/asians-cloud/crowdsec/pkg/database"
 
 type Middlewares struct {
 	APIKey *APIKey

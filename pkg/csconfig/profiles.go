@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/yamlpatch"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/yamlpatch"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )

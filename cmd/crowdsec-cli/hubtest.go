@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/hubtest"
+	"github.com/asians-cloud/crowdsec/pkg/hubtest"
 )
 
 var (

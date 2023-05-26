@@ -7,7 +7,7 @@ import (
 	"github.com/aquasecurity/table"
 	"github.com/enescakir/emoji"
 
-	"github.com/crowdsecurity/crowdsec/pkg/hubtest"
+	"github.com/asians-cloud/crowdsec/pkg/hubtest"
 )
 
 func hubTestResultTable(out io.Writer, testResult map[string]bool) {

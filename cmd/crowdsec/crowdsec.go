@@ -8,12 +8,12 @@ import (
 
 	"path/filepath"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition"
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
-	leaky "github.com/crowdsecurity/crowdsec/pkg/leakybucket"
-	"github.com/crowdsecurity/crowdsec/pkg/parser"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
+	leaky "github.com/asians-cloud/crowdsec/pkg/leakybucket"
+	"github.com/asians-cloud/crowdsec/pkg/parser"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"

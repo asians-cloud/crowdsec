@@ -24,7 +24,7 @@ CROWDSEC_BIN = crowdsec$(EXT)
 CSCLI_BIN = cscli$(EXT)
 BUILD_CMD = build
 
-GO_MODULE_NAME = github.com/crowdsecurity/crowdsec
+GO_MODULE_NAME = github.com/asians-cloud/crowdsec
 
 LD_OPTS_VARS= \
 -X '$(GO_MODULE_NAME)/pkg/cwversion.Version=$(BUILD_VERSION)' \

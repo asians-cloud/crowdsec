@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 // CrowdsecServiceCfg contains the location of parsers/scenarios/... and acquisition files

@@ -1013,5 +1013,5 @@ tags:
   - name: watchers
     description: 'Operations about watchers : cscli & crowdsec'
 externalDocs:
-  url: 'https://github.com/crowdsecurity/crowdsec'
+  url: 'https://github.com/asians-cloud/crowdsec'
   description: Find out more about CrowdSec

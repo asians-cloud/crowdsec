@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/crowdsec/pkg/cstest"
 )
 
 func TestLoadLocalApiClientCfg(t *testing.T) {

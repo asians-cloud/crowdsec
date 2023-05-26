@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
 )
 
 

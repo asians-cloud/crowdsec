@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/pkg/errors"
 )
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	log "github.com/sirupsen/logrus"
 )
 

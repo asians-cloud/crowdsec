@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/alert"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/meta"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/predicate"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/alert"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/meta"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/predicate"
 )
 
 // MetaUpdate is the builder for updating Meta entities.

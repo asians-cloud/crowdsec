@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 )
 
 func NewScenariosCmd() *cobra.Command {

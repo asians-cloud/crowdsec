@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/modules/syslog/internal/parser/utils"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/modules/syslog/internal/parser/utils"
 )
 
 type RFC3164Option func(*RFC3164)

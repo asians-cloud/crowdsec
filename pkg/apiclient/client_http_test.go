@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/stretchr/testify/assert"
 )
 

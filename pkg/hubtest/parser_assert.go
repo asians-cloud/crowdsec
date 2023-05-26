@@ -12,8 +12,8 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
-	"github.com/crowdsecurity/crowdsec/pkg/exprhelpers"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/enescakir/emoji"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"

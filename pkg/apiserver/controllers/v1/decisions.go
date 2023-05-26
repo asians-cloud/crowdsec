@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )

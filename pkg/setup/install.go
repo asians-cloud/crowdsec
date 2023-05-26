@@ -10,8 +10,8 @@ import (
 	goccyyaml "github.com/goccy/go-yaml"
 	"gopkg.in/yaml.v3"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 )
 
 // AcquisDocument is created from a SetupItem. It represents a single YAML document, and can be part of a multi-document file.

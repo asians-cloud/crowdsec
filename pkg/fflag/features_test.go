@@ -9,8 +9,8 @@ import (
 	logtest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/require"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cstest"
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
 )
 
 func TestRegisterFeature(t *testing.T) {

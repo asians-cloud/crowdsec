@@ -7,7 +7,7 @@ import (
 	"github.com/aquasecurity/table"
 	"github.com/enescakir/emoji"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 )
 
 func listHubItemTable(out io.Writer, title string, statuses []cwhub.ItemHubStatus) {

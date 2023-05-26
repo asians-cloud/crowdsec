@@ -2,7 +2,7 @@
 
 * Documentation and help: https://docs.crowdsec.net/
 * Crowdsec concepts: https://docs.crowdsec.net/docs/concepts
-* Where to file issues: https://github.com/crowdsecurity/crowdsec
+* Where to file issues: https://github.com/asians-cloud/crowdsec
 
 # What is Crowdsec
 
@@ -170,7 +170,7 @@ docker run -d \
 
 ## ... or docker-compose
 
-Check this full-stack example using docker-compose: https://github.com/crowdsecurity/example-docker-compose
+Check this full-stack example using docker-compose: https://github.com/asians-cloud/example-docker-compose
 
 
 # How to extend this image
@@ -178,7 +178,7 @@ Check this full-stack example using docker-compose: https://github.com/crowdsecu
 ## Full configuration
 
 The container is built with a specific docker
-[configuration](https://github.com/crowdsecurity/crowdsec/blob/master/docker/config.yaml).
+[configuration](https://github.com/asians-cloud/crowdsec/blob/master/docker/config.yaml).
 If you need to change it and the docker variables (see below) are not enough,
 you can mount `/etc/crowdsec/config.yaml.local` from the host.
 The file should contain only the options from `config.yaml` that you want to change,
@@ -337,7 +337,7 @@ config.yaml) each time the container is run.
 
 # Find Us
 
-* [GitHub](https://github.com/crowdsecurity/crowdsec)
+* [GitHub](https://github.com/asians-cloud/crowdsec)
 
 # Contributing
 
@@ -345,4 +345,4 @@ Please read [contributing](https://docs.crowdsec.net/Crowdsec/v1/contributing/) 
 
 # License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/crowdsecurity/crowdsec/blob/master/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/asians-cloud/crowdsec/blob/master/LICENSE) file for details.

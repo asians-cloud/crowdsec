@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/crowdsecurity/crowdsec/pkg/setup"
+	"github.com/asians-cloud/crowdsec/pkg/setup"
 )
 
 func TestSystemdUnitList(t *testing.T) {

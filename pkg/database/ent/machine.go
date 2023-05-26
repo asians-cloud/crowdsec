@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/machine"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/machine"
 )
 
 // Machine is the model entity for the Machine schema.

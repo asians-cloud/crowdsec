@@ -17,7 +17,7 @@ import (
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/eventlog"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 )
 
 type crowdsec_winservice struct {

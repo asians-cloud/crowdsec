@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/event"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/predicate"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/event"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/predicate"
 )
 
 // EventDelete is the builder for deleting a Event entity.

@@ -9,8 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/configuration"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 type WinEventLogSource struct{}

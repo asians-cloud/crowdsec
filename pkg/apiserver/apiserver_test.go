@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	middlewares "github.com/crowdsecurity/crowdsec/pkg/apiserver/middlewares/v1"
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
-	"github.com/crowdsecurity/crowdsec/pkg/models"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	middlewares "github.com/asians-cloud/crowdsec/pkg/apiserver/middlewares/v1"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/gin-gonic/gin"
 
 	log "github.com/sirupsen/logrus"

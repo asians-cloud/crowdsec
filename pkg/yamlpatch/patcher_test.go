@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/crowdsecurity/crowdsec/pkg/yamlpatch"
+	"github.com/asians-cloud/crowdsec/pkg/yamlpatch"
 	"github.com/stretchr/testify/require"
 )
 

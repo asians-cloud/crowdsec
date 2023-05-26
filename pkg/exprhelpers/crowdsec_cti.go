@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/bluele/gcache"
-	"github.com/crowdsecurity/crowdsec/pkg/cticlient"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/cticlient"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )

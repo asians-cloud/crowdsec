@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
 )

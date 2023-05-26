@@ -11,8 +11,8 @@ import (
 	"gopkg.in/yaml.v3"
 	goccyyaml "github.com/goccy/go-yaml"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/setup"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/setup"
 )
 
 // NewSetupCmd defines the "cscli setup" command.

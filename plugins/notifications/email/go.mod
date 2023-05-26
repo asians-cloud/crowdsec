@@ -1,11 +1,11 @@
-module github.com/crowdsecurity/email-plugin
+module github.com/asians-cloud/email-plugin
 
 go 1.20
 
-replace github.com/crowdsecurity/crowdsec => ../../../
+replace github.com/asians-cloud/crowdsec => ../../../
 
 require (
-	github.com/crowdsecurity/crowdsec v1.5.0
+	github.com/asians-cloud/crowdsec v1.5.0
 	github.com/hashicorp/go-hclog v1.0.0
 	github.com/hashicorp/go-plugin v1.4.3
 	github.com/xhit/go-simple-mail/v2 v2.10.0

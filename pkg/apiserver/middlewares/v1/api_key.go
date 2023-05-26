@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/crowdsecurity/crowdsec/pkg/database"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )

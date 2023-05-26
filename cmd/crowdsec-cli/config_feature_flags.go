@@ -6,7 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
 )
 
 func runConfigFeatureFlags(cmd *cobra.Command, args []string) error {

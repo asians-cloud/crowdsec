@@ -15,7 +15,7 @@ Reports regarding developements of community members that are not part of the cr
 
 We are extremely grateful to security researchers and users that report vulnerabilities regarding the Crowdsec project. All reports are thoroughly investigated by members of the Crowdsec organization.
 
-You can email the private [security@crowdsec.net](mailto:security@crowdsec.net) list with the security details and the details expected for [all Crowdsec bug reports](https://github.com/crowdsecurity/crowdsec/blob/master/.github/ISSUE_TEMPLATE/bug_report.md).
+You can email the private [security@crowdsec.net](mailto:security@crowdsec.net) list with the security details and the details expected for [all Crowdsec bug reports](https://github.com/asians-cloud/crowdsec/blob/master/.github/ISSUE_TEMPLATE/bug_report.md).
 
 You may encrypt your email to this list using the GPG key of the [Security team](https://doc.crowdsec.net/docs/next/contact_team). Encryption using GPG is NOT required to make a disclosure.
 

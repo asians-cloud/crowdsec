@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/crowdsecurity/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/crowdsec/pkg/cstest"
 )
 
 func TestPri(t *testing.T) {

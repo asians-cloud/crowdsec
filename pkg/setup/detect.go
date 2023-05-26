@@ -17,8 +17,8 @@ import (
 
 	// "github.com/k0kubun/pp"
 
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition"
-	"github.com/crowdsecurity/crowdsec/pkg/acquisition/configuration"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition"
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
 )
 
 // ExecCommand can be replaced with a mock during tests.

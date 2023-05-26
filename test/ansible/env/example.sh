@@ -11,7 +11,7 @@ DB_BACKEND=sqlite
 # PACKAGE_TESTING=true
 
 ## The URL of a crowdsec repository with the test scripts.
-# TEST_SUITE_GIT="https://github.com/crowdsecurity/crowdsec"
+# TEST_SUITE_GIT="https://github.com/asians-cloud/crowdsec"
 
 ## The branch, tag or commit of the test scripts.
 # TEST_SUITE_VERSION="master"

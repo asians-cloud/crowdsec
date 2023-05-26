@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/crowdsecurity/crowdsec/pkg/database/ent/bouncer"
+	"github.com/asians-cloud/crowdsec/pkg/database/ent/bouncer"
 )
 
 // Bouncer is the model entity for the Bouncer schema.

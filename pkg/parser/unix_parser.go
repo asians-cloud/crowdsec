@@ -7,11 +7,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/crowdsecurity/crowdsec/pkg/csconfig"
-	"github.com/crowdsecurity/crowdsec/pkg/cwhub"
-	"github.com/crowdsecurity/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/csconfig"
+	"github.com/asians-cloud/crowdsec/pkg/cwhub"
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
 
-	"github.com/crowdsecurity/grokky"
+	"github.com/asians-cloud/grokky"
 	log "github.com/sirupsen/logrus"
 )
 

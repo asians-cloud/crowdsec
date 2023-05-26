@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/dghubble/sling"
 	log "github.com/sirupsen/logrus"
 )

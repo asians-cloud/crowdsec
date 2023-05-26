@@ -39,7 +39,7 @@ issue:
 
           1. Check [Crowdsec Documentation](https://docs.crowdsec.net/) to see if your issue can be self resolved.
           2. You can also join our [Discord](https://discord.gg/crowdsec).
-          3. Check [Releases](https://github.com/crowdsecurity/crowdsec/releases/latest) to make sure your agent is on the latest version.
+          3. Check [Releases](https://github.com/asians-cloud/crowdsec/releases/latest) to make sure your agent is on the latest version.
 
     - prefix: kind
       list: ['feature', 'bug', 'packaging', 'enhancement']

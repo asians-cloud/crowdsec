@@ -6,7 +6,7 @@ Summary:        Crowdsec - An open-source, lightweight agent to detect and respo
 
 License:        MIT
 URL:            https://crowdsec.net
-Source0:        https://github.com/crowdsecurity/%{name}/archive/v%(echo $VERSION).tar.gz
+Source0:        https://github.com/asians-cloud/%{name}/archive/v%(echo $VERSION).tar.gz
 Source1:        80-%{name}.preset
 Patch0:         crowdsec.unit.patch
 Patch1:         user.patch

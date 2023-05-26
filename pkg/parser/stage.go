@@ -20,8 +20,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/crowdsec/pkg/cwversion"
-	"github.com/crowdsecurity/crowdsec/pkg/exprhelpers"
+	"github.com/asians-cloud/crowdsec/pkg/cwversion"
+	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
 )
 
 var seed namegenerator.Generator = namegenerator.NewNameGenerator(time.Now().UTC().UnixNano())
