@@ -11,7 +11,7 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
 
-	"github.com/asians-cloud/grokky"
+	"github.com/crowdsecurity/grokky"
 	log "github.com/sirupsen/logrus"
 )
 

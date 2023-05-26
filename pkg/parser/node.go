@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/antonmedv/expr"
-	"github.com/asians-cloud/grokky"
+	"github.com/crowdsecurity/grokky"
 	"github.com/pkg/errors"
 	yaml "gopkg.in/yaml.v2"
 

@@ -18,7 +18,7 @@ import (
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/asians-cloud/dlog"
+	"github.com/crowdsecurity/dlog"
 
 	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
 	"github.com/asians-cloud/crowdsec/pkg/types"

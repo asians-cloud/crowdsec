@@ -12,9 +12,9 @@ require (
 	github.com/aws/aws-sdk-go v1.42.25
 	github.com/buger/jsonparser v1.1.1
 	github.com/c-robinson/iplib v1.0.3
-	github.com/asians-cloud/dlog v0.0.0-20170105205344-4fb5f8204f26
-	github.com/asians-cloud/grokky v0.2.1
-	github.com/asians-cloud/machineid v1.0.2
+	github.com/crowdsecurity/dlog v0.0.0-20170105205344-4fb5f8204f26
+	github.com/crowdsecurity/grokky v0.2.1
+	github.com/crowdsecurity/machineid v1.0.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dghubble/sling v1.3.0
 	github.com/docker/docker v20.10.24+incompatible

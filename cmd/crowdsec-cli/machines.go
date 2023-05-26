@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/asians-cloud/machineid"
+	"github.com/crowdsecurity/machineid"
 
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/database"
