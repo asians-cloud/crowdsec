@@ -783,6 +783,8 @@ definitions:
         $ref: '#/definitions/Source'
       meta:
         $ref: '#/definitions/Meta'
+      cnames:
+        type: string
       labels:
         type: object
         additionalProperties:
