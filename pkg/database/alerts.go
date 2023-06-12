@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-        "os"
 
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
