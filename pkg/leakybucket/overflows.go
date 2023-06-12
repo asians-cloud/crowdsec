@@ -5,6 +5,7 @@ import (
 	"net"
 	"sort"
 	"strconv"
+        "os"
 
 	"github.com/asians-cloud/crowdsec/pkg/alertcontext"
 	"github.com/asians-cloud/crowdsec/pkg/models"
@@ -16,6 +17,25 @@ import (
 
 	"github.com/antonmedv/expr"
 )
+
+func getCnames() string {
+    cnames := "["
+    files, err := os.ReadDir("/data/logs/kong")
+    if err != nil {
+      log.Fatal(err)
+    }
+    for _, file := range files {
+      if (file.IsDir()) {
+        name := file.Name()
+        if (name != "_") {
+                cnames += fmt.Sprintf("%s, ", name)
+        }
+      }
+    }
+    cnames += "]"
+    return cnames
+}
+
 
 // SourceFromEvent extracts and formats a valid models.Source object from an Event
 func SourceFromEvent(evt types.Event, leaky *Leaky) (map[string]models.Source, error) {
@@ -254,6 +274,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 	leakSpeed := leaky.Leakspeed.String()
 	startAt := string(start_at)
 	stopAt := string(stop_at)
+        cnames := getCnames()
 	apiAlert := models.Alert{
 		Scenario:        &leaky.Name,
 		ScenarioHash:    &leaky.hash,
@@ -266,6 +287,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 		StopAt:          &stopAt,
 		Simulated:       &leaky.Simulated,
                 Labels:          leaky.BucketConfig.Labels,
+                Cnames:          cnames,     
 	}
 	if leaky.BucketConfig == nil {
 		return runtimeAlert, fmt.Errorf("leaky.BucketConfig is nil")

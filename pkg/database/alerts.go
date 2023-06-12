@@ -69,25 +69,6 @@ func formatAlertSource(alert *models.Alert) string {
 	return *alert.Source.Scope + " " + *alert.Source.Value
 }
 
-func getCnames() string {
-	cnames := "["
-	files, err := os.ReadDir("/data/logs/kong")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, file := range files {
-        if (file.IsDir()) {
-			name := file.Name()
-			if (name != "_") {
-				cnames += fmt.Sprintf("%s, ", name)
-			}
-        }
-	}
-	cnames += "]"
-	return cnames
-}
-
 func formatAlertAsString(machineId string, alert *models.Alert) []string {
 	src := formatAlertSource(alert)
 
@@ -133,7 +114,7 @@ func formatAlertAsString(machineId string, alert *models.Alert) []string {
 		decision += fmt.Sprintf("%s %s on %s %s", *decisionItem.Duration,
 			*decisionItem.Type, *decisionItem.Scope, *decisionItem.Value)
 		retStr = append(retStr,
-			fmt.Sprintf("(%s) %s : %s %s", machineIdOrigin, reason, decision, getCnames()))
+			fmt.Sprintf("(%s) %s : %s %s", machineIdOrigin, reason, decision, alert.Cnames))
 	}
 	return retStr
 }
