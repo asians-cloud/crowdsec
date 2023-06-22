@@ -113,7 +113,7 @@ func formatAlertAsString(machineId string, alert *models.Alert) []string {
 		decision += fmt.Sprintf("%s %s on %s %s", *decisionItem.Duration,
 			*decisionItem.Type, *decisionItem.Scope, *decisionItem.Value)
 		retStr = append(retStr,
-			fmt.Sprintf("(%s) %s : %s %s", machineIdOrigin, reason, decision, alert.Cnames))
+			fmt.Sprintf("(%s) %s : %s %s %s", machineIdOrigin, reason, decision, alert.Labels["cname"], alert.Labels["main_domain"]))
 	}
 	return retStr
 }
