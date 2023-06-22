@@ -45,9 +45,6 @@ type Alert struct {
 
 	// labels
 	Labels map[string]string `json:"labels,omitempty"`
-      
-        // cnames
-        Cnames string `json:"cnames,omitempty"`
 
 	// leakspeed
 	// Required: true
