@@ -87,6 +87,17 @@ func formatAlertAsString(machineId string, alert *models.Alert) []string {
 		return []string{fmt.Sprintf("(%s) alert : %s", machineId, reason)}
 	}
 
+        cname := "-"
+        domain := "-"
+        
+        if alert.Labels["cname"] != "" {
+          cname = alert.Labels["cname"]
+        }
+
+        if alert.Labels["domain"] != "" {
+          domain = alert.Labels["domain"]
+        }
+
 	var retStr []string
 
 	for i, decisionItem := range alert.Decisions {
@@ -113,7 +124,7 @@ func formatAlertAsString(machineId string, alert *models.Alert) []string {
 		decision += fmt.Sprintf("%s %s on %s %s", *decisionItem.Duration,
 			*decisionItem.Type, *decisionItem.Scope, *decisionItem.Value)
 		retStr = append(retStr,
-			fmt.Sprintf("(%s) %s : %s %s %s", machineIdOrigin, reason, decision, alert.Labels["cname"], alert.Labels["main_domain"]))
+			fmt.Sprintf("(%s) %s : %s %s %s", machineIdOrigin, reason, decision, cname, domain))
 	}
 	return retStr
 }
