@@ -315,7 +315,7 @@ func (c *Controller) StreamDecisionNonChunked(gctx *gin.Context, bouncerInfo *en
 	}
 
 	// getting new decisions
-	data, err = c.DBClient.QueryNewDecisionsSinceWithFilters(bouncerInfo.LastPull, filters)
+	data, err = c.DBClient.QueryNewDecisionsSinceWithFilters(bouncerInfo.LastPull.Add((-15 * time.Second)), filters)
 	if err != nil {
 		log.Errorf("unable to query new decision for '%s' : %v", bouncerInfo.Name, err)
 		gctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -325,7 +325,7 @@ func (c *Controller) StreamDecisionNonChunked(gctx *gin.Context, bouncerInfo *en
 	ret["new"] = FormatDecisions(data)
 
 	// getting expired decisions
-	data, err = c.DBClient.QueryExpiredDecisionsSinceWithFilters(bouncerInfo.LastPull.Add((-2 * time.Second)), filters) // do we want to give exactly lastPull time ?
+	data, err = c.DBClient.QueryExpiredDecisionsSinceWithFilters(bouncerInfo.LastPull.Add((-15 * time.Second)), filters) // do we want to give exactly lastPull time ?
 	if err != nil {
 		log.Errorf("unable to query expired decision for '%s' : %v", bouncerInfo.Name, err)
 		gctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
