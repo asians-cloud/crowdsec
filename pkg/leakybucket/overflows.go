@@ -292,7 +292,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 		}
 	}
 
-	*apiAlert.Message = fmt.Sprintf("%s %s performed '%s' (%d events over %s) at %s", source_scope, sourceStr, leaky.Name, leaky.Total_count, leaky.Ovflw_ts.Sub(leaky.First_ts), leaky.Last_ts)
+	*apiAlert.Message = fmt.Sprintf("%s %s performed '%s' with %s  (%d events over %s) at %s", source_scope, sourceStr, leaky.Name, leaky.BucketConfig.Type, leaky.Total_count, leaky.Ovflw_ts.Sub(leaky.First_ts), leaky.Last_ts)
 	//Get the events from Leaky/Queue
 	apiAlert.Events = EventsFromQueue(queue)
 	var warnings []error
