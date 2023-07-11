@@ -136,7 +136,6 @@ func normalizeScope(scope string) string {
 func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
-        var results []*models.Decision
 
         v, ok := gctx.Get("clientChan")
         if !ok {
