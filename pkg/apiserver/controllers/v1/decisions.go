@@ -429,26 +429,9 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
 
   for {
       select {
-      case results := <-clientChan:
-          needComma := false
-          gctx.Writer.Write([]byte(`{"new": [`))
-          for _, decision := range results {
-              decisionJSON, _ := json.Marshal(decision)
-              if needComma {
-                //respBuffer.Write([]byte(","))
-                gctx.Writer.Write([]byte(","))
-              } else {
-                needComma = true
-              }
-              //respBuffer.Write(decisionJSON)
-              //_, err := gctx.Writer.Write(respBuffer.Bytes())
-              _, err := gctx.Writer.Write(decisionJSON)
-              if err != nil {
-                gctx.Writer.Flush()
-                return 
-              }
-              //respBuffer.Reset()
-          }
+      case decisions := <-clientChan:
+          gctx.Writer.Write([]byte(`{"new": `))
+          gctx.Writer.Write([]byte(decisions)) 
           gctx.Writer.Write([]byte(`]}, "delete": [`))
           err = writeDeltaDecisions(gctx, filters, bouncerInfo.LastPull, c.DBClient.QueryExpiredDecisionsSinceWithFilters)
 
