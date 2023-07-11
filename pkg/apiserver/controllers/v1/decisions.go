@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-        "io"
 
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
@@ -376,10 +375,6 @@ func (c *Controller) StreamDecision(gctx *gin.Context) {
 
 func (c *Controller) StreamDecisions(gctx *gin.Context) {
   var err error  
-  var data []*ent.Decision
-  ret := make(map[string][]*models.Decision, 0)
-  ret["new"] = []*models.Decision{}
-  ret["deleted"] = []*models.Decision{}
 
   v, ok := gctx.Get("clientChan")
   if !ok {
@@ -397,54 +392,75 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
     if err != nil {
       panic(err)
     }
-    clientChan <- string(byteSlice)
+    gctx.Writer.Write(byteSlice)
+    gctx.Writer.Flush()
     return
   }
+
+  gctx.Writer.Write([]byte(`{"new": [`))
 
   filters := gctx.Request.URL.Query()
   if _, ok := filters["scopes"]; !ok {
     filters["scopes"] = []string{"ip,range"}
   }
 
-  data, err = c.DBClient.QueryAllDecisionsWithFilters(filters)
+  err = writeStartupDecisions(gctx, filters, c.DBClient.QueryAllDecisionsWithFilters)
   if err != nil {
-    log.Errorf("failed querying decisions: %v", err)
-    byteSlice,err := json.Marshal(gin.H{"message": err.Error()})
-    if err != nil {
-      panic(err)
-    }
-    clientChan <- string(byteSlice)
+    log.Errorf("failed sending new decisions for startup: %v", err)
+    gctx.Writer.Write([]byte(`], "deleted": []}`))
+    gctx.Writer.Flush()
     return
   }
-  //data = KeepLongestDecision(data)
-  ret["new"] = FormatDecisions(data)
 
-  // getting expired decisions
+  gctx.Writer.Write([]byte(`], "deleted": [`))
+  //Expired decisions
   if (bouncerInfo.Type != "crowdsec-firewall-bouncer") {
-    data, err = c.DBClient.QueryExpiredDecisionsWithFilters(filters)
+    err = writeStartupDecisions(gctx, filters, c.DBClient.QueryExpiredDecisionsWithFilters)
     if err != nil {
-            log.Errorf("unable to query expired decision for '%s' : %v", bouncerInfo.Name, err)
-            byteSlice, err := json.Marshal(gin.H{"message": err.Error()})
-            if err != nil {
-              panic(err)
-            }
-            clientChan <- string(byteSlice)
+      log.Errorf("failed sending expired decisions for startup: %v", err)
+      gctx.Writer.Write([]byte(`]}`))
+      gctx.Writer.Flush()
+      return
     }
-    ret["deleted"] = FormatDecisions(data)
   }
-  
-  byteSlice, err := json.Marshal(ret)
-  if err != nil {
-    panic(err)
-  }
-  clientChan <- string(byteSlice)
 
-  gctx.Stream(func(w io.Writer) bool {
-          // Stream message to client from message channel
-          if msg, ok := <-clientChan; ok {
-                  gctx.SSEvent("message", msg)
-                  return true
+  gctx.Writer.Write([]byte(`]}`))
+  gctx.Writer.Flush() 
+
+  for {
+      select {
+      case results := <-clientChan:
+          needComma := false
+          gctx.Writer.Write([]byte(`{"new": [`))
+          for _, decision := range results {
+              decisionJSON, _ := json.Marshal(decision)
+              if needComma {
+                //respBuffer.Write([]byte(","))
+                gctx.Writer.Write([]byte(","))
+              } else {
+                needComma = true
+              }
+              //respBuffer.Write(decisionJSON)
+              //_, err := gctx.Writer.Write(respBuffer.Bytes())
+              _, err := gctx.Writer.Write(decisionJSON)
+              if err != nil {
+                gctx.Writer.Flush()
+                return 
+              }
+              //respBuffer.Reset()
           }
-          return false
-  })
+          gctx.Writer.Write([]byte(`]}, "delete": [`))
+          err = writeDeltaDecisions(gctx, filters, bouncerInfo.LastPull, c.DBClient.QueryExpiredDecisionsSinceWithFilters)
+
+          if err != nil {
+                  log.Errorf("failed sending expired decisions for delta: %v", err)
+                  gctx.Writer.Write([]byte(`]}`))
+                  gctx.Writer.Flush()
+                  return
+          }
+
+          gctx.Writer.Write([]byte(`]}`))
+          gctx.Writer.Flush()
+      }
+  }
 }
