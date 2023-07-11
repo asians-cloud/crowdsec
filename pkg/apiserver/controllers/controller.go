@@ -24,7 +24,6 @@ type Controller struct {
 	AlertsAddChan                 chan []*models.Alert
 	DecisionDeleteChan            chan []*models.Decision
 	PluginChannel                 chan csplugin.ProfileAlert
-        Stream                        *EventStream 
 	Log                           *log.Logger
 	ConsoleConfig                 *csconfig.ConsoleConfig
 	TrustedIPs                    []net.IPNet
@@ -63,7 +62,6 @@ func serveHealth() http.HandlerFunc {
 func (c *Controller) NewV1() error {
 	var err error
         strm := NewServer()
-        c.Stream = strm
 
 	v1Config := v1.ControllerV1Config{
 		DbClient:           c.DBClient,
@@ -118,8 +116,8 @@ func (c *Controller) NewV1() error {
 		apiKeyAuth.HEAD("/decisions", c.HandlerV1.GetDecision)
 		apiKeyAuth.GET("/decisions/stream", c.HandlerV1.StreamDecision)
 		apiKeyAuth.HEAD("/decisions/stream", c.HandlerV1.StreamDecision)
-                apiKeyAuth.GET("/decisions-stream", stream.HeadersMiddleware(), strm.serveHTTP(), c.HandlerV1.StreamDecisions)
-                apiKeyAuth.HEAD("/decisions-stream", stream.HeadersMiddleware(), strm.serveHTTP(), c.HandlerV1.StreamDecisions)
+                apiKeyAuth.GET("/decisions-stream", stream.HeadersMiddleware(), serveHTTP(strm), c.HandlerV1.StreamDecisions)
+                apiKeyAuth.HEAD("/decisions-stream", stream.HeadersMiddleware(), serveHTTP(strm), c.HandlerV1.StreamDecisions)
 	}
 
 	return nil

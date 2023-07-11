@@ -6,25 +6,9 @@ import (
   log "github.com/sirupsen/logrus"
 )
 
-// It keeps a list of clients those are currently attached
-// and broadcasting events to those clients.
-type EventStream struct {
-  // Events are pushed to this channel by the main events-gathering routine
-  Message chan string
-
-  // New client connections
-  NewClients chan chan string
-
-  // Closed client connections
-  ClosedClients chan chan string
-
-  // Total client connections
-  TotalClients map[chan string]bool
-}
-
 // It Listens all incoming requests from clients.
 // Handles addition and removal of clients and broadcast messages to clients.
-func (s *EventStream) listen() {
+func listen(s *stream.EventStream) {
   for {
     select {
     // Add new available client
@@ -47,7 +31,7 @@ func (s *EventStream) listen() {
   }
 }
 
-func (s *EventStream) serveHTTP() gin.HandlerFunc {
+func serveHTTP(s *stream.EventStream) gin.HandlerFunc {
   return func(c *gin.Context) {
     // Initialize client channel
     clientChan := make(stream.ClientChan)
@@ -61,20 +45,21 @@ func (s *EventStream) serveHTTP() gin.HandlerFunc {
     }()
 
     c.Set("clientChan", clientChan)
+    c.Set("Stream", s)
 
     c.Next()
   }
 }
 
-func NewServer() (event *EventStream) {
-  event = &EventStream{
+func NewServer() (event *stream.EventStream) {
+  event = &stream.EventStream{
     Message:       make(chan string),
     NewClients:    make(chan chan string),
     ClosedClients: make(chan chan string),
     TotalClients:  make(map[chan string]bool),
   }
 
-  go event.listen()
+  go listen(event)
 
   return
 }

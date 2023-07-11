@@ -137,11 +137,11 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
 
-        v, ok := gctx.Get("clientChan")
+        v, ok := gctx.Get("Stream")
         if !ok {
           return
         }
-        clientChan, ok := v.(stream.ClientChan)
+        strm, ok := v.(stream.EventStream)
         if !ok {
           return
         }
@@ -202,7 +202,7 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                         if err != nil {
                           panic(err)
                         }
-                        clientChan <- string(byteSlice)
+                        strm.Message <- string(byteSlice)
 			continue
 		}
 
@@ -239,7 +239,7 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                         if err != nil {
                           panic(err)
                         }
-                        clientChan <- string(byteSlice)
+                        strm.Message <- string(byteSlice)
 
 			profileAlert := *alert
 			c.sendAlertToPluginChannel(&profileAlert, uint(pIdx))
