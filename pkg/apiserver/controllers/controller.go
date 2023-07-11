@@ -11,6 +11,7 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/csplugin"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/models"
+        "github.com/asians-cloud/crowdsec/pkg/stream"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,12 +24,14 @@ type Controller struct {
 	AlertsAddChan                 chan []*models.Alert
 	DecisionDeleteChan            chan []*models.Decision
 	PluginChannel                 chan csplugin.ProfileAlert
+        Stream                        *EventStream 
 	Log                           *log.Logger
 	ConsoleConfig                 *csconfig.ConsoleConfig
 	TrustedIPs                    []net.IPNet
 	HandlerV1                     *v1.Controller
 	DisableRemoteLapiRegistration bool
 }
+
 
 func (c *Controller) Init() error {
 	if err := c.NewV1(); err != nil {
@@ -59,6 +62,8 @@ func serveHealth() http.HandlerFunc {
 
 func (c *Controller) NewV1() error {
 	var err error
+        strm := NewServer()
+        c.Stream = strm
 
 	v1Config := v1.ControllerV1Config{
 		DbClient:           c.DBClient,
@@ -102,7 +107,7 @@ func (c *Controller) NewV1() error {
 		jwtAuth.DELETE("/alerts", c.HandlerV1.DeleteAlerts)
 		jwtAuth.DELETE("/decisions", c.HandlerV1.DeleteDecisions)
 		jwtAuth.DELETE("/decisions/:decision_id", c.HandlerV1.DeleteDecisionById)
-		jwtAuth.GET("/heartbeat", c.HandlerV1.HeartBeat)
+		jwtAuth.GET("/heartbeat", c.HandlerV1.HeartBeat) 
 
 	}
 
@@ -113,6 +118,8 @@ func (c *Controller) NewV1() error {
 		apiKeyAuth.HEAD("/decisions", c.HandlerV1.GetDecision)
 		apiKeyAuth.GET("/decisions/stream", c.HandlerV1.StreamDecision)
 		apiKeyAuth.HEAD("/decisions/stream", c.HandlerV1.StreamDecision)
+                apiKeyAuth.GET("/decisions-stream", stream.HeadersMiddleware(), strm.serveHTTP(), c.HandlerV1.StreamDecisions)
+                apiKeyAuth.HEAD("/decisions-stream", stream.HeadersMiddleware(), strm.serveHTTP(), c.HandlerV1.StreamDecisions)
 	}
 
 	return nil

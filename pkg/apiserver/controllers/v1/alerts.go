@@ -16,6 +16,7 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/types"
+        "github.com/asians-cloud/crowdsec/pkg/stream"
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/strfmt"
 	log "github.com/sirupsen/logrus"
@@ -135,6 +136,16 @@ func normalizeScope(scope string) string {
 func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
+        var results []*models.Decision
+
+        v, ok := gctx.Get("clientChan")
+        if !ok {
+          return
+        }
+        clientChan, ok := v.(stream.ClientChan)
+        if !ok {
+          return
+        }
 
 	claims := jwt.ExtractClaims(gctx)
 	// TBD: use defined rather than hardcoded key to find back owner
@@ -183,11 +194,19 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 				if profile.Cfg.OnSuccess == "break" {
 					break
 				}
-			}
+			} 
 			decision := alert.Decisions[0]
 			if decision.Origin != nil && *decision.Origin == types.CscliImportOrigin {
 				stopFlush = true
 			}
+                        ret := make(map[string][]*models.Decision, 0)
+                        ret["new"] = alert.Decisions
+                        ret["deleted"] = []*models.Decision{}
+                        byteSlice, err := json.Marshal(ret)     
+                        if err != nil {
+                          panic(err)
+                        }
+                        clientChan <- string(byteSlice)
 			continue
 		}
 
@@ -220,6 +239,16 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if len(alert.Decisions) == 0 { // non manual decision
 				alert.Decisions = append(alert.Decisions, profileDecisions...)
 			}
+
+                        ret := make(map[string][]*models.Decision, 0)
+                        ret["new"] = alert.Decisions
+                        ret["deleted"] = []*models.Decision{}
+                        byteSlice, err := json.Marshal(ret)     
+                        if err != nil {
+                          panic(err)
+                        }
+                        clientChan <- string(byteSlice)
+
 			profileAlert := *alert
 			c.sendAlertToPluginChannel(&profileAlert, uint(pIdx))
 			if profile.Cfg.OnSuccess == "break" || forceBreak {

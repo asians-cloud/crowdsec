@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+        "io"
 
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
 	"github.com/asians-cloud/crowdsec/pkg/models"
+        "github.com/asians-cloud/crowdsec/pkg/stream"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -370,4 +372,79 @@ func (c *Controller) StreamDecision(gctx *gin.Context) {
 			log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
 		}
 	}
+}
+
+func (c *Controller) StreamDecisions(gctx *gin.Context) {
+  var err error  
+  var data []*ent.Decision
+  ret := make(map[string][]*models.Decision, 0)
+  ret["new"] = []*models.Decision{}
+  ret["deleted"] = []*models.Decision{}
+
+  v, ok := gctx.Get("clientChan")
+  if !ok {
+    return
+  }
+  clientChan, ok := v.(stream.ClientChan)
+  if !ok {
+    return
+  }
+
+  bouncerInfo, err := getBouncerFromContext(gctx)
+
+  if err != nil {
+    byteSlice, err := json.Marshal(gin.H{"message": "not allowed"})
+    if err != nil {
+      panic(err)
+    }
+    clientChan <- string(byteSlice)
+    return
+  }
+
+  filters := gctx.Request.URL.Query()
+  if _, ok := filters["scopes"]; !ok {
+    filters["scopes"] = []string{"ip,range"}
+  }
+
+  data, err = c.DBClient.QueryAllDecisionsWithFilters(filters)
+  if err != nil {
+    log.Errorf("failed querying decisions: %v", err)
+    byteSlice,err := json.Marshal(gin.H{"message": err.Error()})
+    if err != nil {
+      panic(err)
+    }
+    clientChan <- string(byteSlice)
+    return
+  }
+  //data = KeepLongestDecision(data)
+  ret["new"] = FormatDecisions(data)
+
+  // getting expired decisions
+  if (bouncerInfo.Type != "crowdsec-firewall-bouncer") {
+    data, err = c.DBClient.QueryExpiredDecisionsWithFilters(filters)
+    if err != nil {
+            log.Errorf("unable to query expired decision for '%s' : %v", bouncerInfo.Name, err)
+            byteSlice, err := json.Marshal(gin.H{"message": err.Error()})
+            if err != nil {
+              panic(err)
+            }
+            clientChan <- string(byteSlice)
+    }
+    ret["deleted"] = FormatDecisions(data)
+  }
+  
+  byteSlice, err := json.Marshal(ret)
+  if err != nil {
+    panic(err)
+  }
+  clientChan <- string(byteSlice)
+
+  gctx.Stream(func(w io.Writer) bool {
+          // Stream message to client from message channel
+          if msg, ok := <-clientChan; ok {
+                  gctx.SSEvent("message", msg)
+                  return true
+          }
+          return false
+  })
 }
