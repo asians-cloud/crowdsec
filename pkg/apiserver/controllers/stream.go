@@ -45,7 +45,7 @@ func serveHTTP(s *stream.EventStream) gin.HandlerFunc {
     }()
 
     c.Set("clientChan", clientChan)
-    c.Set("Stream", s)
+    c.Set("Message", s.Message)
 
     c.Next()
   }

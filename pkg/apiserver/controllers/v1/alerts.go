@@ -136,12 +136,12 @@ func normalizeScope(scope string) string {
 func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
-
-        v, ok := gctx.Get("Stream")
+        log.Print("Holas")
+        v, ok := gctx.Get("Message")
         if !ok {
           return
         }
-        strm, ok := v.(stream.EventStream)
+        message, ok := v.(stream.ClientChan)
         if !ok {
           return
         }
@@ -204,9 +204,9 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                           log.Print(err)
                         }
                         log.Print(string(byteSlice))
-                        if strm.Message != nil {
+                        if message != nil {
                           select {
-                            case strm.Message <- string(byteSlice):
+                            case message <- string(byteSlice):
                               log.Print("broadcast alert to all client using SSE")
                             default:
                               log.Print("Cannot broadcast alert to all client using SSE")
@@ -250,9 +250,9 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                           log.Print(err)
                         }
                         log.Print(string(byteSlice))
-                        if strm.Message != nil {
+                        if message != nil {
                           select {
-                            case strm.Message <- string(byteSlice):
+                            case message <- string(byteSlice):
                               log.Print("broadcast alert to all client using SSE")
                             default:
                               log.Print("Cannot broadcast alert to all client using SSE")
