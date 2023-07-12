@@ -12,6 +12,7 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/csprofiles"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/models"
+        "github.com/asians-cloud/crowdsec/pkg/stream"
 	"github.com/pkg/errors"
 )
 
@@ -24,6 +25,7 @@ type Controller struct {
 
 	AlertsAddChan      chan []*models.Alert
 	DecisionDeleteChan chan []*models.Decision
+        Stream             *stream.EventStream
 
 	PluginChannel chan csplugin.ProfileAlert
 	ConsoleConfig csconfig.ConsoleConfig
@@ -37,6 +39,7 @@ type ControllerV1Config struct {
 
 	AlertsAddChan      chan []*models.Alert
 	DecisionDeleteChan chan []*models.Decision
+        Stream             *stream.EventStream
 
 	PluginChannel chan csplugin.ProfileAlert
 	ConsoleConfig csconfig.ConsoleConfig
@@ -58,6 +61,7 @@ func New(cfg *ControllerV1Config) (*Controller, error) {
 		Profiles:           profiles,
 		AlertsAddChan:      cfg.AlertsAddChan,
 		DecisionDeleteChan: cfg.DecisionDeleteChan,
+                Stream:             cfg.Stream,
 		PluginChannel:      cfg.PluginChannel,
 		ConsoleConfig:      cfg.ConsoleConfig,
 		TrustedIPs:         cfg.TrustedIPs,

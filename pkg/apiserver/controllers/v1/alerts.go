@@ -183,11 +183,24 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 				if profile.Cfg.OnSuccess == "break" {
 					break
 				}
-			}
+			} 
 			decision := alert.Decisions[0]
 			if decision.Origin != nil && *decision.Origin == types.CscliImportOrigin {
 				stopFlush = true
 			}
+                        ret := make(map[string][]*models.Decision, 0)
+                        ret["new"] = alert.Decisions
+                        ret["deleted"] = []*models.Decision{}
+                        byteSlice, err := json.Marshal(ret)     
+                        if err != nil {
+                          log.Print(err)
+                        }
+                        select {
+                          case c.Stream.Message <- string(byteSlice):
+                            log.Print("broadcast alert to all client using SSE")
+                          default:
+                            log.Print("Cannot broadcast alert to all client using SSE")
+                        }
 			continue
 		}
 
@@ -220,6 +233,20 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if len(alert.Decisions) == 0 { // non manual decision
 				alert.Decisions = append(alert.Decisions, profileDecisions...)
 			}
+                        ret := make(map[string][]*models.Decision, 0)
+                        ret["new"] = alert.Decisions
+                        ret["deleted"] = []*models.Decision{}
+                        byteSlice, err := json.Marshal(ret)
+                        if err != nil {
+                          log.Print(err)
+                        }
+                        select {
+                          case c.Stream.Message <- string(byteSlice):
+                            log.Print("broadcast alert to all client using SSE")
+                          default:
+                            log.Print("Cannot broadcast alert to all client using SSE")
+                        }
+
 			profileAlert := *alert
 			c.sendAlertToPluginChannel(&profileAlert, uint(pIdx))
 			if profile.Cfg.OnSuccess == "break" || forceBreak {

@@ -10,6 +10,7 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
 	"github.com/asians-cloud/crowdsec/pkg/models"
+        "github.com/asians-cloud/crowdsec/pkg/stream"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -91,6 +92,22 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
 	}
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
+        
+        if deletedDecisions != nil {
+          ret := make(map[string][]*models.Decision, 0)
+          ret["new"] = []*models.Decision{}
+          ret["deleted"] = deletedDecisions 
+          byteSlice, err := json.Marshal(ret)     
+          if err != nil {
+            log.Print(err)
+          }
+          select {
+            case c.Stream.Message <- string(byteSlice):
+              log.Print("broadcast alert to all client using SSE")
+            default:
+              log.Print("Cannot broadcast alert to all client using SSE")
+          }
+        }
 
 	if c.DecisionDeleteChan != nil {
 		c.DecisionDeleteChan <- deletedDecisions
@@ -112,6 +129,22 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
 	}
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
+        
+        if deletedDecisions != nil {
+          ret := make(map[string][]*models.Decision, 0)
+          ret["new"] = []*models.Decision{}
+          ret["deleted"] = deletedDecisions 
+          byteSlice, err := json.Marshal(ret)     
+          if err != nil {
+            log.Print(err)
+          }
+          select {
+            case c.Stream.Message <- string(byteSlice):
+              log.Print("broadcast alert to all client using SSE")
+            default:
+              log.Print("Cannot broadcast alert to all client using SSE")
+          }
+        }
 
 	if c.DecisionDeleteChan != nil {
 		c.DecisionDeleteChan <- deletedDecisions
@@ -370,4 +403,76 @@ func (c *Controller) StreamDecision(gctx *gin.Context) {
 			log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
 		}
 	}
+}
+
+func (c *Controller) StreamDecisions(gctx *gin.Context) {
+  var err error  
+
+  v, ok := gctx.Get("clientChan")
+  if !ok {
+    return
+  }
+  clientChan, ok := v.(stream.ClientChan)
+  if !ok {
+    return
+  }
+
+  bouncerInfo, err := getBouncerFromContext(gctx)
+
+  if err != nil {
+    byteSlice, err := json.Marshal(gin.H{"message": "not allowed"})
+    if err != nil {
+      panic(err)
+    }
+    gctx.Writer.Write(byteSlice)
+    gctx.Writer.Flush()
+    return
+  }
+  gctx.Writer.Header().Set("Content-Type", "application/json")
+  gctx.Writer.WriteHeader(http.StatusOK)
+  gctx.Writer.Write([]byte(`{"new": [`))
+
+  filters := gctx.Request.URL.Query()
+  if _, ok := filters["scopes"]; !ok {
+    filters["scopes"] = []string{"ip,range"}
+  }
+
+  err = writeStartupDecisions(gctx, filters, c.DBClient.QueryAllDecisionsWithFilters)
+  if err != nil {
+    log.Errorf("failed sending new decisions for startup: %v", err)
+    gctx.Writer.Write([]byte(`], "deleted": []}`))
+    gctx.Writer.Flush()
+    return
+  }
+
+  gctx.Writer.Write([]byte(`], "deleted": [`))
+  //Expired decisions
+  if (bouncerInfo.Type != "crowdsec-firewall-bouncer") {
+    err = writeStartupDecisions(gctx, filters, c.DBClient.QueryExpiredDecisionsWithFilters)
+    if err != nil {
+      log.Errorf("failed sending expired decisions for startup: %v", err)
+      gctx.Writer.Write([]byte(`]}`))
+      gctx.Writer.Flush()
+      return
+    }
+  }
+
+  gctx.Writer.Write([]byte(`]}`))
+  gctx.Writer.Flush() 
+
+  //Only update the last pull time if no error occurred when sending the decisions to avoid missing decisions
+  if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
+    log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+  }
+
+  for {
+      select {
+      case message := <-clientChan:
+          gctx.Writer.Write([]byte(message))
+          gctx.Writer.Flush()
+          if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
+            log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+          }
+      }
+  }
 }
