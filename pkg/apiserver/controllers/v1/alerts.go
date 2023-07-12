@@ -137,14 +137,6 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
         log.Print("Holas")
-        v, ok := gctx.Get("Message")
-        if !ok {
-          return
-        }
-        message, ok := v.(stream.ClientChan)
-        if !ok {
-          return
-        }
 
 	claims := jwt.ExtractClaims(gctx)
 	// TBD: use defined rather than hardcoded key to find back owner
@@ -204,13 +196,11 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                           log.Print(err)
                         }
                         log.Print(string(byteSlice))
-                        if message != nil {
-                          select {
-                            case message <- string(byteSlice):
-                              log.Print("broadcast alert to all client using SSE")
-                            default:
-                              log.Print("Cannot broadcast alert to all client using SSE")
-                          }
+                        select {
+                          case c.Stream.Message <- string(byteSlice):
+                            log.Print("broadcast alert to all client using SSE")
+                          default:
+                            log.Print("Cannot broadcast alert to all client using SSE")
                         }
 			continue
 		}
@@ -250,13 +240,11 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                           log.Print(err)
                         }
                         log.Print(string(byteSlice))
-                        if message != nil {
-                          select {
-                            case message <- string(byteSlice):
-                              log.Print("broadcast alert to all client using SSE")
-                            default:
-                              log.Print("Cannot broadcast alert to all client using SSE")
-                          }
+                        select {
+                          case c.Stream.Message <- string(byteSlice):
+                            log.Print("broadcast alert to all client using SSE")
+                          default:
+                            log.Print("Cannot broadcast alert to all client using SSE")
                         }
 
 			profileAlert := *alert

@@ -23,6 +23,7 @@ type Controller struct {
 	Profiles                      []*csconfig.ProfileCfg
 	AlertsAddChan                 chan []*models.Alert
 	DecisionDeleteChan            chan []*models.Decision
+        Stream                        *stream.EventStream
 	PluginChannel                 chan csplugin.ProfileAlert
 	Log                           *log.Logger
 	ConsoleConfig                 *csconfig.ConsoleConfig
@@ -62,6 +63,7 @@ func serveHealth() http.HandlerFunc {
 func (c *Controller) NewV1() error {
 	var err error
         strm := NewServer()
+        c.Stream = strm
 
 	v1Config := v1.ControllerV1Config{
 		DbClient:           c.DBClient,
@@ -69,6 +71,7 @@ func (c *Controller) NewV1() error {
 		ProfilesCfg:        c.Profiles,
 		DecisionDeleteChan: c.DecisionDeleteChan,
 		AlertsAddChan:      c.AlertsAddChan,
+                Stream:             c.Stream,
 		PluginChannel:      c.PluginChannel,
 		ConsoleConfig:      *c.ConsoleConfig,
 		TrustedIPs:         c.TrustedIPs,
@@ -94,9 +97,9 @@ func (c *Controller) NewV1() error {
 
 	jwtAuth := groupV1.Group("")
 	jwtAuth.GET("/refresh_token", c.HandlerV1.Middlewares.JWT.Middleware.RefreshHandler)
-	jwtAuth.Use(c.HandlerV1.Middlewares.JWT.Middleware.MiddlewareFunc(), v1.PrometheusMachinesMiddleware())
+	jwtAuth.Use(c.HandlerV1.Middlewares.JWT.Middleware.MiddlewareFunc(), v1.PrometheusMachinesMiddleware(), serveHTTP(strm))
 	{
-		jwtAuth.POST("/alerts", c.HandlerV1.CreateAlert)
+		jwtAuth.POST("/alerts", serveHTTP(strm), c.HandlerV1.CreateAlert)
 		jwtAuth.GET("/alerts", c.HandlerV1.FindAlerts)
 		jwtAuth.HEAD("/alerts", c.HandlerV1.FindAlerts)
 		jwtAuth.GET("/alerts/:alert_id", c.HandlerV1.FindAlertByID)
@@ -110,14 +113,14 @@ func (c *Controller) NewV1() error {
 	}
 
 	apiKeyAuth := groupV1.Group("")
-	apiKeyAuth.Use(c.HandlerV1.Middlewares.APIKey.MiddlewareFunc(), v1.PrometheusBouncersMiddleware())
+	apiKeyAuth.Use(c.HandlerV1.Middlewares.APIKey.MiddlewareFunc(), v1.PrometheusBouncersMiddleware(), serveHTTP(strm))
 	{
 		apiKeyAuth.GET("/decisions", c.HandlerV1.GetDecision)
 		apiKeyAuth.HEAD("/decisions", c.HandlerV1.GetDecision)
 		apiKeyAuth.GET("/decisions/stream", c.HandlerV1.StreamDecision)
 		apiKeyAuth.HEAD("/decisions/stream", c.HandlerV1.StreamDecision)
-                apiKeyAuth.GET("/decisions-stream", stream.HeadersMiddleware(), serveHTTP(strm), c.HandlerV1.StreamDecisions)
-                apiKeyAuth.HEAD("/decisions-stream", stream.HeadersMiddleware(), serveHTTP(strm), c.HandlerV1.StreamDecisions)
+                apiKeyAuth.GET("/decisions-stream", stream.HeadersMiddleware(), c.HandlerV1.StreamDecisions)
+                apiKeyAuth.HEAD("/decisions-stream", stream.HeadersMiddleware(), c.HandlerV1.StreamDecisions)
 	}
 
 	return nil
