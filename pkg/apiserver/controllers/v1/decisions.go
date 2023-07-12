@@ -93,6 +93,20 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
 
+        ret := make(map[string][]*models.Decision, 0)
+        ret["new"] = []*models.Decision{}
+        ret["deleted"] = deletedDecisions 
+        byteSlice, err := json.Marshal(ret)     
+        if err != nil {
+          log.Print(err)
+        }
+        select {
+          case c.Stream.Message <- string(byteSlice):
+            log.Print("broadcast alert to all client using SSE")
+          default:
+            log.Print("Cannot broadcast alert to all client using SSE")
+        }
+
 	if c.DecisionDeleteChan != nil {
 		c.DecisionDeleteChan <- deletedDecisions
 	}
@@ -113,6 +127,20 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
 	}
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
+
+        ret := make(map[string][]*models.Decision, 0)
+        ret["new"] = []*models.Decision{}
+        ret["deleted"] = deletedDecisions 
+        byteSlice, err := json.Marshal(ret)     
+        if err != nil {
+          log.Print(err)
+        }
+        select {
+          case c.Stream.Message <- string(byteSlice):
+            log.Print("broadcast alert to all client using SSE")
+          default:
+            log.Print("Cannot broadcast alert to all client using SSE")
+        }
 
 	if c.DecisionDeleteChan != nil {
 		c.DecisionDeleteChan <- deletedDecisions
@@ -434,23 +462,9 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
 
   for {
       select {
-      case decisions := <-clientChan:
-          gctx.Writer.Write([]byte(`{"new": `))
-          gctx.Writer.Write([]byte(decisions)) 
-          gctx.Writer.Write([]byte(`]}, "delete": [`))
-          err = writeDeltaDecisions(gctx, filters, bouncerInfo.LastPull, c.DBClient.QueryExpiredDecisionsSinceWithFilters)
-
-          if err != nil {
-                  log.Errorf("failed sending expired decisions for delta: %v", err)
-                  gctx.Writer.Write([]byte(`]}`))
-                  gctx.Writer.Flush()
-                  return
-          }
-
-          gctx.Writer.Write([]byte(`]}`))
+      case message := <-clientChan:
+          gctx.Writer.Write([]byte(message)) 
           gctx.Writer.Flush()
-
-          //Only update the last pull time if no error occurred when sending the decisions to avoid missing decisions
           if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
             log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
           }

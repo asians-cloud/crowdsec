@@ -188,7 +188,10 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if decision.Origin != nil && *decision.Origin == types.CscliImportOrigin {
 				stopFlush = true
 			}
-                        byteSlice, err := json.Marshal(alert.Decisions)     
+                        ret := make(map[string][]*models.Decision, 0)
+                        ret["new"] = alert.Decisions
+                        ret["deleted"] = []*models.Decision{}
+                        byteSlice, err := json.Marshal(ret)     
                         if err != nil {
                           log.Print(err)
                         }
@@ -230,7 +233,10 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if len(alert.Decisions) == 0 { // non manual decision
 				alert.Decisions = append(alert.Decisions, profileDecisions...)
 			}
-                        byteSlice, err := json.Marshal(alert.Decisions)     
+                        ret := make(map[string][]*models.Decision, 0)
+                        ret["new"] = alert.Decisions
+                        ret["deleted"] = []*models.Decision{}
+                        byteSlice, err := json.Marshal(ret)
                         if err != nil {
                           log.Print(err)
                         }
