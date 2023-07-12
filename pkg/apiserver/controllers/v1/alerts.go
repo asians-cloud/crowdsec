@@ -198,9 +198,10 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if decision.Origin != nil && *decision.Origin == types.CscliImportOrigin {
 				stopFlush = true
 			}
+                        log.Print("Process message stream")
                         byteSlice, err := json.Marshal(alert.Decisions)     
                         if err != nil {
-                          panic(err)
+                          log.Print(err)
                         }
                         log.Print(string(byteSlice))
                         if strm.Message != nil {
@@ -243,9 +244,10 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if len(alert.Decisions) == 0 { // non manual decision
 				alert.Decisions = append(alert.Decisions, profileDecisions...)
 			}
+                        log.Print("Process message stream")
                         byteSlice, err := json.Marshal(alert.Decisions)     
                         if err != nil {
-                          panic(err)
+                          log.Print(err)
                         }
                         log.Print(string(byteSlice))
                         if strm.Message != nil {
