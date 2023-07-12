@@ -92,19 +92,21 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
 	}
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
-
-        ret := make(map[string][]*models.Decision, 0)
-        ret["new"] = []*models.Decision{}
-        ret["deleted"] = deletedDecisions 
-        byteSlice, err := json.Marshal(ret)     
-        if err != nil {
-          log.Print(err)
-        }
-        select {
-          case c.Stream.Message <- string(byteSlice):
-            log.Print("broadcast alert to all client using SSE")
-          default:
-            log.Print("Cannot broadcast alert to all client using SSE")
+        
+        if deletedDecisions != nil {
+          ret := make(map[string][]*models.Decision, 0)
+          ret["new"] = []*models.Decision{}
+          ret["deleted"] = deletedDecisions 
+          byteSlice, err := json.Marshal(ret)     
+          if err != nil {
+            log.Print(err)
+          }
+          select {
+            case c.Stream.Message <- string(byteSlice):
+              log.Print("broadcast alert to all client using SSE")
+            default:
+              log.Print("Cannot broadcast alert to all client using SSE")
+          }
         }
 
 	if c.DecisionDeleteChan != nil {
@@ -127,19 +129,21 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
 	}
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
-
-        ret := make(map[string][]*models.Decision, 0)
-        ret["new"] = []*models.Decision{}
-        ret["deleted"] = deletedDecisions 
-        byteSlice, err := json.Marshal(ret)     
-        if err != nil {
-          log.Print(err)
-        }
-        select {
-          case c.Stream.Message <- string(byteSlice):
-            log.Print("broadcast alert to all client using SSE")
-          default:
-            log.Print("Cannot broadcast alert to all client using SSE")
+        
+        if deletedDecisions != nil {
+          ret := make(map[string][]*models.Decision, 0)
+          ret["new"] = []*models.Decision{}
+          ret["deleted"] = deletedDecisions 
+          byteSlice, err := json.Marshal(ret)     
+          if err != nil {
+            log.Print(err)
+          }
+          select {
+            case c.Stream.Message <- string(byteSlice):
+              log.Print("broadcast alert to all client using SSE")
+            default:
+              log.Print("Cannot broadcast alert to all client using SSE")
+          }
         }
 
 	if c.DecisionDeleteChan != nil {
@@ -424,7 +428,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
     gctx.Writer.Flush()
     return
   }
-
+  gctx.Writer.WriteHeader(http.StatusOK)
   gctx.Writer.Write([]byte(`{"new": [`))
 
   filters := gctx.Request.URL.Query()
