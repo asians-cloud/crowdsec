@@ -93,6 +93,24 @@ func (s *DecisionsService) FetchV2Decisions(ctx context.Context, url string) (*m
 	return &decisions, resp, nil
 }
 
+func (s *DecisionsService) StreamDecisions(ctx context.Context, opts DecisionsStreamOpts) (*models.DecisionsStreamResponse, *Response, error) {
+  var decisions models.DecisionsStreamResponse
+  url, err := opts.addQueryParamsToURL(s.client.URLPrefix + "/decisions-stream")
+  if err != nil {
+          return nil, nil, err
+  }
+  req, err := s.client.NewRequest(http.MethodGet, url, nil)
+  if err != nil {
+    return nil, nil, err
+  }
+
+  resp, err := s.client.Do(ctx, req, &decisions)
+  if err != nil {
+    return nil, resp, err
+  }
+  return &decisions, resp, nil
+}
+
 func (s *DecisionsService) GetDecisionsFromGroups(decisionsGroups []*modelscapi.GetDecisionsStreamResponseNewItem) []*models.Decision {
 	var decisions []*models.Decision
 
