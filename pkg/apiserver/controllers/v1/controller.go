@@ -61,6 +61,7 @@ func New(cfg *ControllerV1Config) (*Controller, error) {
 		Profiles:           profiles,
 		AlertsAddChan:      cfg.AlertsAddChan,
 		DecisionDeleteChan: cfg.DecisionDeleteChan,
+                Stream:             cfg.Stream,
 		PluginChannel:      cfg.PluginChannel,
 		ConsoleConfig:      cfg.ConsoleConfig,
 		TrustedIPs:         cfg.TrustedIPs,
