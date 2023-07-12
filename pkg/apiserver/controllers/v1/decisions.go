@@ -428,6 +428,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
     gctx.Writer.Flush()
     return
   }
+  gctx.Writer.Header().Set("Content-Type", "application/json")
   gctx.Writer.WriteHeader(http.StatusOK)
   gctx.Writer.Write([]byte(`{"new": [`))
 
@@ -457,7 +458,6 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
   }
 
   gctx.Writer.Write([]byte(`]}`))
-  gctx.Writer.Write([]byte(`\n`))
   gctx.Writer.Flush() 
 
   //Only update the last pull time if no error occurred when sending the decisions to avoid missing decisions
@@ -469,7 +469,6 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
       select {
       case message := <-clientChan:
           gctx.Writer.Write([]byte(message))
-          gctx.Writer.Write([]byte(`\n`))
           gctx.Writer.Flush()
           if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
             log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
