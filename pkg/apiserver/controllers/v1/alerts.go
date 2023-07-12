@@ -135,7 +135,6 @@ func normalizeScope(scope string) string {
 func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
-        log.Print("Holas")
 
 	claims := jwt.ExtractClaims(gctx)
 	// TBD: use defined rather than hardcoded key to find back owner
@@ -189,12 +188,10 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if decision.Origin != nil && *decision.Origin == types.CscliImportOrigin {
 				stopFlush = true
 			}
-                        log.Print("Process message stream")
                         byteSlice, err := json.Marshal(alert.Decisions)     
                         if err != nil {
                           log.Print(err)
                         }
-                        log.Print(string(byteSlice))
                         select {
                           case c.Stream.Message <- string(byteSlice):
                             log.Print("broadcast alert to all client using SSE")
@@ -233,12 +230,10 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if len(alert.Decisions) == 0 { // non manual decision
 				alert.Decisions = append(alert.Decisions, profileDecisions...)
 			}
-                        log.Print("Process message stream")
                         byteSlice, err := json.Marshal(alert.Decisions)     
                         if err != nil {
                           log.Print(err)
                         }
-                        log.Print(string(byteSlice))
                         select {
                           case c.Stream.Message <- string(byteSlice):
                             log.Print("broadcast alert to all client using SSE")

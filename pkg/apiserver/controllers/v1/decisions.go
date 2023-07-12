@@ -427,6 +427,11 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
   gctx.Writer.Write([]byte(`]}`))
   gctx.Writer.Flush() 
 
+  //Only update the last pull time if no error occurred when sending the decisions to avoid missing decisions
+  if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
+    log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+  }
+
   for {
       select {
       case decisions := <-clientChan:
@@ -444,6 +449,11 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
 
           gctx.Writer.Write([]byte(`]}`))
           gctx.Writer.Flush()
+
+          //Only update the last pull time if no error occurred when sending the decisions to avoid missing decisions
+          if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
+            log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+          }
       }
   }
 }
