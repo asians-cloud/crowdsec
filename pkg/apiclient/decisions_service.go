@@ -93,29 +93,6 @@ func (s *DecisionsService) FetchV2Decisions(ctx context.Context, url string) (*m
 	return &decisions, resp, nil
 }
 
-func (s *DecisionsService) StreamDecisions(ctx context.Context, opts DecisionsStreamOpts) (*Response, error) {
-  url, err := opts.addQueryParamsToURL(s.client.URLPrefix + "/decisions-stream")
-  if err != nil {
-          return nil, err
-  }
-  req, err := s.client.NewRequest(http.MethodGet, url, nil)
-  if err != nil {
-    return nil, err
-  }
-
-  req.Header.Set("Cache-Control", "no-cache")
-  req.Header.Set("Accept", "text/event-stream")
-  req.Header.Set("Connection", "keep-alive")
-  req.Header.Set("Content-Type", "application/json")
-
-
-  resp, err := s.client.Do(ctx, req, nil)
-  if err != nil {
-    return resp, err
-  }
-  return resp, nil
-}
-
 func (s *DecisionsService) GetDecisionsFromGroups(decisionsGroups []*modelscapi.GetDecisionsStreamResponseNewItem) []*models.Decision {
 	var decisions []*models.Decision
 
