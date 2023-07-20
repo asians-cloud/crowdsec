@@ -195,12 +195,14 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                         if err != nil {
                           log.Print(err)
                         }
-                        select {
-                          case c.Stream.Message <- string(byteSlice):
-                            log.Print("broadcast alert to all client using SSE")
-                          default:
-                            log.Print("Cannot broadcast alert to all client using SSE")
-                        }
+                        go func() {
+                          select {
+                            case c.Stream.Message <- string(byteSlice):
+                              log.Print("broadcast alert to all client using SSE")
+                            default:
+                              log.Print("Cannot broadcast alert to all client using SSE")
+                          }
+                        }()
 			continue
 		}
 
@@ -240,12 +242,14 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                         if err != nil {
                           log.Print(err)
                         }
-                        select {
-                          case c.Stream.Message <- string(byteSlice):
-                            log.Print("broadcast alert to all client using SSE")
-                          default:
-                            log.Print("Cannot broadcast alert to all client using SSE")
-                        }
+                        go func() {
+                          select {
+                            case c.Stream.Message <- string(byteSlice):
+                              log.Print("broadcast alert to all client using SSE")
+                            default:
+                              log.Print("Cannot broadcast alert to all client using SSE")
+                          }
+                        }()
 
 			profileAlert := *alert
 			c.sendAlertToPluginChannel(&profileAlert, uint(pIdx))
