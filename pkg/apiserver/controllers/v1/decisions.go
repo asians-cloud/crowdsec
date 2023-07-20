@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
         "strings"
+        "io"
 
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
@@ -480,10 +481,9 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
     log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
   }
 
-  for {
-      select {
-      case message := <-clientChan:
-        data := &models.DecisionsStreamResponse{
+  gctx.Stream(func(w io.Writer) bool{
+    if message, ok := <-clientChan; ok {
+      data := &models.DecisionsStreamResponse{
           New:   []*models.Decision{},
           Deleted: []*models.Decision{},
         }
@@ -492,7 +492,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
 
         if err != nil {
             log.Error("Error:", err)
-            continue
+            return true
 	}
 
         for param, value := range filters {
@@ -541,14 +541,13 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
               } 
             }
             data.Deleted = ret
-          default:
           }
         }
 
         messageByte, err := json.Marshal(data)
         if err != nil {
             log.Error("Error:", err)
-            continue
+            return true
 	}
 
         gctx.Writer.Write(messageByte)
@@ -556,7 +555,8 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
         if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
           log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
         }
-      default:
-      }  
-  }
+        return true
+    }
+    return false
+  })
 }
