@@ -11,6 +11,7 @@ import (
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/google/uuid"
+        jsoniter "github.com/json-iterator/go"
 
 	"github.com/asians-cloud/crowdsec/pkg/csplugin"
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
@@ -135,6 +136,7 @@ func normalizeScope(scope string) string {
 func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
+        var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	claims := jwt.ExtractClaims(gctx)
 	// TBD: use defined rather than hardcoded key to find back owner
@@ -190,7 +192,7 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			}
                         ret := make(map[string][]*models.Decision, 0)
                         ret["new"] = alert.Decisions
-                        ret["deleted"] = []*models.Decision{}
+                        ret["deleted"] = []*models.Decision{} 
                         byteSlice, err := json.Marshal(ret)     
                         if err != nil {
                           log.Print(err)

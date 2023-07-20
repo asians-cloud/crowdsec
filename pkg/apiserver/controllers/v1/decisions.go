@@ -15,6 +15,7 @@ import (
         "github.com/asians-cloud/crowdsec/pkg/stream"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+        jsoniter "github.com/json-iterator/go"
 )
 
 // Format decisions for the bouncers
@@ -79,6 +80,7 @@ func (c *Controller) GetDecision(gctx *gin.Context) {
 }
 
 func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
+        var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var err error
 
 	decisionIDStr := gctx.Param("decision_id")
@@ -130,6 +132,7 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
 }
 
 func (c *Controller) DeleteDecisions(gctx *gin.Context) {
+        var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var err error
 	nbDeleted, deletedFromDB, err := c.DBClient.SoftDeleteDecisionsWithFilter(gctx.Request.URL.Query())
 	if err != nil {
