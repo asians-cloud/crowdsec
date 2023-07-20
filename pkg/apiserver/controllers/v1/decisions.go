@@ -425,6 +425,7 @@ func (c *Controller) StreamDecision(gctx *gin.Context) {
 }
 
 func (c *Controller) StreamDecisions(gctx *gin.Context) {
+  var json = jsoniter.ConfigCompatibleWithStandardLibrary
   var err error  
 
   v, ok := gctx.Get("clientChan")
