@@ -482,6 +482,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
   }
 
   gctx.Stream(func(w io.Writer) bool{
+    resultChan := make(chan bool)
     if message, ok := <-clientChan; ok {
       go func () {
         data := &models.DecisionsStreamResponse{
@@ -493,7 +494,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
 
         if err != nil {
             log.Error("Error:", err)
-            return
+            resultChan <- false
         }
 
         for param, value := range filters {
@@ -549,15 +550,18 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
         messageByte, err := json.Marshal(data)
         if err != nil {
             log.Error("Error:", err)
-            return
+            resultChan <- false
         }
 
         w.Write(messageByte)
         if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
           log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+          resultChan <- false
         }
+        resultChan <- true
       }()
-      return true
+      result := <- resultChan
+      return result
     }
     return false
   })
