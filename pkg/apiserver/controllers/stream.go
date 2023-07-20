@@ -51,7 +51,7 @@ func serveHTTP(s *stream.EventStream) gin.HandlerFunc {
 
 func NewServer() (event *stream.EventStream) {
   event = &stream.EventStream{
-    Message:       make(chan string, 20),
+    Message:       make(chan string, 5),
     NewClients:    make(chan chan string),
     ClosedClients: make(chan chan string),
     TotalClients:  make(map[chan string]bool),
