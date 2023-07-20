@@ -23,9 +23,11 @@ func listen(s *stream.EventStream) {
     // Broadcast message to client
     case eventMsg := <-s.Message:
       log.Printf("Broadcast to %d registered clients", len(s.TotalClients))
-      for clientMessageChan := range s.TotalClients {
-        clientMessageChan <- eventMsg
-      }
+      go func() {
+        for clientMessageChan := range s.TotalClients {
+          clientMessageChan <- eventMsg
+        }
+      }()
     }
   }
 }
