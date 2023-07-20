@@ -43,6 +43,11 @@ func serveHTTP(s *stream.EventStream) gin.HandlerFunc {
             s.ClosedClients <- clientChan
     }()
 
+    go func() {
+      <-c.Done()
+      s.ClosedClients <- clientChan
+    }()
+
     c.Set("clientChan", clientChan)
 
     c.Next()
