@@ -102,11 +102,14 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
           if err != nil {
             log.Print(err)
           }
-          select {
-            case c.Stream.Message <- string(byteSlice):
-              log.Print("broadcast alert to all client using SSE")
-            default:
-              log.Print("Cannot broadcast alert to all client using SSE")
+          for {
+            select {
+              case c.Stream.Message <- string(byteSlice):
+                log.Print("broadcast alert to all client using SSE")
+                break
+              default:
+                log.Print("Cannot broadcast alert to all client using SSE")
+            }
           }
         }
 
@@ -139,11 +142,14 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
           if err != nil {
             log.Print(err)
           }
-          select {
-            case c.Stream.Message <- string(byteSlice):
-              log.Print("broadcast alert to all client using SSE")
-            default:
-              log.Print("Cannot broadcast alert to all client using SSE")
+          for {
+            select {
+              case c.Stream.Message <- string(byteSlice):
+                log.Print("broadcast alert to all client using SSE")
+                break
+              default:
+                log.Print("Cannot broadcast alert to all client using SSE")
+            }
           }
         }
 
@@ -527,8 +533,6 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
               } 
             }
             data.Deleted = ret
-          default:
-            return
           }
         }
 
@@ -543,9 +547,6 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
         if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
           log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
         }
-
-      default:
-        return
       } 
   }
 }
