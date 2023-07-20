@@ -197,14 +197,14 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                         }
                         go func() {
                           RETRY:
-                          for try := 0; try < 5; try++ {
+                          for try := 0; try < 10; try++ {
                             select {
                               case c.Stream.Message <- string(byteSlice):
                                 log.Print("broadcast alert to all client using SSE")
                                 break RETRY
                               default:
                                 log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
-                                time.Sleep(50 * time.Millisecond)
+                                time.Sleep(5 * time.Second)
                             }
                           }
                         }()		
@@ -249,14 +249,14 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                         }
                         go func() {
                           RETRY:
-                          for try := 0; try < 5; try++ {
+                          for try := 0; try < 10; try++ {
                             select {
                               case c.Stream.Message <- string(byteSlice):
                                 log.Print("broadcast alert to all client using SSE")
                                 break RETRY
                               default:
                                 log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
-                                time.Sleep(50 * time.Millisecond)
+                                time.Sleep(5 * time.Second)
                             }
                           }
                         }()

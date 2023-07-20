@@ -105,14 +105,14 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
           }
           go func() {
             RETRY:
-            for try := 0; try < 5; try++ {
+            for try := 0; try < 10; try++ {
               select {
                 case c.Stream.Message <- string(byteSlice):
                   log.Print("broadcast alert to all client using SSE")
                   break RETRY
                 default:
                   log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
-                  time.Sleep(50 * time.Millisecond)
+                  time.Sleep(5 * time.Second)
               }
             }
           }()
@@ -149,14 +149,14 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
           }
           go func() {
             RETRY:
-            for try := 0; try < 5; try++ {
+            for try := 0; try < 10; try++ {
               select {
                 case c.Stream.Message <- string(byteSlice):
                   log.Print("broadcast alert to all client using SSE")
                   break RETRY
                 default:
                   log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
-                  time.Sleep(50 * time.Millisecond)
+                  time.Sleep(5 * time.Second)
               }
             }
           }()
@@ -484,78 +484,78 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
   gctx.Stream(func(w io.Writer) bool{
     if message, ok := <-clientChan; ok {
       data := &models.DecisionsStreamResponse{
-          New:   []*models.Decision{},
-          Deleted: []*models.Decision{},
-        }
+        New:   []*models.Decision{},
+        Deleted: []*models.Decision{},
+      } 
 
-        err:= json.Unmarshal([]byte(message), data)
+      err:= json.Unmarshal([]byte(message), data)
 
-        if err != nil {
-            log.Error("Error:", err)
-            return true
-	}
+      if err != nil {
+          log.Error("Error:", err)
+          return true
+      }
 
-        for param, value := range filters {
-          switch param {
-          case "scenarios_containing":
-            ret := []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.New {
-                scenario := *decision.Scenario
-                if strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
+      for param, value := range filters {
+        switch param {
+        case "scenarios_containing":
+          ret := []*models.Decision{}
+          for _, v := range value {
+            for _, decision := range data.New {
+              scenario := *decision.Scenario
+              if strings.Contains(scenario, v) {
+                ret = append(ret, decision) 
               }
             }
-            data.New = ret
-
-            ret = []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.Deleted {
-                scenario := *decision.Scenario
-                if strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              } 
-            }
-            data.Deleted = ret
-          case "scenarios_not_containing":
-            ret := []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.New {
-                scenario := *decision.Scenario
-                if !strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              }
-            }
-            data.New = ret
-
-            ret = []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.Deleted {
-                scenario := *decision.Scenario
-                if !strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              } 
-            }
-            data.Deleted = ret
           }
-        }
+          data.New = ret
 
-        messageByte, err := json.Marshal(data)
-        if err != nil {
-            log.Error("Error:", err)
-            return true
-	}
+          ret = []*models.Decision{}
+          for _, v := range value {
+            for _, decision := range data.Deleted {
+              scenario := *decision.Scenario
+              if strings.Contains(scenario, v) {
+                ret = append(ret, decision) 
+              }
+            } 
+          }
+          data.Deleted = ret
+        case "scenarios_not_containing":
+          ret := []*models.Decision{}
+          for _, v := range value {
+            for _, decision := range data.New {
+              scenario := *decision.Scenario
+              if !strings.Contains(scenario, v) {
+                ret = append(ret, decision) 
+              }
+            }
+          }
+          data.New = ret
 
-        gctx.Writer.Write(messageByte)
-        gctx.Writer.Flush()
-        if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
-          log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+          ret = []*models.Decision{}
+          for _, v := range value {
+            for _, decision := range data.Deleted {
+              scenario := *decision.Scenario
+              if !strings.Contains(scenario, v) {
+                ret = append(ret, decision) 
+              }
+            } 
+          }
+          data.Deleted = ret
+        default:
         }
-        return true
+      }
+
+      messageByte, err := json.Marshal(data)
+      if err != nil {
+          log.Error("Error:", err)
+          return true
+      }
+
+      w.Write(messageByte)
+      if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
+        log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
+      }
+      return true
     }
     return false
   })
