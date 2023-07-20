@@ -196,14 +196,19 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                           log.Print(err)
                         }
                         go func() {
-                          select {
-                            case c.Stream.Message <- string(byteSlice):
-                              log.Print("broadcast alert to all client using SSE")
-                            default:
-                              log.Print("Cannot broadcast alert to all client using SSE")
+                          RETRY:
+                          for try := 0; try < 5; try++ {
+                            select {
+                              case c.Stream.Message <- string(byteSlice):
+                                log.Print("broadcast alert to all client using SSE")
+                                break RETRY
+                              default:
+                                log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
+                                time.Sleep(50 * time.Millisecond)
+                            }
                           }
-                        }()
-			continue
+                        }()		
+                        continue
 		}
 
 		for pIdx, profile := range c.Profiles {
@@ -243,11 +248,16 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
                           log.Print(err)
                         }
                         go func() {
-                          select {
-                            case c.Stream.Message <- string(byteSlice):
-                              log.Print("broadcast alert to all client using SSE")
-                            default:
-                              log.Print("Cannot broadcast alert to all client using SSE")
+                          RETRY:
+                          for try := 0; try < 5; try++ {
+                            select {
+                              case c.Stream.Message <- string(byteSlice):
+                                log.Print("broadcast alert to all client using SSE")
+                                break RETRY
+                              default:
+                                log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
+                                time.Sleep(50 * time.Millisecond)
+                            }
                           }
                         }()
 

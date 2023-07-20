@@ -103,11 +103,16 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
             log.Print(err)
           }
           go func() {
-            select {
-              case c.Stream.Message <- string(byteSlice):
-                log.Print("broadcast alert to all client using SSE")
-              default:
-                log.Print("Cannot broadcast alert to all client using SSE")
+            RETRY:
+            for try := 0; try < 5; try++ {
+              select {
+                case c.Stream.Message <- string(byteSlice):
+                  log.Print("broadcast alert to all client using SSE")
+                  break RETRY
+                default:
+                  log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
+                  time.Sleep(50 * time.Millisecond)
+              }
             }
           }()
         }
@@ -142,11 +147,16 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
             log.Print(err)
           }
           go func() {
-            select {
-              case c.Stream.Message <- string(byteSlice):
-                log.Print("broadcast alert to all client using SSE")
-              default:
-                log.Print("Cannot broadcast alert to all client using SSE")
+            RETRY:
+            for try := 0; try < 5; try++ {
+              select {
+                case c.Stream.Message <- string(byteSlice):
+                  log.Print("broadcast alert to all client using SSE")
+                  break RETRY
+                default:
+                  log.Printf("Cannot broadcast alert to all client using SSE (try: %d)", try)
+                  time.Sleep(50 * time.Millisecond)
+              }
             }
           }()
         }
