@@ -13,17 +13,16 @@ func listen(s *stream.EventStream) {
     select {
     // Add new available client
     case client := <-s.NewClients:
-      s.TotalClients[client] = true
-      log.Printf("Client added. %d registered clients", len(s.TotalClients))
+      s.TotalClients[client] = true 
 
     // Remove closed client
     case client := <-s.ClosedClients:
       delete(s.TotalClients, client)
       close(client)
-      log.Printf("Removed client. %d registered clients", len(s.TotalClients))
 
     // Broadcast message to client
     case eventMsg := <-s.Message:
+      log.Printf("Boradcast to %d registered clients", len(s.TotalClients))
       for clientMessageChan := range s.TotalClients {
         clientMessageChan <- eventMsg
       }
