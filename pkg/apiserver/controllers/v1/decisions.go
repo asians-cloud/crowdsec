@@ -558,10 +558,6 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
         }
 
         w.Write(messageByte)
-        if err := c.DBClient.UpdateBouncerLastPull(time.Now().UTC(), bouncerInfo.ID); err != nil {
-          log.Errorf("unable to update bouncer '%s' pull: %v", bouncerInfo.Name, err)
-          resultChan <- false
-        }
         resultChan <- true
       }()
       result := <- resultChan
