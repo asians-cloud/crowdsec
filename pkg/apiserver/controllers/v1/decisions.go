@@ -442,7 +442,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
   if err != nil {
     byteSlice, err := json.Marshal(gin.H{"message": "not allowed"})
     if err != nil {
-      panic(err)
+      log.Error(err)
     }
     gctx.Writer.Write(byteSlice)
     gctx.Writer.Flush()
