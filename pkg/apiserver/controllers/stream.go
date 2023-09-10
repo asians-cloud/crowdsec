@@ -25,7 +25,11 @@ func listen(s *stream.EventStream) {
       log.Printf("Broadcast to %d registered clients", len(s.TotalClients))
       go func() {
         for clientMessageChan := range s.TotalClients {
-          clientMessageChan <- eventMsg
+          select {
+            case clientMessageChan <- eventMsg:
+              log.Print("send event to client channel")
+            default:
+          }
         }
       }()
     }
