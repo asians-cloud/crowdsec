@@ -334,6 +334,8 @@ func (s *APIServer) Run(apiReady chan bool) error {
 		Addr:      s.URL,
 		Handler:   s.router,
 		TLSConfig: tlsCfg,
+                WriteTimeout: 24 * time.Hour,
+                ReadTimeout: 24 * time.Hour,
 	}
 
 	if s.apic != nil {
