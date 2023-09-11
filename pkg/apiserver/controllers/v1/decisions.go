@@ -487,82 +487,89 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
 
   gctx.Stream(func(w io.Writer) bool{
     resultChan := make(chan bool)
-    if message, ok := <-clientChan; ok {
-      go func () {
-        data := &models.DecisionsStreamResponse{
-          New:   []*models.Decision{},
-          Deleted: []*models.Decision{},
-        } 
+    select {
+      case message := <-clientChan:
+        go func () {
+          data := &models.DecisionsStreamResponse{
+            New:   []*models.Decision{},
+            Deleted: []*models.Decision{},
+          } 
 
-        err:= json.Unmarshal([]byte(message), data)
+          err:= json.Unmarshal([]byte(message), data)
 
-        if err != nil {
-            log.Error("Error:", err)
-            resultChan <- false
-        }
-
-        for param, value := range filters {
-          switch param {
-          case "scenarios_containing":
-            ret := []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.New {
-                scenario := *decision.Scenario
-                if strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              }
-            }
-            data.New = ret
-
-            ret = []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.Deleted {
-                scenario := *decision.Scenario
-                if strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              } 
-            }
-            data.Deleted = ret
-          case "scenarios_not_containing":
-            ret := []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.New {
-                scenario := *decision.Scenario
-                if !strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              }
-            }
-            data.New = ret
-
-            ret = []*models.Decision{}
-            for _, v := range value {
-              for _, decision := range data.Deleted {
-                scenario := *decision.Scenario
-                if !strings.Contains(scenario, v) {
-                  ret = append(ret, decision) 
-                }
-              } 
-            }
-            data.Deleted = ret
-          default:
+          if err != nil {
+              log.Error("Error:", err)
+              resultChan <- false
           }
-        }
 
-        messageByte, err := json.Marshal(data)
-        if err != nil {
-            log.Error("Error:", err)
-            resultChan <- false
-        }
+          for param, value := range filters {
+            switch param {
+            case "scenarios_containing":
+              ret := []*models.Decision{}
+              for _, v := range value {
+                for _, decision := range data.New {
+                  scenario := *decision.Scenario
+                  if strings.Contains(scenario, v) {
+                    ret = append(ret, decision) 
+                  }
+                }
+              }
+              data.New = ret
 
-        w.Write(messageByte)
-        resultChan <- true
-      }()
-      result := <- resultChan
-      return result
+              ret = []*models.Decision{}
+              for _, v := range value {
+                for _, decision := range data.Deleted {
+                  scenario := *decision.Scenario
+                  if strings.Contains(scenario, v) {
+                    ret = append(ret, decision) 
+                  }
+                } 
+              }
+              data.Deleted = ret
+            case "scenarios_not_containing":
+              ret := []*models.Decision{}
+              for _, v := range value {
+                for _, decision := range data.New {
+                  scenario := *decision.Scenario
+                  if !strings.Contains(scenario, v) {
+                    ret = append(ret, decision) 
+                  }
+                }
+              }
+              data.New = ret
+
+              ret = []*models.Decision{}
+              for _, v := range value {
+                for _, decision := range data.Deleted {
+                  scenario := *decision.Scenario
+                  if !strings.Contains(scenario, v) {
+                    ret = append(ret, decision) 
+                  }
+                } 
+              }
+              data.Deleted = ret
+            default:
+            }
+          }
+
+          messageByte, err := json.Marshal(data)
+          if err != nil {
+              log.Error("Error:", err)
+              resultChan <- false
+          }
+
+          w.Write(messageByte)
+          resultChan <- true
+        }()
+
+      default:
     }
-    return false
+  
+    select {
+      case result := <- resultChan:
+        return result
+      default:
+        return false
+    }
   })
 }
