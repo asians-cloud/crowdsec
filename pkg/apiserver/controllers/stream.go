@@ -42,16 +42,29 @@ func serveHTTP(s *stream.EventStream) gin.HandlerFunc {
     clientChan := make(stream.ClientChan)
 
     // Send new connection to event server
-    s.NewClients <- clientChan
+    select {
+      case s.NewClients <- clientChan:
+        log.Print("Send new connection to event server")
+      default:
+    }
 
     defer func() {
-            // Send closed connection to event server
-            s.ClosedClients <- clientChan
+      // Send closed connection to event server
+      select {
+        case s.ClosedClients <- clientChan:
+          log.Print("Send closed connection to event server")
+        default:
+      }
     }()
 
     go func() {
-      <-c.Done()
-      s.ClosedClients <- clientChan
+      select {
+        case <-c.Done():
+          log.Print("Send done action")
+        case s.ClosedClients <- clientChan:
+          log.Print("Send close client to event server")
+        default:
+      }
     }()
 
     c.Set("clientChan", clientChan)
