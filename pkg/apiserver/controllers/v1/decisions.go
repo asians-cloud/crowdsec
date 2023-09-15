@@ -461,6 +461,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
   if err != nil {
     log.Errorf("failed sending new decisions for startup: %v", err)
     gctx.Writer.Write([]byte(`], "deleted": []}`))
+    gctx.Writer.Write([]byte{0x1a})
     gctx.Writer.Flush()
     return
   }
@@ -472,12 +473,14 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
     if err != nil {
       log.Errorf("failed sending expired decisions for startup: %v", err)
       gctx.Writer.Write([]byte(`]}`))
+      gctx.Writer.Write([]byte{0x1a})
       gctx.Writer.Flush()
       return
     }
   }
 
   gctx.Writer.Write([]byte(`]}`))
+  gctx.Writer.Write([]byte{0x1a})
   gctx.Writer.Flush() 
 
   //Only update the last pull time if no error occurred when sending the decisions to avoid missing decisions
@@ -559,6 +562,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
           }
 
           w.Write(messageByte)
+          w.Write([]byte{0x1a})
           resultChan <- true
         }()
 
