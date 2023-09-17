@@ -561,6 +561,7 @@ func (c *Controller) StreamDecisions(gctx *gin.Context) {
         }
 
         w.Write(messageByte)
+        w.Write([]byte{0x1a})
         resultChan <- true
       }()
       result := <- resultChan
