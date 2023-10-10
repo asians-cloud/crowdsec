@@ -160,3 +160,4 @@ If you wish to contribute to the core of crowdsec, you are welcome to open a PR 
 If you wish to add a new parser, scenario or collection, please open a PR in the [hub repository](https://github.com/asians-cloud/hub).
 
 If you wish to contribute to the documentation, please open a PR in the [documentation repository](http://github.com/asians-cloud/crowdsec-docs).
+
