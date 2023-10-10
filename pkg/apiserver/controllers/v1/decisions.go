@@ -177,7 +177,7 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
 
 func writeStartupDecisions(gctx *gin.Context, filters map[string][]string, dbFunc func(map[string][]string) ([]*ent.Decision, error)) error {
 	// respBuffer := bytes.NewBuffer([]byte{})
-	limit := 30000 //FIXME : make it configurable
+	limit := 500 //FIXME : make it configurable
 	needComma := false
 	lastId := 0
 
