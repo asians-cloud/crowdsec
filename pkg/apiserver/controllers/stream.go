@@ -18,7 +18,6 @@ func listen(s *stream.EventStream) {
     // Remove closed client
     case client := <-s.ClosedClients:
       delete(s.TotalClients, client)
-      close(client)
 
     // Broadcast message to client
     case eventMsg := <-s.Message:
