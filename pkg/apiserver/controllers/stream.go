@@ -18,15 +18,14 @@ func listen(s *stream.EventStream) {
     // Remove closed client
     case client := <-s.ClosedClients:
       delete(s.TotalClients, client)
+      close(client)
 
     // Broadcast message to client
     case eventMsg := <-s.Message:
       log.Printf("Broadcast to %d registered clients", len(s.TotalClients))
-      go func() {
-        for clientMessageChan := range s.TotalClients {
-          clientMessageChan <- eventMsg
-        }
-      }()
+      for clientMessageChan := range s.TotalClients {
+        clientMessageChan <- eventMsg
+      }
     }
   }
 }
