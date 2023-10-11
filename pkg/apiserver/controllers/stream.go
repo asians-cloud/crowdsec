@@ -26,7 +26,10 @@ func listen(s *stream.EventStream) {
       for clientMessageChan := range s.TotalClients {
         clientMessageChan := clientMessageChan
         go func() {
-          clientMessageChan <- eventMsg
+          select {
+          case clientMessageChan <- eventMsg:
+          default:
+          }  
         }()
       }
     }
