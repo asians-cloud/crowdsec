@@ -1,6 +1,7 @@
 package controllers
 
 import (
+  "sync"
   "github.com/asians-cloud/crowdsec/pkg/stream"
   "github.com/gin-gonic/gin"
   log "github.com/sirupsen/logrus"
@@ -9,6 +10,7 @@ import (
 // It Listens all incoming requests from clients.
 // Handles addition and removal of clients and broadcast messages to clients.
 func listen(s *stream.EventStream) {
+  var mu sync.Mutex
   for {
     select {
     // Add new available client
@@ -17,8 +19,10 @@ func listen(s *stream.EventStream) {
 
     // Remove closed client
     case client := <-s.ClosedClients:
+      mu.Lock()
       delete(s.TotalClients, client)
       close(client)
+      mu.Unlock()
 
     // Broadcast message to client
     case eventMsg := <-s.Message:
@@ -26,10 +30,9 @@ func listen(s *stream.EventStream) {
       for clientMessageChan := range s.TotalClients {
         clientMessageChan := clientMessageChan
         go func() {
-          select {
-          case clientMessageChan <- eventMsg:
-          default:
-          }  
+          mu.Lock()
+          clientMessageChan <- eventMsg
+          mu.Unlock()
         }()
       }
     }
