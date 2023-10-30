@@ -783,9 +783,11 @@ definitions:
         $ref: '#/definitions/Source'
       meta:
         $ref: '#/definitions/Meta'
+      cnames:
+        type: string
       labels:
-        type: array
-        items:
+        type: object
+        additionalProperties:
           type: string
     required:
       - scenario

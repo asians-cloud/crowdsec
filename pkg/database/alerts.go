@@ -93,6 +93,16 @@ func formatAlertAsString(machineID string, alert *models.Alert) []string {
 		return []string{fmt.Sprintf("(%s) alert : %s", machineID, reason)}
 	}
 
+	cname := "-"
+	domain := "-"
+
+	if alert.Labels["cname"] != "" {
+		cname = alert.Labels["cname"]
+	}
+	if alert.Labels["domain"] != "" {
+		domain = alert.Labels["domain"]
+	}
+
 	var retStr []string
 
 	if alert.Decisions[0].Origin != nil && *alert.Decisions[0].Origin == types.CscliImportOrigin {
@@ -126,7 +136,7 @@ func formatAlertAsString(machineID string, alert *models.Alert) []string {
 		decision += fmt.Sprintf("%s %s on %s %s", *decisionItem.Duration,
 			*decisionItem.Type, *decisionItem.Scope, *decisionItem.Value)
 		retStr = append(retStr,
-			fmt.Sprintf("(%s) %s : %s", machineIDOrigin, reason, decision))
+			fmt.Sprintf("(%s) %s : %s %s %s", machineIDOrigin, reason, decision, cname, domain))
 	}
 
 	return retStr
