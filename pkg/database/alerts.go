@@ -97,10 +97,10 @@ func formatAlertAsString(machineID string, alert *models.Alert) []string {
 	domain := "-"
 
 	if alert.Labels["cname"] != "" {
-		cname = alert.Labels["cname"]
+		cname = fmt.Sprintf("%s", alert.Labels["cname"])
 	}
 	if alert.Labels["domain"] != "" {
-		domain = alert.Labels["domain"]
+		domain = fmt.Sprintf("%s", alert.Labels["domain"])
 	}
 
 	var retStr []string
