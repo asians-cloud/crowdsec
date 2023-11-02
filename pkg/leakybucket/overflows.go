@@ -1,6 +1,7 @@
 package leakybucket
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"sort"
@@ -254,11 +255,22 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 	startAt := string(start_at)
 	stopAt := string(stop_at)
 
-	// Create a slice to hold the keys
-	labels := make([]string, 0, len(leaky.BucketConfig.Labels))
-	// Iterate over the map and append the keys to the slice
-	for k := range leaky.BucketConfig.Labels {
-		labels = append(labels, k)
+	// New map[string]string
+	labels := make(map[string]string)
+	for key, value := range leaky.BucketConfig.Labels {
+		switch v := value.(type) {
+		case string:
+			labels[key] = v
+		case map[string]string:
+			jsonStr, err := json.Marshal(v)
+			if err != nil {
+				fmt.Println("Error marshalling map:", err)
+				continue
+			}
+			labels[key] = string(jsonStr)
+		default:
+			labels[key] = fmt.Sprintf("%v", v)
+		}
 	}
 
 	apiAlert := models.Alert{

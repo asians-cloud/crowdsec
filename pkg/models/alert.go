@@ -44,8 +44,8 @@ type Alert struct {
 	ID int64 `json:"id,omitempty"`
 
 	// labels
-	Labels []string `json:"labels"`
-	
+	Labels map[string]string `json:"labels,omitempty"`
+
 	// leakspeed
 	// Required: true
 	Leakspeed *string `json:"leakspeed"`
