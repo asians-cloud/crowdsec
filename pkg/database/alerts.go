@@ -96,12 +96,12 @@ func formatAlertAsString(machineID string, alert *models.Alert) []string {
 	cname := "-"
 	domain := "-"
 
-	if cnameValue, ok := alert.Labels["cname"]; ok {
-		cname = cnameValue.(string)
+	if alert.Labels["cname"] != "" {
+		cname = alert.Labels["cname"]
 	}
 
-	if domainValue, ok := alert.Labels["domain"]; ok {
-		domain = domainValue.(string)
+	if alert.Labels["domain"] != "" {
+		domain = alert.Labels["domain"]
 	}
 
 	var retStr []string
