@@ -786,8 +786,8 @@ definitions:
       cnames:
         type: string
       labels:
-        type: object
-        additionalProperties:
+        type: array
+        items:
           type: string
     required:
       - scenario

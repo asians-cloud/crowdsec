@@ -253,6 +253,14 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 	leakSpeed := leaky.Leakspeed.String()
 	startAt := string(start_at)
 	stopAt := string(stop_at)
+
+	// Create a slice to hold the keys
+	labels := make([]string, 0, len(leaky.BucketConfig.Labels))
+	// Iterate over the map and append the keys to the slice
+	for k := range leaky.BucketConfig.Labels {
+		labels = append(labels, k)
+	}
+
 	apiAlert := models.Alert{
 		Scenario:        &leaky.Name,
 		ScenarioHash:    &leaky.hash,
@@ -264,7 +272,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 		StartAt:         &startAt,
 		StopAt:          &stopAt,
 		Simulated:       &leaky.Simulated,
-		Labels:          leaky.BucketConfig.Labels,
+		Labels:          labels,
 	}
 	if leaky.BucketConfig == nil {
 		return runtimeAlert, fmt.Errorf("leaky.BucketConfig is nil")
