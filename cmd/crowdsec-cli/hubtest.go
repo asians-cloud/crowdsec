@@ -73,7 +73,7 @@ func NewHubTestCreateCmd() *cobra.Command {
 		Short: "create [test_name]",
 		Example: `cscli hubtest create my-awesome-test --type syslog
 cscli hubtest create my-nginx-custom-test --type nginx
-cscli hubtest create my-scenario-test --parsers crowdsecurity/nginx --scenarios crowdsecurity/http-probing`,
+cscli hubtest create my-scenario-test --parsers asians-cloud/nginx --scenarios asians-cloud/http-probing`,
 		Args:              cobra.ExactArgs(1),
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -116,8 +116,8 @@ cscli hubtest create my-scenario-test --parsers crowdsecurity/nginx --scenarios 
 			}
 			scenarioAssertFile.Close()
 
-			parsers = append(parsers, "crowdsecurity/syslog-logs")
-			parsers = append(parsers, "crowdsecurity/dateparse-enrich")
+			parsers = append(parsers, "asians-cloud/syslog-logs")
+			parsers = append(parsers, "asians-cloud/dateparse-enrich")
 
 			if len(scenarios) == 0 {
 				scenarios = append(scenarios, "")

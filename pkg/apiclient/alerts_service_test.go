@@ -8,11 +8,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
-	"github.com/asians-cloud/crowdsec/pkg/models"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/asians-cloud/go-cs-lib/version"
+
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 func TestAlertsListAsMachine(t *testing.T) {
@@ -31,7 +33,7 @@ func TestAlertsListAsMachine(t *testing.T) {
 	client, err := NewClient(&Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
 	})
@@ -59,7 +61,7 @@ func TestAlertsListAsMachine(t *testing.T) {
 				  {"duration":"59m49.264032632s",
 				  "id":1,
 				  "origin":"crowdsec",
-				  "scenario":"crowdsecurity/ssh-bf",
+				  "scenario":"asians-cloud/ssh-bf",
 				  "scope":"Ip",
 				  "simulated":false,
 				  "type":"ban",
@@ -82,8 +84,8 @@ func TestAlertsListAsMachine(t *testing.T) {
 				"labels":null,
 				"leakspeed":"10s",
 				"machine_id":"test",
-				"message":"Ip 1.1.1.172 performed 'crowdsecurity/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761",
-				"scenario":"crowdsecurity/ssh-bf",
+				"message":"Ip 1.1.1.172 performed 'asians-cloud/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761",
+				"scenario":"asians-cloud/ssh-bf",
 				"scenario_hash":"4441dcff07020f6690d998b7101e642359ba405c2abb83565bbbdcee36de280f",
 				"scenario_version":"0.1",
 				"simulated":false,
@@ -106,14 +108,14 @@ func TestAlertsListAsMachine(t *testing.T) {
 	tcapacity := int32(5)
 	tduration := "59m49.264032632s"
 	torigin := "crowdsec"
-	tscenario := "crowdsecurity/ssh-bf"
+	tscenario := "asians-cloud/ssh-bf"
 	tscope := "Ip"
 	ttype := "ban"
 	tvalue := "1.1.1.172"
 	ttimestamp := "2020-11-28 10:20:46 +0000 UTC"
 	teventscount := int32(6)
 	tleakspeed := "10s"
-	tmessage := "Ip 1.1.1.172 performed 'crowdsecurity/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761"
+	tmessage := "Ip 1.1.1.172 performed 'asians-cloud/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761"
 	tscenariohash := "4441dcff07020f6690d998b7101e642359ba405c2abb83565bbbdcee36de280f"
 	tscenarioversion := "0.1"
 	tstartat := "2020-11-28 10:20:46.842701127 +0100 +0100"
@@ -233,7 +235,7 @@ func TestAlertsGetAsMachine(t *testing.T) {
 	client, err := NewClient(&Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
 	})
@@ -258,7 +260,7 @@ func TestAlertsGetAsMachine(t *testing.T) {
 				  "end_ip":16843180,
 				  "id":1,
 				  "origin":"crowdsec",
-				  "scenario":"crowdsecurity/ssh-bf",
+				  "scenario":"asians-cloud/ssh-bf",
 				  "scope":"Ip",
 				  "simulated":false,
 				  "start_ip":16843180,
@@ -282,8 +284,8 @@ func TestAlertsGetAsMachine(t *testing.T) {
 				"labels":null,
 				"leakspeed":"10s",
 				"machine_id":"test",
-				"message":"Ip 1.1.1.172 performed 'crowdsecurity/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761",
-				"scenario":"crowdsecurity/ssh-bf",
+				"message":"Ip 1.1.1.172 performed 'asians-cloud/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761",
+				"scenario":"asians-cloud/ssh-bf",
 				"scenario_hash":"4441dcff07020f6690d998b7101e642359ba405c2abb83565bbbdcee36de280f",
 				"scenario_version":"0.1",
 				"simulated":false,
@@ -305,14 +307,14 @@ func TestAlertsGetAsMachine(t *testing.T) {
 	tcapacity := int32(5)
 	tduration := "59m49.264032632s"
 	torigin := "crowdsec"
-	tscenario := "crowdsecurity/ssh-bf"
+	tscenario := "asians-cloud/ssh-bf"
 	tscope := "Ip"
 	ttype := "ban"
 	tvalue := "1.1.1.172"
 	ttimestamp := "2020-11-28 10:20:46 +0000 UTC"
 	teventscount := int32(6)
 	tleakspeed := "10s"
-	tmessage := "Ip 1.1.1.172 performed 'crowdsecurity/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761"
+	tmessage := "Ip 1.1.1.172 performed 'asians-cloud/ssh-bf' (6 events over 2.920062ms) at 2020-11-28 10:20:46.845619968 +0100 CET m=+5.903899761"
 	tscenariohash := "4441dcff07020f6690d998b7101e642359ba405c2abb83565bbbdcee36de280f"
 	tscenarioversion := "0.1"
 	tstartat := "2020-11-28 10:20:46.842701127 +0100 +0100"
@@ -423,7 +425,7 @@ func TestAlertsCreateAsMachine(t *testing.T) {
 	client, err := NewClient(&Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
 	})
@@ -467,7 +469,7 @@ func TestAlertsDeleteAsMachine(t *testing.T) {
 	client, err := NewClient(&Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
 	})

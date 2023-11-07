@@ -6,19 +6,16 @@ Test collection management
 
 from http import HTTPStatus
 import json
-import os
-import pwd
 
 import pytest
-import yaml
 
 pytestmark = pytest.mark.docker
 
 
 def test_install_two_collections(crowdsec, flavor):
     """Test installing collections at startup"""
-    it1 = 'crowdsecurity/apache2'
-    it2 = 'crowdsecurity/asterisk'
+    it1 = 'asians-cloud/apache2'
+    it2 = 'asians-cloud/asterisk'
     env = {
         'COLLECTIONS': f'{it1} {it2}'
     }
@@ -40,7 +37,7 @@ def test_install_two_collections(crowdsec, flavor):
 
 def test_disable_collection(crowdsec, flavor):
     """Test removing a pre-installed collection at startup"""
-    it = 'crowdsecurity/linux'
+    it = 'asians-cloud/linux'
     env = {
         'DISABLE_COLLECTIONS': it
     }
@@ -60,7 +57,7 @@ def test_disable_collection(crowdsec, flavor):
 
 def test_install_and_disable_collection(crowdsec, flavor):
     """Declare a collection to install AND disable: disable wins"""
-    it = 'crowdsecurity/apache2'
+    it = 'asians-cloud/apache2'
     env = {
         'COLLECTIONS': it,
         'DISABLE_COLLECTIONS': it,
@@ -80,17 +77,12 @@ def test_install_and_disable_collection(crowdsec, flavor):
 
 # already done in bats, prividing here as example of a somewhat complex test
 def test_taint_bubble_up(crowdsec, tmp_path_factory, flavor):
-    coll = 'crowdsecurity/nginx'
+    coll = 'asians-cloud/nginx'
     env = {
         'COLLECTIONS': f'{coll}'
     }
 
-    hub = tmp_path_factory.mktemp("hub")
-    volumes = {
-        hub: {'bind': '/etc/crowdsec/hub', 'mode': 'rw'}
-    }
-
-    with crowdsec(flavor=flavor, environment=env, volumes=volumes) as cs:
+    with crowdsec(flavor=flavor, environment=env) as cs:
         cs.wait_for_http(8080, '/health', want_status=HTTPStatus.OK)
         res = cs.cont.exec_run('cscli collections list -o json')
         assert res.exit_code == 0
@@ -102,25 +94,13 @@ def test_taint_bubble_up(crowdsec, tmp_path_factory, flavor):
             f'*Enabled collections : {coll}*',
         ])
 
-        # change file permissions to allow edit
-        current_uid = pwd.getpwuid(os.getuid()).pw_uid
-        res = cs.cont.exec_run(f'chown -R {current_uid} /etc/crowdsec/hub')
+        scenario = 'asians-cloud/http-crawl-non_statics'
+
+        # the description won't be read back, it's from the index
+        yq_command = f"yq -e -i '.description=\"tainted\"' /etc/crowdsec/hub/scenarios/{scenario}.yaml"
+        res = cs.cont.exec_run(yq_command)
         assert res.exit_code == 0
 
-    scenario = 'crowdsecurity/http-crawl-non_statics'
-    scenario_file = hub / f'scenarios/{scenario}.yaml'
-
-    with open(scenario_file) as f:
-        yml = yaml.safe_load(f)
-
-    yml['description'] += ' (tainted)'
-    # won't be able to read it back because description is taken from the index
-
-    with open(scenario_file, 'w') as f:
-        yaml.dump(yml, f)
-
-    with crowdsec(flavor=flavor, environment=env, volumes=volumes) as cs:
-        cs.wait_for_http(8080, '/health', want_status=HTTPStatus.OK)
         res = cs.cont.exec_run(f'cscli scenarios inspect {scenario} -o json')
         assert res.exit_code == 0
         j = json.loads(res.output)
@@ -130,5 +110,5 @@ def test_taint_bubble_up(crowdsec, tmp_path_factory, flavor):
         assert res.exit_code == 0
         j = json.loads(res.output)
         items = {c['name']: c for c in j['collections']}
-        assert items['crowdsecurity/nginx']['status'] == 'enabled,tainted'
-        assert items['crowdsecurity/base-http-scenarios']['status'] == 'enabled,tainted'
+        assert items['asians-cloud/nginx']['status'] == 'enabled,tainted'
+        assert items['asians-cloud/base-http-scenarios']['status'] == 'enabled,tainted'

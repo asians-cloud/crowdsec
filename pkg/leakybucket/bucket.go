@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/asians-cloud/go-cs-lib/trace"
+
 	"github.com/asians-cloud/crowdsec/pkg/time/rate"
 	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/davecgh/go-spew/spew"
@@ -68,6 +70,7 @@ type Leaky struct {
 	wgPour              *sync.WaitGroup
 	wgDumpState         *sync.WaitGroup
 	mutex               *sync.Mutex //used only for TIMEMACHINE mode to allow garbage collection without races
+	orderEvent          bool
 }
 
 var BucketsPour = prometheus.NewCounterVec(
@@ -176,6 +179,7 @@ func FromFactory(bucketFactory BucketFactory) *Leaky {
 		wgPour:          bucketFactory.wgPour,
 		wgDumpState:     bucketFactory.wgDumpState,
 		mutex:           &sync.Mutex{},
+		orderEvent:      bucketFactory.orderEvent,
 	}
 	if l.BucketConfig.Capacity > 0 && l.BucketConfig.leakspeed != time.Duration(0) {
 		l.Duration = time.Duration(l.BucketConfig.Capacity+1) * l.BucketConfig.leakspeed
@@ -187,6 +191,10 @@ func FromFactory(bucketFactory BucketFactory) *Leaky {
 
 	if l.BucketConfig.Type == "conditional" {
 		l.conditionalOverflow = true
+		l.Duration = l.BucketConfig.leakspeed
+	}
+
+	if l.BucketConfig.Type == "bayesian" {
 		l.Duration = l.BucketConfig.leakspeed
 	}
 	return l
@@ -202,13 +210,13 @@ func LeakRoutine(leaky *Leaky) error {
 		firstEvent         = true
 	)
 
-	defer types.CatchPanic(fmt.Sprintf("crowdsec/LeakRoutine/%s", leaky.Name))
+	defer trace.CatchPanic(fmt.Sprintf("crowdsec/LeakRoutine/%s", leaky.Name))
 
 	BucketsCurrentCount.With(prometheus.Labels{"name": leaky.Name}).Inc()
 	defer BucketsCurrentCount.With(prometheus.Labels{"name": leaky.Name}).Dec()
 
 	/*todo : we create a logger at runtime while we want leakroutine to be up asap, might not be a good idea*/
-	leaky.logger = leaky.BucketConfig.logger.WithFields(log.Fields{"capacity": leaky.Capacity, "partition": leaky.Mapkey, "bucket_id": leaky.Uuid})
+	leaky.logger = leaky.BucketConfig.logger.WithFields(log.Fields{"partition": leaky.Mapkey, "bucket_id": leaky.Uuid})
 
 	//We copy the processors, as they are coming from the BucketFactory, and thus are shared between buckets
 	//If we don't copy, processors using local cache (such as Uniq) are subject to race conditions
@@ -239,6 +247,9 @@ func LeakRoutine(leaky *Leaky) error {
 				msg = processor.OnBucketPour(leaky.BucketConfig)(*msg, leaky)
 				// if &msg == nil we stop processing
 				if msg == nil {
+					if leaky.orderEvent {
+						orderEvent[leaky.Mapkey].Done()
+					}
 					goto End
 				}
 			}
@@ -252,6 +263,9 @@ func LeakRoutine(leaky *Leaky) error {
 			for _, processor := range processors {
 				msg = processor.AfterBucketPour(leaky.BucketConfig)(*msg, leaky)
 				if msg == nil {
+					if leaky.orderEvent {
+						orderEvent[leaky.Mapkey].Done()
+					}
 					goto End
 				}
 			}
@@ -271,7 +285,10 @@ func LeakRoutine(leaky *Leaky) error {
 				}
 			}
 			firstEvent = false
-		/*we overflowed*/
+			/*we overflowed*/
+			if leaky.orderEvent {
+				orderEvent[leaky.Mapkey].Done()
+			}
 		case ofw := <-leaky.Out:
 			leaky.overflow(ofw)
 			return nil

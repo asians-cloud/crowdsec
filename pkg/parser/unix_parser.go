@@ -3,16 +3,17 @@ package parser
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"sort"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/asians-cloud/grokky"
 
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
-
-	"github.com/crowdsecurity/grokky"
-	log "github.com/sirupsen/logrus"
 )
 
 type UnixParserCtx struct {
@@ -45,7 +46,7 @@ func Init(c map[string]interface{}) (*UnixParserCtx, error) {
 		if strings.Contains(f.Name(), ".") {
 			continue
 		}
-		if err := r.Grok.AddFromFile(path.Join(c["patterns"].(string), f.Name())); err != nil {
+		if err := r.Grok.AddFromFile(filepath.Join(c["patterns"].(string), f.Name())); err != nil {
 			log.Errorf("failed to load pattern %s : %v", f.Name(), err)
 			return nil, err
 		}
@@ -96,7 +97,7 @@ func NewParsers() *Parsers {
 func LoadParsers(cConfig *csconfig.Config, parsers *Parsers) (*Parsers, error) {
 	var err error
 
-	patternsDir := path.Join(cConfig.Crowdsec.ConfigDir, "patterns/")
+	patternsDir := filepath.Join(cConfig.Crowdsec.ConfigDir, "patterns/")
 	log.Infof("Loading grok library %s", patternsDir)
 	/* load base regexps for two grok parsers */
 	parsers.Ctx, err = Init(map[string]interface{}{"patterns": patternsDir,
@@ -117,7 +118,7 @@ func LoadParsers(cConfig *csconfig.Config, parsers *Parsers) (*Parsers, error) {
 
 	parsers.EnricherCtx, err = Loadplugin(cConfig.Crowdsec.DataDir)
 	if err != nil {
-		return parsers, fmt.Errorf("Failed to load enrich plugin : %v", err)
+		return parsers, fmt.Errorf("failed to load enrich plugin : %v", err)
 	}
 
 	/*
@@ -135,8 +136,8 @@ func LoadParsers(cConfig *csconfig.Config, parsers *Parsers) (*Parsers, error) {
 		log.Infof("Loading postoverflow parsers")
 		parsers.Povfwnodes, err = LoadStages(parsers.PovfwStageFiles, parsers.Povfwctx, parsers.EnricherCtx)
 	} else {
-		parsers.Povfwnodes = []Node{}
 		log.Infof("No postoverflow parsers to load")
+		parsers.Povfwnodes = []Node{}
 	}
 
 	if err != nil {
@@ -147,6 +148,12 @@ func LoadParsers(cConfig *csconfig.Config, parsers *Parsers) (*Parsers, error) {
 		parsers.Ctx.Profiling = true
 		parsers.Povfwctx.Profiling = true
 	}
-
+	/*
+		Reset CTX grok to reduce memory footprint after we compile all the patterns
+	*/
+	parsers.Ctx.Grok = grokky.Host{}
+	parsers.Povfwctx.Grok = grokky.Host{}
+	parsers.StageFiles = []Stagefile{}
+	parsers.PovfwStageFiles = []Stagefile{}
 	return parsers, nil
 }

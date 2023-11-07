@@ -9,11 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
+
+	"github.com/asians-cloud/go-cs-lib/trace"
 
 	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
 	"github.com/asians-cloud/crowdsec/pkg/types"
@@ -235,7 +236,7 @@ func (j *JournalCtlSource) ConfigureByDSN(dsn string, labels map[string]string, 
 			}
 			lvl, err := log.ParseLevel(value[0])
 			if err != nil {
-				return errors.Wrapf(err, "unknown level %s", value[0])
+				return fmt.Errorf("unknown level %s: %w", value[0], err)
 			}
 			j.logger.Logger.SetLevel(lvl)
 		case "since":
@@ -257,7 +258,7 @@ func (j *JournalCtlSource) GetName() string {
 }
 
 func (j *JournalCtlSource) OneShotAcquisition(out chan types.Event, t *tomb.Tomb) error {
-	defer types.CatchPanic("crowdsec/acquis/journalctl/oneshot")
+	defer trace.CatchPanic("crowdsec/acquis/journalctl/oneshot")
 	err := j.runJournalCtl(out, t)
 	j.logger.Debug("Oneshot journalctl acquisition is done")
 	return err
@@ -266,7 +267,7 @@ func (j *JournalCtlSource) OneShotAcquisition(out chan types.Event, t *tomb.Tomb
 
 func (j *JournalCtlSource) StreamingAcquisition(out chan types.Event, t *tomb.Tomb) error {
 	t.Go(func() error {
-		defer types.CatchPanic("crowdsec/acquis/journalctl/streaming")
+		defer trace.CatchPanic("crowdsec/acquis/journalctl/streaming")
 		return j.runJournalCtl(out, t)
 	})
 	return nil

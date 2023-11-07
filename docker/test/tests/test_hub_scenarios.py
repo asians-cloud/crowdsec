@@ -14,8 +14,8 @@ pytestmark = pytest.mark.docker
 
 def test_install_two_scenarios(crowdsec, flavor):
     """Test installing scenarios at startup"""
-    it1 = 'crowdsecurity/cpanel-bf-attempt'
-    it2 = 'crowdsecurity/asterisk_bf'
+    it1 = 'asians-cloud/cpanel-bf-attempt'
+    it2 = 'asians-cloud/asterisk_bf'
     env = {
         'SCENARIOS': f'{it1} {it2}'
     }
@@ -36,7 +36,7 @@ def test_install_two_scenarios(crowdsec, flavor):
 
 def test_disable_scenario(crowdsec, flavor):
     """Test removing a pre-installed scenario at startup"""
-    it = 'crowdsecurity/ssh-bf'
+    it = 'asians-cloud/ssh-bf'
     env = {
         'DISABLE_SCENARIOS': it
     }
@@ -55,7 +55,7 @@ def test_disable_scenario(crowdsec, flavor):
 
 def test_install_and_disable_scenario(crowdsec, flavor):
     """Declare a scenario to install AND disable: disable wins"""
-    it = 'crowdsecurity/asterisk_bf'
+    it = 'asians-cloud/asterisk_bf'
     env = {
         'SCENARIOS': it,
         'DISABLE_SCENARIOS': it,

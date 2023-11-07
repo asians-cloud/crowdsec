@@ -9,9 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/asians-cloud/crowdsec/pkg/cticlient"
-	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/asians-cloud/go-cs-lib/ptr"
+
+	"github.com/asians-cloud/crowdsec/pkg/cticlient"
 )
 
 var sampledata = map[string]cticlient.SmokeItem{
@@ -48,8 +50,8 @@ var sampledata = map[string]cticlient.SmokeItem{
 			{Name: "ssh:bruteforce", Label: "SSH Bruteforce", Description: "SSH Bruteforce"},
 		},
 		AttackDetails: []*cticlient.CTIAttackDetails{
-			{Name: "crowdsecurity/ssh-bf", Label: "Example Attack"},
-			{Name: "crowdsecurity/ssh-slow-bf", Label: "Example Attack"},
+			{Name: "asians-cloud/ssh-bf", Label: "Example Attack"},
+			{Name: "asians-cloud/ssh-slow-bf", Label: "Example Attack"},
 		},
 	},
 	//1.2.3.7 is a ok guy, but part of a bad range
@@ -104,9 +106,19 @@ func smokeHandler(req *http.Request) *http.Response {
 	}
 }
 
+func TestNillClient(t *testing.T) {
+	defer ShutdownCrowdsecCTI()
+	if err := InitCrowdsecCTI(ptr.Of(""), nil, nil, nil); err != cticlient.ErrDisabled {
+		t.Fatalf("failed to init CTI : %s", err)
+	}
+	item, err := CrowdsecCTI("1.2.3.4")
+	assert.Equal(t, err, cticlient.ErrDisabled)
+	assert.Equal(t, item, &cticlient.SmokeItem{})
+}
+
 func TestInvalidAuth(t *testing.T) {
 	defer ShutdownCrowdsecCTI()
-	if err := InitCrowdsecCTI(types.StrPtr("asdasd"), nil, nil, nil); err != nil {
+	if err := InitCrowdsecCTI(ptr.Of("asdasd"), nil, nil, nil); err != nil {
 		t.Fatalf("failed to init CTI : %s", err)
 	}
 	//Replace the client created by InitCrowdsecCTI with one that uses a custom transport
@@ -133,7 +145,7 @@ func TestInvalidAuth(t *testing.T) {
 func TestNoKey(t *testing.T) {
 	defer ShutdownCrowdsecCTI()
 	err := InitCrowdsecCTI(nil, nil, nil, nil)
-	assert.ErrorContains(t, err, "CTI API key not set")
+	assert.ErrorIs(t, err, cticlient.ErrDisabled)
 	//Replace the client created by InitCrowdsecCTI with one that uses a custom transport
 	ctiClient = cticlient.NewCrowdsecCTIClient(cticlient.WithAPIKey("asdasd"), cticlient.WithHTTPClient(&http.Client{
 		Transport: RoundTripFunc(smokeHandler),
@@ -148,7 +160,7 @@ func TestNoKey(t *testing.T) {
 func TestCache(t *testing.T) {
 	defer ShutdownCrowdsecCTI()
 	cacheDuration := 1 * time.Second
-	if err := InitCrowdsecCTI(types.StrPtr(validApiKey), &cacheDuration, nil, nil); err != nil {
+	if err := InitCrowdsecCTI(ptr.Of(validApiKey), &cacheDuration, nil, nil); err != nil {
 		t.Fatalf("failed to init CTI : %s", err)
 	}
 	//Replace the client created by InitCrowdsecCTI with one that uses a custom transport

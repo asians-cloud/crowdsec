@@ -1,15 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/coreos/go-systemd/v22/daemon"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
+
+	"github.com/asians-cloud/go-cs-lib/csdaemon"
+	"github.com/asians-cloud/go-cs-lib/trace"
 
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/database"
@@ -66,7 +68,7 @@ func reloadHandler(sig os.Signal) (*csconfig.Config, error) {
 		}
 		apiServer, err := initAPIServer(cConfig)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to init api server")
+			return nil, fmt.Errorf("unable to init api server: %w", err)
 		}
 
 		apiReady := make(chan bool, 1)
@@ -76,7 +78,7 @@ func reloadHandler(sig os.Signal) (*csconfig.Config, error) {
 	if !cConfig.DisableAgent {
 		csParsers, err := initCrowdsec(cConfig)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to init crowdsec")
+			return nil, fmt.Errorf("unable to init crowdsec: %w", err)
 		}
 
 		// restore bucket state
@@ -139,12 +141,24 @@ func ShutdownCrowdsecRoutines() error {
 	time.Sleep(1 * time.Second) // ugly workaround for now
 	outputsTomb.Kill(nil)
 
-	if err := outputsTomb.Wait(); err != nil {
-		log.Warningf("Ouputs returned error : %s", err)
-		reterr = err
+	done := make(chan error, 1)
+	go func() {
+		done <- outputsTomb.Wait()
+	}()
+
+	// wait for outputs to finish, max 3 seconds
+	select {
+	case err := <-done:
+		if err != nil {
+			log.Warningf("Outputs returned error : %s", err)
+			reterr = err
+		}
+		log.Debugf("outputs are done")
+	case <-time.After(3 * time.Second):
+		// this can happen if outputs are stuck in a http retry loop
+		log.Warningf("Outputs didn't finish in time, some events may have not been flushed")
 	}
 
-	log.Debugf("outputs are done")
 	// He's dead, Jim.
 	crowdsecTomb.Kill(nil)
 
@@ -178,13 +192,13 @@ func shutdownCrowdsec() error {
 func shutdown(sig os.Signal, cConfig *csconfig.Config) error {
 	if !cConfig.DisableAgent {
 		if err := shutdownCrowdsec(); err != nil {
-			return errors.Wrap(err, "failed to shut down crowdsec")
+			return fmt.Errorf("failed to shut down crowdsec: %w", err)
 		}
 	}
 
 	if !cConfig.DisableAPI {
 		if err := shutdownAPI(); err != nil {
-			return errors.Wrap(err, "failed to shut down api routines")
+			return fmt.Errorf("failed to shut down api routines: %w", err)
 		}
 	}
 
@@ -226,7 +240,7 @@ func HandleSignals(cConfig *csconfig.Config) error {
 	exitChan := make(chan error)
 
 	go func() {
-		defer types.CatchPanic("crowdsec/HandleSignals")
+		defer trace.CatchPanic("crowdsec/HandleSignals")
 	Loop:
 		for {
 			s := <-signalChan
@@ -236,13 +250,13 @@ func HandleSignals(cConfig *csconfig.Config) error {
 				log.Warning("SIGHUP received, reloading")
 
 				if err = shutdown(s, cConfig); err != nil {
-					exitChan <- errors.Wrap(err, "failed shutdown")
+					exitChan <- fmt.Errorf("failed shutdown: %w", err)
 
 					break Loop
 				}
 
 				if newConfig, err = reloadHandler(s); err != nil {
-					exitChan <- errors.Wrap(err, "reload handler failure")
+					exitChan <- fmt.Errorf("reload handler failure: %w", err)
 
 					break Loop
 				}
@@ -254,7 +268,7 @@ func HandleSignals(cConfig *csconfig.Config) error {
 			case os.Interrupt, syscall.SIGTERM:
 				log.Warning("SIGTERM received, shutting down")
 				if err = shutdown(s, cConfig); err != nil {
-					exitChan <- errors.Wrap(err, "failed shutdown")
+					exitChan <- fmt.Errorf("failed shutdown: %w", err)
 
 					break Loop
 				}
@@ -282,17 +296,17 @@ func Serve(cConfig *csconfig.Config, apiReady chan bool, agentReady chan bool) e
 	if cConfig.API.Server != nil && cConfig.API.Server.DbConfig != nil {
 		dbClient, err := database.NewClient(cConfig.API.Server.DbConfig)
 		if err != nil {
-			return errors.Wrap(err, "failed to get database client")
+			return fmt.Errorf("failed to get database client: %w", err)
 		}
 
 		err = exprhelpers.Init(dbClient)
 		if err != nil {
-			return errors.Wrap(err, "failed to init expr helpers")
+			return fmt.Errorf("failed to init expr helpers: %w", err)
 		}
 	} else {
 		err := exprhelpers.Init(nil)
 		if err != nil {
-			return errors.Wrap(err, "failed to init expr helpers")
+			return fmt.Errorf("failed to init expr helpers: %w", err)
 		}
 
 		log.Warningln("Exprhelpers loaded without database client.")
@@ -301,7 +315,7 @@ func Serve(cConfig *csconfig.Config, apiReady chan bool, agentReady chan bool) e
 	if cConfig.API.CTI != nil && *cConfig.API.CTI.Enabled {
 		log.Infof("Crowdsec CTI helper enabled")
 		if err := exprhelpers.InitCrowdsecCTI(cConfig.API.CTI.Key, cConfig.API.CTI.CacheTimeout, cConfig.API.CTI.CacheSize, cConfig.API.CTI.LogLevel); err != nil {
-			return errors.Wrap(err, "failed to init crowdsec cti")
+			return fmt.Errorf("failed to init crowdsec cti: %w", err)
 		}
 	}
 
@@ -317,7 +331,7 @@ func Serve(cConfig *csconfig.Config, apiReady chan bool, agentReady chan bool) e
 
 		apiServer, err := initAPIServer(cConfig)
 		if err != nil {
-			return errors.Wrap(err, "api server init")
+			return fmt.Errorf("api server init: %w", err)
 		}
 
 		if !flags.TestMode {
@@ -330,7 +344,7 @@ func Serve(cConfig *csconfig.Config, apiReady chan bool, agentReady chan bool) e
 	if !cConfig.DisableAgent {
 		csParsers, err := initCrowdsec(cConfig)
 		if err != nil {
-			return errors.Wrap(err, "crowdsec init")
+			return fmt.Errorf("crowdsec init: %w", err)
 		}
 
 		// if it's just linting, we're done
@@ -342,16 +356,13 @@ func Serve(cConfig *csconfig.Config, apiReady chan bool, agentReady chan bool) e
 	}
 
 	if flags.TestMode {
-		log.Infof("test done")
+		log.Infof("Configuration test done")
 		pluginBroker.Kill()
 		os.Exit(0)
 	}
 
 	if cConfig.Common != nil && cConfig.Common.Daemonize {
-		sent, err := daemon.SdNotify(false, daemon.SdNotifyReady)
-		if !sent || err != nil {
-			log.Errorf("Failed to notify(sent: %v): %v", sent, err)
-		}
+		csdaemon.NotifySystemd(log.StandardLogger())
 		// wait for signals
 		return HandleSignals(cConfig)
 	}

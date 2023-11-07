@@ -5,24 +5,25 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	"github.com/asians-cloud/go-cs-lib/version"
+
+	"github.com/asians-cloud/crowdsec/cmd/crowdsec-cli/require"
 	"github.com/asians-cloud/crowdsec/pkg/alertcontext"
 	"github.com/asians-cloud/crowdsec/pkg/apiclient"
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/parser"
-	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 var LAPIURLPrefix string = "v1"
@@ -36,22 +37,19 @@ func runLapiStatus(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		log.Fatalf("parsing api url ('%s'): %s", apiurl, err)
 	}
-	if err := csConfig.LoadHub(); err != nil {
+
+	if err := require.Hub(csConfig); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := cwhub.GetHubIdx(csConfig.Hub); err != nil {
-		log.Info("Run 'sudo cscli hub update' to get the hub index")
-		log.Fatalf("Failed to load hub index : %s", err)
-	}
-	scenarios, err := cwhub.GetInstalledScenariosAsString()
+	scenarios, err := cwhub.GetInstalledItemsAsString(cwhub.SCENARIOS)
 	if err != nil {
 		log.Fatalf("failed to get scenarios : %s", err)
 	}
 
 	Client, err = apiclient.NewDefaultClient(apiurl,
 		LAPIURLPrefix,
-		fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		fmt.Sprintf("crowdsec/%s", version.String()),
 		nil)
 	if err != nil {
 		log.Fatalf("init default client: %s", err)
@@ -122,7 +120,7 @@ func runLapiRegister(cmd *cobra.Command, args []string) error {
 	_, err = apiclient.RegisterClient(&apiclient.Config{
 		MachineID:     lapiUser,
 		Password:      password,
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiurl,
 		VersionPrefix: LAPIURLPrefix,
 	}, nil)
@@ -180,7 +178,7 @@ func NewLapiRegisterCmd() *cobra.Command {
 	cmdLapiRegister := &cobra.Command{
 		Use:   "register",
 		Short: "Register a machine to Local API (LAPI)",
-		Long: `Register you machine to the Local API (LAPI).
+		Long: `Register your machine to the Local API (LAPI).
 Keep in mind the machine needs to be validated by an administrator on LAPI side to be effective.`,
 		Args:              cobra.MinimumNArgs(0),
 		DisableAutoGenTag: true,
@@ -203,7 +201,7 @@ func NewLapiCmd() *cobra.Command {
 		DisableAutoGenTag: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := csConfig.LoadAPIClient(); err != nil {
-				return errors.Wrap(err, "loading api client")
+				return fmt.Errorf("loading api client: %w", err)
 			}
 			return nil
 		},
@@ -214,6 +212,29 @@ func NewLapiCmd() *cobra.Command {
 	cmdLapi.AddCommand(NewLapiContextCmd())
 
 	return cmdLapi
+}
+
+func AddContext(key string, values []string) error {
+	if err := alertcontext.ValidateContextExpr(key, values); err != nil {
+		return fmt.Errorf("invalid context configuration :%s", err)
+	}
+	if _, ok := csConfig.Crowdsec.ContextToSend[key]; !ok {
+		csConfig.Crowdsec.ContextToSend[key] = make([]string, 0)
+		log.Infof("key '%s' added", key)
+	}
+	data := csConfig.Crowdsec.ContextToSend[key]
+	for _, val := range values {
+		if !slices.Contains(data, val) {
+			log.Infof("value '%s' added to key '%s'", val, key)
+			data = append(data, val)
+		}
+		csConfig.Crowdsec.ContextToSend[key] = data
+	}
+	if err := csConfig.Crowdsec.DumpContextConfigFile(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewLapiContextCmd() *cobra.Command {
@@ -246,32 +267,29 @@ func NewLapiContextCmd() *cobra.Command {
 		Short: "Add context to send with alerts. You must specify the output key with the expr value you want",
 		Example: `cscli lapi context add --key source_ip --value evt.Meta.source_ip
 cscli lapi context add --key file_source --value evt.Line.Src
+cscli lapi context add --value evt.Meta.source_ip --value evt.Meta.target_user 
 		`,
 		DisableAutoGenTag: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := alertcontext.ValidateContextExpr(keyToAdd, valuesToAdd); err != nil {
-				log.Fatalf("invalid context configuration :%s", err)
-			}
-			if _, ok := csConfig.Crowdsec.ContextToSend[keyToAdd]; !ok {
-				csConfig.Crowdsec.ContextToSend[keyToAdd] = make([]string, 0)
-				log.Infof("key '%s' added", keyToAdd)
-			}
-			data := csConfig.Crowdsec.ContextToSend[keyToAdd]
-			for _, val := range valuesToAdd {
-				if !inSlice(val, data) {
-					log.Infof("value '%s' added to key '%s'", val, keyToAdd)
-					data = append(data, val)
+			if keyToAdd != "" {
+				if err := AddContext(keyToAdd, valuesToAdd); err != nil {
+					log.Fatalf(err.Error())
 				}
-				csConfig.Crowdsec.ContextToSend[keyToAdd] = data
+				return
 			}
-			if err := csConfig.Crowdsec.DumpContextConfigFile(); err != nil {
-				log.Fatalf(err.Error())
+
+			for _, v := range valuesToAdd {
+				keySlice := strings.Split(v, ".")
+				key := keySlice[len(keySlice)-1]
+				value := []string{v}
+				if err := AddContext(key, value); err != nil {
+					log.Fatalf(err.Error())
+				}
 			}
 		},
 	}
 	cmdContextAdd.Flags().StringVarP(&keyToAdd, "key", "k", "", "The key of the different values to send")
 	cmdContextAdd.Flags().StringSliceVar(&valuesToAdd, "value", []string{}, "The expr fields to associate with the key")
-	cmdContextAdd.MarkFlagRequired("key")
 	cmdContextAdd.MarkFlagRequired("value")
 	cmdContext.AddCommand(cmdContextAdd)
 
@@ -301,7 +319,7 @@ cscli lapi context add --key file_source --value evt.Line.Src
 		Use:   "detect",
 		Short: "Detect available fields from the installed parsers",
 		Example: `cscli lapi context detect --all
-cscli lapi context detect crowdsecurity/sshd-logs
+cscli lapi context detect asians-cloud/sshd-logs
 		`,
 		DisableAutoGenTag: true,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -332,7 +350,7 @@ cscli lapi context detect crowdsecurity/sshd-logs
 
 			fieldByParsers := make(map[string][]string)
 			for _, node := range csParsers.Nodes {
-				if !detectAll && !inSlice(node.Name, args) {
+				if !detectAll && !slices.Contains(args, node.Name) {
 					continue
 				}
 				if !detectAll {
@@ -343,7 +361,7 @@ cscli lapi context detect crowdsecurity/sshd-logs
 
 				subNodeFields := detectSubNode(node, *csParsers.Ctx)
 				for _, field := range subNodeFields {
-					if !inSlice(field, fieldByParsers[node.Name]) {
+					if !slices.Contains(fieldByParsers[node.Name], field) {
 						fieldByParsers[node.Name] = append(fieldByParsers[node.Name], field)
 					}
 				}
@@ -411,7 +429,7 @@ cscli lapi context delete --value evt.Line.Src
 			for _, value := range valuesToDelete {
 				valueFound := false
 				for key, context := range csConfig.Crowdsec.ContextToSend {
-					if inSlice(value, context) {
+					if slices.Contains(context, value) {
 						valueFound = true
 						csConfig.Crowdsec.ContextToSend[key] = removeFromSlice(value, context)
 						log.Infof("value '%s' has been removed from key '%s'", value, key)
@@ -438,18 +456,18 @@ cscli lapi context delete --value evt.Line.Src
 	return cmdContext
 }
 
-func detectStaticField(GrokStatics []types.ExtraField) []string {
+func detectStaticField(GrokStatics []parser.ExtraField) []string {
 	ret := make([]string, 0)
 	for _, static := range GrokStatics {
 		if static.Parsed != "" {
 			fieldName := fmt.Sprintf("evt.Parsed.%s", static.Parsed)
-			if !inSlice(fieldName, ret) {
+			if !slices.Contains(ret, fieldName) {
 				ret = append(ret, fieldName)
 			}
 		}
 		if static.Meta != "" {
 			fieldName := fmt.Sprintf("evt.Meta.%s", static.Meta)
-			if !inSlice(fieldName, ret) {
+			if !slices.Contains(ret, fieldName) {
 				ret = append(ret, fieldName)
 			}
 		}
@@ -458,7 +476,7 @@ func detectStaticField(GrokStatics []types.ExtraField) []string {
 			if !strings.HasPrefix(fieldName, "evt.") {
 				fieldName = "evt." + fieldName
 			}
-			if !inSlice(fieldName, ret) {
+			if !slices.Contains(ret, fieldName) {
 				ret = append(ret, fieldName)
 			}
 		}
@@ -472,7 +490,7 @@ func detectNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 	if node.Grok.RunTimeRegexp != nil {
 		for _, capturedField := range node.Grok.RunTimeRegexp.Names() {
 			fieldName := fmt.Sprintf("evt.Parsed.%s", capturedField)
-			if !inSlice(fieldName, ret) {
+			if !slices.Contains(ret, fieldName) {
 				ret = append(ret, fieldName)
 			}
 		}
@@ -485,7 +503,7 @@ func detectNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 		}
 		for _, capturedField := range grokCompiled.Names() {
 			fieldName := fmt.Sprintf("evt.Parsed.%s", capturedField)
-			if !inSlice(fieldName, ret) {
+			if !slices.Contains(ret, fieldName) {
 				ret = append(ret, fieldName)
 			}
 		}
@@ -494,7 +512,7 @@ func detectNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 	if len(node.Grok.Statics) > 0 {
 		staticsField := detectStaticField(node.Grok.Statics)
 		for _, staticField := range staticsField {
-			if !inSlice(staticField, ret) {
+			if !slices.Contains(ret, staticField) {
 				ret = append(ret, staticField)
 			}
 		}
@@ -503,7 +521,7 @@ func detectNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 	if len(node.Statics) > 0 {
 		staticsField := detectStaticField(node.Statics)
 		for _, staticField := range staticsField {
-			if !inSlice(staticField, ret) {
+			if !slices.Contains(ret, staticField) {
 				ret = append(ret, staticField)
 			}
 		}
@@ -519,7 +537,7 @@ func detectSubNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 		if subnode.Grok.RunTimeRegexp != nil {
 			for _, capturedField := range subnode.Grok.RunTimeRegexp.Names() {
 				fieldName := fmt.Sprintf("evt.Parsed.%s", capturedField)
-				if !inSlice(fieldName, ret) {
+				if !slices.Contains(ret, fieldName) {
 					ret = append(ret, fieldName)
 				}
 			}
@@ -531,7 +549,7 @@ func detectSubNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 			}
 			for _, capturedField := range grokCompiled.Names() {
 				fieldName := fmt.Sprintf("evt.Parsed.%s", capturedField)
-				if !inSlice(fieldName, ret) {
+				if !slices.Contains(ret, fieldName) {
 					ret = append(ret, fieldName)
 				}
 			}
@@ -540,7 +558,7 @@ func detectSubNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 		if len(subnode.Grok.Statics) > 0 {
 			staticsField := detectStaticField(subnode.Grok.Statics)
 			for _, staticField := range staticsField {
-				if !inSlice(staticField, ret) {
+				if !slices.Contains(ret, staticField) {
 					ret = append(ret, staticField)
 				}
 			}
@@ -549,7 +567,7 @@ func detectSubNode(node parser.Node, parserCTX parser.UnixParserCtx) []string {
 		if len(subnode.Statics) > 0 {
 			staticsField := detectStaticField(subnode.Statics)
 			for _, staticField := range staticsField {
-				if !inSlice(staticField, ret) {
+				if !slices.Contains(ret, staticField) {
 					ret = append(ret, staticField)
 				}
 			}

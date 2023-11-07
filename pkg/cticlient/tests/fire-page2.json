@@ -57,13 +57,13 @@
       },
       "attack_details": [
         {
-          "name": "crowdsecurity/smb-bf",
+          "name": "asians-cloud/smb-bf",
           "label": "Samba Bruteforce",
           "description": "Detect smb brute force",
           "references": []
         },
         {
-          "name": "crowdsecurity/windows-bf",
+          "name": "asians-cloud/windows-bf",
           "label": "SMB/RDP brute force",
           "description": "Detect samba/remote-desktop user brute force",
           "references": []
@@ -155,19 +155,19 @@
       },
       "attack_details": [
         {
-          "name": "crowdsecurity/ssh-slow-bf",
+          "name": "asians-cloud/ssh-slow-bf",
           "label": "Slow SSH Bruteforce",
           "description": "Detect slow ssh brute force",
           "references": []
         },
         {
-          "name": "crowdsecurity/ssh-bf",
+          "name": "asians-cloud/ssh-bf",
           "label": "SSH Bruteforce",
           "description": "Detect ssh brute force",
           "references": []
         },
         {
-          "name": "crowdsecurity/iptables-scan-multi_ports",
+          "name": "asians-cloud/iptables-scan-multi_ports",
           "label": "Port Scanner",
           "description": "Detect tcp port scan",
           "references": []
@@ -252,13 +252,13 @@
       },
       "attack_details": [
         {
-          "name": "crowdsecurity/ssh-slow-bf",
+          "name": "asians-cloud/ssh-slow-bf",
           "label": "Slow SSH Bruteforce",
           "description": "Detect slow ssh brute force",
           "references": []
         },
         {
-          "name": "crowdsecurity/ssh-bf",
+          "name": "asians-cloud/ssh-bf",
           "label": "SSH Bruteforce",
           "description": "Detect ssh brute force",
           "references": []

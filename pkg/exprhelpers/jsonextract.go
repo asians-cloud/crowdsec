@@ -174,9 +174,9 @@ func UnmarshalJSON(params ...any) (any, error) {
 
 	err := json.Unmarshal([]byte(jsonBlob), &out)
 	if err != nil {
-		log.Errorf("UnmarshalJSON : %s", err)
-		return "", nil
+		log.WithField("line", jsonBlob).Errorf("UnmarshalJSON : %s", err)
+		return nil, err
 	}
 	target[key] = out
-	return target, nil
+	return nil, nil
 }

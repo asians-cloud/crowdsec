@@ -2,9 +2,8 @@ package v1
 
 import (
 	"context"
+	"fmt"
 	"net"
-
-	//"github.com/asians-cloud/crowdsec/pkg/apiserver/controllers"
 
 	middlewares "github.com/asians-cloud/crowdsec/pkg/apiserver/middlewares/v1"
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
@@ -12,8 +11,6 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/csprofiles"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/models"
-        "github.com/asians-cloud/crowdsec/pkg/stream"
-	"github.com/pkg/errors"
 )
 
 type Controller struct {
@@ -51,7 +48,7 @@ func New(cfg *ControllerV1Config) (*Controller, error) {
 
 	profiles, err := csprofiles.NewProfile(cfg.ProfilesCfg)
 	if err != nil {
-		return &Controller{}, errors.Wrapf(err, "failed to compile profiles")
+		return &Controller{}, fmt.Errorf("failed to compile profiles: %w", err)
 	}
 
 	v1 := &Controller{

@@ -43,7 +43,7 @@ services:
       timeout: 5s
 
   kafka1:
-    image: crowdsecurity/kafka-ssl
+    image: asians-cloud/kafka-ssl
     ports:
       - "9093:9093"
       - "9092:9092"

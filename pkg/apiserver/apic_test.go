@@ -20,10 +20,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/tomb.v2"
 
+	"github.com/asians-cloud/go-cs-lib/cstest"
+	"github.com/asians-cloud/go-cs-lib/ptr"
+	"github.com/asians-cloud/go-cs-lib/version"
+
 	"github.com/asians-cloud/crowdsec/pkg/apiclient"
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/database/ent/decision"
 	"github.com/asians-cloud/crowdsec/pkg/database/ent/machine"
@@ -59,10 +61,10 @@ func getAPIC(t *testing.T) *apic {
 		metricsTomb:  tomb.Tomb{},
 		scenarioList: make([]string, 0),
 		consoleConfig: &csconfig.ConsoleConfig{
-			ShareManualDecisions:  types.BoolPtr(false),
-			ShareTaintedScenarios: types.BoolPtr(false),
-			ShareCustomScenarios:  types.BoolPtr(false),
-			ShareContext:          types.BoolPtr(false),
+			ShareManualDecisions:  ptr.Of(false),
+			ShareTaintedScenarios: ptr.Of(false),
+			ShareCustomScenarios:  ptr.Of(false),
+			ShareContext:          ptr.Of(false),
 		},
 		isPulling: make(chan bool, 1),
 	}
@@ -139,17 +141,17 @@ func TestAPICFetchScenariosListFromDB(t *testing.T) {
 		{
 			name: "Simple one machine with two scenarios",
 			machineIDsWithScenarios: map[string]string{
-				"a": "crowdsecurity/http-bf,crowdsecurity/ssh-bf",
+				"a": "asians-cloud/http-bf,asians-cloud/ssh-bf",
 			},
-			expectedScenarios: []string{"crowdsecurity/ssh-bf", "crowdsecurity/http-bf"},
+			expectedScenarios: []string{"asians-cloud/ssh-bf", "asians-cloud/http-bf"},
 		},
 		{
 			name: "Multi machine with custom+hub scenarios",
 			machineIDsWithScenarios: map[string]string{
-				"a": "crowdsecurity/http-bf,crowdsecurity/ssh-bf,my_scenario",
-				"b": "crowdsecurity/http-bf,crowdsecurity/ssh-bf,foo_scenario",
+				"a": "asians-cloud/http-bf,asians-cloud/ssh-bf,my_scenario",
+				"b": "asians-cloud/http-bf,asians-cloud/ssh-bf,foo_scenario",
 			},
-			expectedScenarios: []string{"crowdsecurity/ssh-bf", "crowdsecurity/http-bf", "my_scenario", "foo_scenario"},
+			expectedScenarios: []string{"asians-cloud/ssh-bf", "asians-cloud/http-bf", "my_scenario", "foo_scenario"},
 		},
 	}
 
@@ -205,7 +207,7 @@ func TestNewAPIC(t *testing.T) {
 			action: func() {},
 			args: args{
 				dbClient:      getDBClient(t),
-				consoleConfig: LoadTestConfig().API.Server.ConsoleConfig,
+				consoleConfig: LoadTestConfig(t).API.Server.ConsoleConfig,
 			},
 		},
 		{
@@ -213,7 +215,7 @@ func TestNewAPIC(t *testing.T) {
 			action: func() { testConfig.Credentials.URL = "foobar http://" },
 			args: args{
 				dbClient:      getDBClient(t),
-				consoleConfig: LoadTestConfig().API.Server.ConsoleConfig,
+				consoleConfig: LoadTestConfig(t).API.Server.ConsoleConfig,
 			},
 			expectedErr: "first path segment in URL cannot contain colon",
 		},
@@ -265,11 +267,11 @@ func TestAPICHandleDeletedDecisions(t *testing.T) {
 	assertTotalDecisionCount(t, api.dbClient, 2)
 
 	nbDeleted, err := api.HandleDeletedDecisions([]*models.Decision{{
-		Value:    types.StrPtr("1.2.3.4"),
-		Origin:   types.StrPtr(types.CAPIOrigin),
+		Value:    ptr.Of("1.2.3.4"),
+		Origin:   ptr.Of(types.CAPIOrigin),
 		Type:     &decision1.Type,
-		Scenario: types.StrPtr("crowdsec/test"),
-		Scope:    types.StrPtr("IP"),
+		Scenario: ptr.Of("crowdsec/test"),
+		Scope:    ptr.Of("IP"),
 	}}, deleteCounters)
 
 	assert.NoError(t, err)
@@ -293,7 +295,7 @@ func TestAPICGetMetrics(t *testing.T) {
 			machineIDs: []string{},
 			bouncers:   []string{},
 			expectedMetric: &models.Metrics{
-				ApilVersion: types.StrPtr(cwversion.VersionStr()),
+				ApilVersion: ptr.Of(version.String()),
 				Bouncers:    []*models.MetricsBouncerInfo{},
 				Machines:    []*models.MetricsAgentInfo{},
 			},
@@ -303,7 +305,7 @@ func TestAPICGetMetrics(t *testing.T) {
 			machineIDs: []string{"a", "b", "c"},
 			bouncers:   []string{"1", "2", "3"},
 			expectedMetric: &models.Metrics{
-				ApilVersion: types.StrPtr(cwversion.VersionStr()),
+				ApilVersion: ptr.Of(version.String()),
 				Bouncers: []*models.MetricsBouncerInfo{
 					{
 						CustomName: "1",
@@ -346,7 +348,7 @@ func TestAPICGetMetrics(t *testing.T) {
 					SetMachineId(machineID).
 					SetPassword(testPassword.String()).
 					SetIpAddress(fmt.Sprintf("1.2.3.%d", i)).
-					SetScenarios("crowdsecurity/test").
+					SetScenarios("asians-cloud/test").
 					SetLastPush(time.Time{}).
 					SetUpdatedAt(time.Time{}).
 					ExecX(context.Background())
@@ -374,23 +376,23 @@ func TestAPICGetMetrics(t *testing.T) {
 
 func TestCreateAlertsForDecision(t *testing.T) {
 	httpBfDecisionList := &models.Decision{
-		Origin:   types.StrPtr(types.ListOrigin),
-		Scenario: types.StrPtr("crowdsecurity/http-bf"),
+		Origin:   ptr.Of(types.ListOrigin),
+		Scenario: ptr.Of("asians-cloud/http-bf"),
 	}
 
 	sshBfDecisionList := &models.Decision{
-		Origin:   types.StrPtr(types.ListOrigin),
-		Scenario: types.StrPtr("crowdsecurity/ssh-bf"),
+		Origin:   ptr.Of(types.ListOrigin),
+		Scenario: ptr.Of("asians-cloud/ssh-bf"),
 	}
 
 	httpBfDecisionCommunity := &models.Decision{
-		Origin:   types.StrPtr(types.CAPIOrigin),
-		Scenario: types.StrPtr("crowdsecurity/http-bf"),
+		Origin:   ptr.Of(types.CAPIOrigin),
+		Scenario: ptr.Of("asians-cloud/http-bf"),
 	}
 
 	sshBfDecisionCommunity := &models.Decision{
-		Origin:   types.StrPtr(types.CAPIOrigin),
-		Scenario: types.StrPtr("crowdsecurity/ssh-bf"),
+		Origin:   ptr.Of(types.CAPIOrigin),
+		Scenario: ptr.Of("asians-cloud/ssh-bf"),
 	}
 	type args struct {
 		decisions []*models.Decision
@@ -453,27 +455,27 @@ func TestCreateAlertsForDecision(t *testing.T) {
 
 func TestFillAlertsWithDecisions(t *testing.T) {
 	httpBfDecisionCommunity := &models.Decision{
-		Origin:   types.StrPtr(types.CAPIOrigin),
-		Scenario: types.StrPtr("crowdsecurity/http-bf"),
-		Scope:    types.StrPtr("ip"),
+		Origin:   ptr.Of(types.CAPIOrigin),
+		Scenario: ptr.Of("asians-cloud/http-bf"),
+		Scope:    ptr.Of("ip"),
 	}
 
 	sshBfDecisionCommunity := &models.Decision{
-		Origin:   types.StrPtr(types.CAPIOrigin),
-		Scenario: types.StrPtr("crowdsecurity/ssh-bf"),
-		Scope:    types.StrPtr("ip"),
+		Origin:   ptr.Of(types.CAPIOrigin),
+		Scenario: ptr.Of("asians-cloud/ssh-bf"),
+		Scope:    ptr.Of("ip"),
 	}
 
 	httpBfDecisionList := &models.Decision{
-		Origin:   types.StrPtr(types.ListOrigin),
-		Scenario: types.StrPtr("crowdsecurity/http-bf"),
-		Scope:    types.StrPtr("ip"),
+		Origin:   ptr.Of(types.ListOrigin),
+		Scenario: ptr.Of("asians-cloud/http-bf"),
+		Scope:    ptr.Of("ip"),
 	}
 
 	sshBfDecisionList := &models.Decision{
-		Origin:   types.StrPtr(types.ListOrigin),
-		Scenario: types.StrPtr("crowdsecurity/ssh-bf"),
-		Scope:    types.StrPtr("ip"),
+		Origin:   ptr.Of(types.ListOrigin),
+		Scenario: ptr.Of("asians-cloud/ssh-bf"),
+		Scope:    ptr.Of("ip"),
 	}
 	type args struct {
 		alerts    []*models.Alert
@@ -556,7 +558,7 @@ func TestAPICWhitelists(t *testing.T) {
 		SetType("ban").
 		SetValue("9.9.9.9").
 		SetScope("Ip").
-		SetScenario("crowdsecurity/ssh-bf").
+		SetScenario("asians-cloud/ssh-bf").
 		SetUntil(time.Now().Add(time.Hour)).
 		ExecX(context.Background())
 	assertTotalDecisionCount(t, api.dbClient, 1)
@@ -572,58 +574,58 @@ func TestAPICWhitelists(t *testing.T) {
 							"9.9.9.9", // This is already present in DB
 							"9.1.9.9", // This not present in DB
 						},
-						Scope: types.StrPtr("Ip"),
+						Scope: ptr.Of("Ip"),
 					}, // This is already present in DB
 				},
 				New: modelscapi.GetDecisionsStreamResponseNew{
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("13.2.3.4"), //wl by cidr
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("13.2.3.4"), //wl by cidr
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
 
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("2.2.3.4"),
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("2.2.3.4"),
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test2"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test2"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("13.2.3.5"), //wl by cidr
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("13.2.3.5"), //wl by cidr
+								Duration: ptr.Of("24h"),
 							},
 						},
 					}, // These two are from community list.
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("6.2.3.4"),
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("6.2.3.4"),
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("9.2.3.4"), //wl by ip
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("9.2.3.4"), //wl by ip
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
@@ -631,18 +633,18 @@ func TestAPICWhitelists(t *testing.T) {
 				Links: &modelscapi.GetDecisionsStreamResponseLinks{
 					Blocklists: []*modelscapi.BlocklistLink{
 						{
-							URL:         types.StrPtr("http://api.crowdsec.net/blocklist1"),
-							Name:        types.StrPtr("blocklist1"),
-							Scope:       types.StrPtr("Ip"),
-							Remediation: types.StrPtr("ban"),
-							Duration:    types.StrPtr("24h"),
+							URL:         ptr.Of("http://api.crowdsec.net/blocklist1"),
+							Name:        ptr.Of("blocklist1"),
+							Scope:       ptr.Of("Ip"),
+							Remediation: ptr.Of("ban"),
+							Duration:    ptr.Of("24h"),
 						},
 						{
-							URL:         types.StrPtr("http://api.crowdsec.net/blocklist2"),
-							Name:        types.StrPtr("blocklist2"),
-							Scope:       types.StrPtr("Ip"),
-							Remediation: types.StrPtr("ban"),
-							Duration:    types.StrPtr("24h"),
+							URL:         ptr.Of("http://api.crowdsec.net/blocklist2"),
+							Name:        ptr.Of("blocklist2"),
+							Scope:       ptr.Of("Ip"),
+							Remediation: ptr.Of("ban"),
+							Duration:    ptr.Of("24h"),
 						},
 					},
 				},
@@ -661,7 +663,7 @@ func TestAPICWhitelists(t *testing.T) {
 	apic, err := apiclient.NewDefaultClient(
 		url,
 		"/api",
-		fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		fmt.Sprintf("crowdsec/%s", version.String()),
 		nil,
 	)
 	require.NoError(t, err)
@@ -687,7 +689,7 @@ func TestAPICWhitelists(t *testing.T) {
 		alertScenario[alert.SourceScope]++
 	}
 	assert.Equal(t, 3, len(alertScenario))
-	assert.Equal(t, 1, alertScenario[SCOPE_CAPI_ALIAS_ALIAS])
+	assert.Equal(t, 1, alertScenario[types.CommunityBlocklistPullSourceScope])
 	assert.Equal(t, 1, alertScenario["lists:blocklist1"])
 	assert.Equal(t, 1, alertScenario["lists:blocklist2"])
 
@@ -708,7 +710,7 @@ func TestAPICWhitelists(t *testing.T) {
 	}
 	assert.Equal(t, 1, decisionScenarioFreq["blocklist1"], 1)
 	assert.Equal(t, 1, decisionScenarioFreq["blocklist2"], 1)
-	assert.Equal(t, 2, decisionScenarioFreq["crowdsecurity/test1"], 2)
+	assert.Equal(t, 2, decisionScenarioFreq["asians-cloud/test1"], 2)
 }
 
 func TestAPICPullTop(t *testing.T) {
@@ -718,7 +720,7 @@ func TestAPICPullTop(t *testing.T) {
 		SetType("ban").
 		SetValue("9.9.9.9").
 		SetScope("Ip").
-		SetScenario("crowdsecurity/ssh-bf").
+		SetScenario("asians-cloud/ssh-bf").
 		SetUntil(time.Now().Add(time.Hour)).
 		ExecX(context.Background())
 	assertTotalDecisionCount(t, api.dbClient, 1)
@@ -734,27 +736,27 @@ func TestAPICPullTop(t *testing.T) {
 							"9.9.9.9", // This is already present in DB
 							"9.1.9.9", // This not present in DB
 						},
-						Scope: types.StrPtr("Ip"),
+						Scope: ptr.Of("Ip"),
 					}, // This is already present in DB
 				},
 				New: modelscapi.GetDecisionsStreamResponseNew{
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("1.2.3.4"),
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("1.2.3.4"),
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test2"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test2"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("1.2.3.5"),
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("1.2.3.5"),
+								Duration: ptr.Of("24h"),
 							},
 						},
 					}, // These two are from community list.
@@ -762,18 +764,18 @@ func TestAPICPullTop(t *testing.T) {
 				Links: &modelscapi.GetDecisionsStreamResponseLinks{
 					Blocklists: []*modelscapi.BlocklistLink{
 						{
-							URL:         types.StrPtr("http://api.crowdsec.net/blocklist1"),
-							Name:        types.StrPtr("blocklist1"),
-							Scope:       types.StrPtr("Ip"),
-							Remediation: types.StrPtr("ban"),
-							Duration:    types.StrPtr("24h"),
+							URL:         ptr.Of("http://api.crowdsec.net/blocklist1"),
+							Name:        ptr.Of("blocklist1"),
+							Scope:       ptr.Of("Ip"),
+							Remediation: ptr.Of("ban"),
+							Duration:    ptr.Of("24h"),
 						},
 						{
-							URL:         types.StrPtr("http://api.crowdsec.net/blocklist2"),
-							Name:        types.StrPtr("blocklist2"),
-							Scope:       types.StrPtr("Ip"),
-							Remediation: types.StrPtr("ban"),
-							Duration:    types.StrPtr("24h"),
+							URL:         ptr.Of("http://api.crowdsec.net/blocklist2"),
+							Name:        ptr.Of("blocklist2"),
+							Scope:       ptr.Of("Ip"),
+							Remediation: ptr.Of("ban"),
+							Duration:    ptr.Of("24h"),
 						},
 					},
 				},
@@ -792,7 +794,7 @@ func TestAPICPullTop(t *testing.T) {
 	apic, err := apiclient.NewDefaultClient(
 		url,
 		"/api",
-		fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		fmt.Sprintf("crowdsec/%s", version.String()),
 		nil,
 	)
 	require.NoError(t, err)
@@ -816,7 +818,7 @@ func TestAPICPullTop(t *testing.T) {
 		alertScenario[alert.SourceScope]++
 	}
 	assert.Equal(t, 3, len(alertScenario))
-	assert.Equal(t, 1, alertScenario[SCOPE_CAPI_ALIAS_ALIAS])
+	assert.Equal(t, 1, alertScenario[types.CommunityBlocklistPullSourceScope])
 	assert.Equal(t, 1, alertScenario["lists:blocklist1"])
 	assert.Equal(t, 1, alertScenario["lists:blocklist2"])
 
@@ -826,8 +828,8 @@ func TestAPICPullTop(t *testing.T) {
 
 	assert.Equal(t, 1, decisionScenarioFreq["blocklist1"], 1)
 	assert.Equal(t, 1, decisionScenarioFreq["blocklist2"], 1)
-	assert.Equal(t, 1, decisionScenarioFreq["crowdsecurity/test1"], 1)
-	assert.Equal(t, 1, decisionScenarioFreq["crowdsecurity/test2"], 1)
+	assert.Equal(t, 1, decisionScenarioFreq["asians-cloud/test1"], 1)
+	assert.Equal(t, 1, decisionScenarioFreq["asians-cloud/test2"], 1)
 }
 
 func TestAPICPullTopBLCacheFirstCall(t *testing.T) {
@@ -840,12 +842,12 @@ func TestAPICPullTopBLCacheFirstCall(t *testing.T) {
 			modelscapi.GetDecisionsStreamResponse{
 				New: modelscapi.GetDecisionsStreamResponseNew{
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("1.2.3.4"),
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("1.2.3.4"),
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
@@ -853,11 +855,11 @@ func TestAPICPullTopBLCacheFirstCall(t *testing.T) {
 				Links: &modelscapi.GetDecisionsStreamResponseLinks{
 					Blocklists: []*modelscapi.BlocklistLink{
 						{
-							URL:         types.StrPtr("http://api.crowdsec.net/blocklist1"),
-							Name:        types.StrPtr("blocklist1"),
-							Scope:       types.StrPtr("Ip"),
-							Remediation: types.StrPtr("ban"),
-							Duration:    types.StrPtr("24h"),
+							URL:         ptr.Of("http://api.crowdsec.net/blocklist1"),
+							Name:        ptr.Of("blocklist1"),
+							Scope:       ptr.Of("Ip"),
+							Remediation: ptr.Of("ban"),
+							Duration:    ptr.Of("24h"),
 						},
 					},
 				},
@@ -874,7 +876,7 @@ func TestAPICPullTopBLCacheFirstCall(t *testing.T) {
 	apic, err := apiclient.NewDefaultClient(
 		url,
 		"/api",
-		fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		fmt.Sprintf("crowdsec/%s", version.String()),
 		nil,
 	)
 	require.NoError(t, err)
@@ -883,7 +885,7 @@ func TestAPICPullTopBLCacheFirstCall(t *testing.T) {
 	err = api.PullTop(false)
 	require.NoError(t, err)
 
-	blocklistConfigItemName := fmt.Sprintf("blocklist:%s:last_pull", *types.StrPtr("blocklist1"))
+	blocklistConfigItemName := "blocklist:blocklist1:last_pull"
 	lastPullTimestamp, err := api.dbClient.GetConfigItem(blocklistConfigItemName)
 	require.NoError(t, err)
 	assert.NotEqual(t, "", *lastPullTimestamp)
@@ -927,12 +929,12 @@ func TestAPICPullTopBLCacheForceCall(t *testing.T) {
 			modelscapi.GetDecisionsStreamResponse{
 				New: modelscapi.GetDecisionsStreamResponseNew{
 					&modelscapi.GetDecisionsStreamResponseNewItem{
-						Scenario: types.StrPtr("crowdsecurity/test1"),
-						Scope:    types.StrPtr("Ip"),
+						Scenario: ptr.Of("asians-cloud/test1"),
+						Scope:    ptr.Of("Ip"),
 						Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 							{
-								Value:    types.StrPtr("1.2.3.4"),
-								Duration: types.StrPtr("24h"),
+								Value:    ptr.Of("1.2.3.4"),
+								Duration: ptr.Of("24h"),
 							},
 						},
 					},
@@ -940,11 +942,11 @@ func TestAPICPullTopBLCacheForceCall(t *testing.T) {
 				Links: &modelscapi.GetDecisionsStreamResponseLinks{
 					Blocklists: []*modelscapi.BlocklistLink{
 						{
-							URL:         types.StrPtr("http://api.crowdsec.net/blocklist1"),
-							Name:        types.StrPtr("blocklist1"),
-							Scope:       types.StrPtr("Ip"),
-							Remediation: types.StrPtr("ban"),
-							Duration:    types.StrPtr("24h"),
+							URL:         ptr.Of("http://api.crowdsec.net/blocklist1"),
+							Name:        ptr.Of("blocklist1"),
+							Scope:       ptr.Of("Ip"),
+							Remediation: ptr.Of("ban"),
+							Duration:    ptr.Of("24h"),
 						},
 					},
 				},
@@ -961,7 +963,7 @@ func TestAPICPullTopBLCacheForceCall(t *testing.T) {
 	apic, err := apiclient.NewDefaultClient(
 		url,
 		"/api",
-		fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		fmt.Sprintf("crowdsec/%s", version.String()),
 		nil,
 	)
 	require.NoError(t, err)
@@ -981,10 +983,10 @@ func TestAPICPush(t *testing.T) {
 			name: "simple single alert",
 			alerts: []*models.Alert{
 				{
-					Scenario:        types.StrPtr("crowdsec/test"),
-					ScenarioHash:    types.StrPtr("certified"),
-					ScenarioVersion: types.StrPtr("v1.0"),
-					Simulated:       types.BoolPtr(false),
+					Scenario:        ptr.Of("crowdsec/test"),
+					ScenarioHash:    ptr.Of("certified"),
+					ScenarioVersion: ptr.Of("v1.0"),
+					Simulated:       ptr.Of(false),
 					Source:          &models.Source{},
 				},
 			},
@@ -994,10 +996,10 @@ func TestAPICPush(t *testing.T) {
 			name: "simulated alert is not pushed",
 			alerts: []*models.Alert{
 				{
-					Scenario:        types.StrPtr("crowdsec/test"),
-					ScenarioHash:    types.StrPtr("certified"),
-					ScenarioVersion: types.StrPtr("v1.0"),
-					Simulated:       types.BoolPtr(true),
+					Scenario:        ptr.Of("crowdsec/test"),
+					ScenarioHash:    ptr.Of("certified"),
+					ScenarioVersion: ptr.Of("v1.0"),
+					Simulated:       ptr.Of(true),
 					Source:          &models.Source{},
 				},
 			},
@@ -1010,10 +1012,10 @@ func TestAPICPush(t *testing.T) {
 				alerts := make([]*models.Alert, 100)
 				for i := 0; i < 100; i++ {
 					alerts[i] = &models.Alert{
-						Scenario:        types.StrPtr("crowdsec/test"),
-						ScenarioHash:    types.StrPtr("certified"),
-						ScenarioVersion: types.StrPtr("v1.0"),
-						Simulated:       types.BoolPtr(false),
+						Scenario:        ptr.Of("crowdsec/test"),
+						ScenarioHash:    ptr.Of("certified"),
+						ScenarioVersion: ptr.Of("v1.0"),
+						Simulated:       ptr.Of(false),
 						Source:          &models.Source{},
 					}
 				}
@@ -1036,7 +1038,7 @@ func TestAPICPush(t *testing.T) {
 			apic, err := apiclient.NewDefaultClient(
 				url,
 				"/api",
-				fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+				fmt.Sprintf("crowdsec/%s", version.String()),
 				nil,
 			)
 			require.NoError(t, err)
@@ -1051,90 +1053,6 @@ func TestAPICPush(t *testing.T) {
 			err = api.Push()
 			require.NoError(t, err)
 			assert.Equal(t, tc.expectedCalls, httpmock.GetTotalCallCount())
-		})
-	}
-}
-
-func TestAPICSendMetrics(t *testing.T) {
-	tests := []struct {
-		name            string
-		duration        time.Duration
-		expectedCalls   int
-		setUp           func(*apic)
-		metricsInterval time.Duration
-	}{
-		{
-			name:            "basic",
-			duration:        time.Millisecond * 30,
-			metricsInterval: time.Millisecond * 5,
-			expectedCalls:   5,
-			setUp:           func(api *apic) {},
-		},
-		{
-			name:            "with some metrics",
-			duration:        time.Millisecond * 30,
-			metricsInterval: time.Millisecond * 5,
-			expectedCalls:   5,
-			setUp: func(api *apic) {
-				api.dbClient.Ent.Machine.Delete().ExecX(context.Background())
-				api.dbClient.Ent.Machine.Create().
-					SetMachineId("1234").
-					SetPassword(testPassword.String()).
-					SetIpAddress("1.2.3.4").
-					SetScenarios("crowdsecurity/test").
-					SetLastPush(time.Time{}).
-					SetUpdatedAt(time.Time{}).
-					ExecX(context.Background())
-
-				api.dbClient.Ent.Bouncer.Delete().ExecX(context.Background())
-				api.dbClient.Ent.Bouncer.Create().
-					SetIPAddress("1.2.3.6").
-					SetName("someBouncer").
-					SetAPIKey("foobar").
-					SetRevoked(false).
-					SetLastPull(time.Time{}).
-					ExecX(context.Background())
-			},
-		},
-	}
-
-	httpmock.RegisterResponder("POST", "http://api.crowdsec.net/api/metrics/", httpmock.NewBytesResponder(200, []byte{}))
-	httpmock.Activate()
-	defer httpmock.Deactivate()
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			url, err := url.ParseRequestURI("http://api.crowdsec.net/")
-			require.NoError(t, err)
-
-			apiClient, err := apiclient.NewDefaultClient(
-				url,
-				"/api",
-				fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
-				nil,
-			)
-			require.NoError(t, err)
-
-			api := getAPIC(t)
-			api.pushInterval = time.Millisecond
-			api.pushIntervalFirst = time.Millisecond
-			api.apiClient = apiClient
-			api.metricsInterval = tc.metricsInterval
-			api.metricsIntervalFirst = tc.metricsInterval
-			tc.setUp(api)
-
-			stop := make(chan bool)
-			httpmock.ZeroCallCounters()
-			go api.SendMetrics(stop)
-			time.Sleep(tc.duration)
-			stop <- true
-
-			info := httpmock.GetCallCountInfo()
-			noResponderCalls := info["NO_RESPONDER"]
-			responderCalls := info["POST http://api.crowdsec.net/api/metrics/"]
-			assert.LessOrEqual(t, absDiff(tc.expectedCalls, responderCalls), 2)
-			assert.Zero(t, noResponderCalls)
 		})
 	}
 }
@@ -1159,7 +1077,7 @@ func TestAPICPull(t *testing.T) {
 					SetMachineId("1.2.3.4").
 					SetPassword(testPassword.String()).
 					SetIpAddress("1.2.3.4").
-					SetScenarios("crowdsecurity/ssh-bf").
+					SetScenarios("asians-cloud/ssh-bf").
 					ExecX(context.Background())
 			},
 			expectedDecisionCount: 1,
@@ -1179,7 +1097,7 @@ func TestAPICPull(t *testing.T) {
 			apic, err := apiclient.NewDefaultClient(
 				url,
 				"/api",
-				fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+				fmt.Sprintf("crowdsec/%s", version.String()),
 				nil,
 			)
 			require.NoError(t, err)
@@ -1188,12 +1106,12 @@ func TestAPICPull(t *testing.T) {
 				modelscapi.GetDecisionsStreamResponse{
 					New: modelscapi.GetDecisionsStreamResponseNew{
 						&modelscapi.GetDecisionsStreamResponseNewItem{
-							Scenario: types.StrPtr("crowdsecurity/ssh-bf"),
-							Scope:    types.StrPtr("Ip"),
+							Scenario: ptr.Of("asians-cloud/ssh-bf"),
+							Scope:    ptr.Of("Ip"),
 							Decisions: []*modelscapi.GetDecisionsStreamResponseNewItemDecisionsItems0{
 								{
-									Value:    types.StrPtr("1.2.3.5"),
-									Duration: types.StrPtr("24h"),
+									Value:    ptr.Of("1.2.3.5"),
+									Duration: ptr.Of("24h"),
 								},
 							},
 						},
@@ -1228,29 +1146,29 @@ func TestShouldShareAlert(t *testing.T) {
 		{
 			name: "custom alert should be shared if config enables it",
 			consoleConfig: &csconfig.ConsoleConfig{
-				ShareCustomScenarios: types.BoolPtr(true),
+				ShareCustomScenarios: ptr.Of(true),
 			},
-			alert:         &models.Alert{Simulated: types.BoolPtr(false)},
+			alert:         &models.Alert{Simulated: ptr.Of(false)},
 			expectedRet:   true,
 			expectedTrust: "custom",
 		},
 		{
 			name: "custom alert should not be shared if config disables it",
 			consoleConfig: &csconfig.ConsoleConfig{
-				ShareCustomScenarios: types.BoolPtr(false),
+				ShareCustomScenarios: ptr.Of(false),
 			},
-			alert:         &models.Alert{Simulated: types.BoolPtr(false)},
+			alert:         &models.Alert{Simulated: ptr.Of(false)},
 			expectedRet:   false,
 			expectedTrust: "custom",
 		},
 		{
 			name: "manual alert should be shared if config enables it",
 			consoleConfig: &csconfig.ConsoleConfig{
-				ShareManualDecisions: types.BoolPtr(true),
+				ShareManualDecisions: ptr.Of(true),
 			},
 			alert: &models.Alert{
-				Simulated: types.BoolPtr(false),
-				Decisions: []*models.Decision{{Origin: types.StrPtr(types.CscliOrigin)}},
+				Simulated: ptr.Of(false),
+				Decisions: []*models.Decision{{Origin: ptr.Of(types.CscliOrigin)}},
 			},
 			expectedRet:   true,
 			expectedTrust: "manual",
@@ -1258,11 +1176,11 @@ func TestShouldShareAlert(t *testing.T) {
 		{
 			name: "manual alert should not be shared if config disables it",
 			consoleConfig: &csconfig.ConsoleConfig{
-				ShareManualDecisions: types.BoolPtr(false),
+				ShareManualDecisions: ptr.Of(false),
 			},
 			alert: &models.Alert{
-				Simulated: types.BoolPtr(false),
-				Decisions: []*models.Decision{{Origin: types.StrPtr(types.CscliOrigin)}},
+				Simulated: ptr.Of(false),
+				Decisions: []*models.Decision{{Origin: ptr.Of(types.CscliOrigin)}},
 			},
 			expectedRet:   false,
 			expectedTrust: "manual",
@@ -1270,11 +1188,11 @@ func TestShouldShareAlert(t *testing.T) {
 		{
 			name: "manual alert should be shared if config enables it",
 			consoleConfig: &csconfig.ConsoleConfig{
-				ShareTaintedScenarios: types.BoolPtr(true),
+				ShareTaintedScenarios: ptr.Of(true),
 			},
 			alert: &models.Alert{
-				Simulated:    types.BoolPtr(false),
-				ScenarioHash: types.StrPtr("whateverHash"),
+				Simulated:    ptr.Of(false),
+				ScenarioHash: ptr.Of("whateverHash"),
 			},
 			expectedRet:   true,
 			expectedTrust: "tainted",
@@ -1282,11 +1200,11 @@ func TestShouldShareAlert(t *testing.T) {
 		{
 			name: "manual alert should not be shared if config disables it",
 			consoleConfig: &csconfig.ConsoleConfig{
-				ShareTaintedScenarios: types.BoolPtr(false),
+				ShareTaintedScenarios: ptr.Of(false),
 			},
 			alert: &models.Alert{
-				Simulated:    types.BoolPtr(false),
-				ScenarioHash: types.StrPtr("whateverHash"),
+				Simulated:    ptr.Of(false),
+				ScenarioHash: ptr.Of("whateverHash"),
 			},
 			expectedRet:   false,
 			expectedTrust: "tainted",

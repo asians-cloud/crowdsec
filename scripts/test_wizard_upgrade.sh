@@ -62,8 +62,8 @@ function init
     ./wizard.sh --bininstall
     cd ${CURRENT_FOLDER}
     cscli hub update
-    cscli collections install crowdsecurity/sshd
-    cscli postoverflows install crowdsecurity/cdn-whitelist
+    cscli collections install asians-cloud/sshd
+    cscli postoverflows install asians-cloud/cdn-whitelist
     cscli machines add -a
     systemctl start crowdsec
 

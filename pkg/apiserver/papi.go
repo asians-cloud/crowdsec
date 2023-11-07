@@ -8,15 +8,17 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+	"gopkg.in/tomb.v2"
+
+	"github.com/asians-cloud/go-cs-lib/trace"
+
 	"github.com/asians-cloud/crowdsec/pkg/apiclient"
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/longpollclient"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/tomb.v2"
 )
 
 var (
@@ -101,7 +103,7 @@ func NewPAPI(apic *apic, dbClient *database.Client, consoleConfig *csconfig.Cons
 	})
 
 	if err != nil {
-		return &Papi{}, errors.Wrap(err, "failed to create PAPI client")
+		return &Papi{}, fmt.Errorf("failed to create PAPI client: %w", err)
 	}
 
 	channels := &OperationChannels{
@@ -217,8 +219,7 @@ func (p *Papi) PullOnce(since time.Time, sync bool) error {
 
 // PullPAPI is the long polling client for real-time decisions from PAPI
 func (p *Papi) Pull() error {
-
-	defer types.CatchPanic("lapi/PullPAPI")
+	defer trace.CatchPanic("lapi/PullPAPI")
 	p.Logger.Infof("Starting Polling API Pull")
 
 	lastTimestamp := time.Time{}
@@ -230,7 +231,7 @@ func (p *Papi) Pull() error {
 	if lastTimestampStr == nil {
 		binTime, err := lastTimestamp.MarshalText()
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal last timestamp")
+			return fmt.Errorf("failed to marshal last timestamp: %w", err)
 		}
 		if err := p.DBClient.SetConfigItem(PapiPullKey, string(binTime)); err != nil {
 			p.Logger.Errorf("error setting papi pull last key: %s", err)
@@ -239,7 +240,7 @@ func (p *Papi) Pull() error {
 		}
 	} else {
 		if err := lastTimestamp.UnmarshalText([]byte(*lastTimestampStr)); err != nil {
-			return errors.Wrap(err, "failed to unmarshal last timestamp")
+			return fmt.Errorf("failed to unmarshal last timestamp: %w", err)
 		}
 	}
 
@@ -250,7 +251,7 @@ func (p *Papi) Pull() error {
 		newTime := time.Now().UTC()
 		binTime, err := newTime.MarshalText()
 		if err != nil {
-			return errors.Wrap(err, "failed to marshal last timestamp")
+			return fmt.Errorf("failed to marshal last timestamp: %w", err)
 		}
 
 		err = p.handleEvent(event, false)
@@ -260,7 +261,7 @@ func (p *Papi) Pull() error {
 		}
 
 		if err := p.DBClient.SetConfigItem(PapiPullKey, string(binTime)); err != nil {
-			return errors.Wrap(err, "failed to update last timestamp")
+			return fmt.Errorf("failed to update last timestamp: %w", err)
 		} else {
 			logger.Debugf("set last timestamp to %s", newTime)
 		}
@@ -270,7 +271,7 @@ func (p *Papi) Pull() error {
 }
 
 func (p *Papi) SyncDecisions() error {
-	defer types.CatchPanic("lapi/syncDecisionsToCAPI")
+	defer trace.CatchPanic("lapi/syncDecisionsToCAPI")
 
 	var cache models.DecisionsDeleteRequest
 	ticker := time.NewTicker(p.SyncInterval)

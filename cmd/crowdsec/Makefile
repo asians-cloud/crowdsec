@@ -4,12 +4,9 @@ ifeq ($(OS), Windows_NT)
 	EXT = .exe
 endif
 
-# Go parameters
-GOCMD = go
-GOBUILD = $(GOCMD) build
-GOCLEAN = $(GOCMD) clean
-GOTEST = $(GOCMD) test
-GOGET = $(GOCMD) get
+GO = go
+GOBUILD = $(GO) build
+GOTEST = $(GO) test
 
 CROWDSEC_BIN = crowdsec$(EXT)
 # names longer than 15 chars break 'pgrep'
@@ -25,7 +22,7 @@ SYSTEMD_PATH_FILE = "/etc/systemd/system/crowdsec.service"
 all: clean test build
 
 build: clean
-	$(GOBUILD) $(LD_OPTS) $(BUILD_VENDOR_FLAGS) -o $(CROWDSEC_BIN)
+	$(GOBUILD) $(LD_OPTS) -o $(CROWDSEC_BIN)
 
 test:
 	$(GOTEST) $(LD_OPTS) -v ./...
@@ -59,7 +56,7 @@ install-conf:
 install-bin:
 	install -v -m 755 -D "$(CROWDSEC_BIN)" "$(BIN_PREFIX)/$(CROWDSEC_BIN)" || exit
 
-.PHONY: systemd"$(BIN_PREFI"$(BIN_PREFIX)/$(CROWDSEC_BIN)""$(BIN_PREFIX)/$(CROWDSEC_BIN)"X)/$(CROWDSEC_BIN)"
+.PHONY: systemd
 systemd: install
 	CFG=$(CFG_PREFIX) PID=$(PID_DIR) BIN=$(BIN_PREFIX)"/"$(CROWDSEC_BIN) envsubst < ../../config/crowdsec.service > "$(SYSTEMD_PATH_FILE)"
 	systemctl daemon-reload

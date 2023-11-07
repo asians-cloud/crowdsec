@@ -9,7 +9,8 @@ import (
 	logtest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/require"
 
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
 )
 
@@ -363,7 +364,7 @@ func TestSetFromYamlFile(t *testing.T) {
 	defer os.Remove(tmpfile.Name())
 
 	// write the config file
-	_, err = tmpfile.Write([]byte("- experimental1"))
+	_, err = tmpfile.WriteString("- experimental1")
 	require.NoError(t, err)
 	require.NoError(t, tmpfile.Close())
 

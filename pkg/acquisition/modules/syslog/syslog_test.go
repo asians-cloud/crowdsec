@@ -7,7 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"

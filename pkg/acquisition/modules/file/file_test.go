@@ -13,8 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/tomb.v2"
 
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	fileacquisition "github.com/asians-cloud/crowdsec/pkg/acquisition/modules/file"
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
 	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
@@ -37,7 +38,7 @@ func TestBadConfiguration(t *testing.T) {
 		{
 			name:        "glob syntax error",
 			config:      `filename: "[asd-.log"`,
-			expectedErr: "Glob failure: syntax error in pattern",
+			expectedErr: "glob failure: syntax error in pattern",
 		},
 		{
 			name: "bad exclude regexp",
@@ -149,7 +150,7 @@ filename: /`,
 			config: `
 mode: cat
 filename: "[*-.log"`,
-			expectedConfigErr: "Glob failure: syntax error in pattern",
+			expectedConfigErr: "glob failure: syntax error in pattern",
 			logLevel:          log.WarnLevel,
 			expectedLines:     0,
 		},
@@ -259,7 +260,7 @@ func TestLiveAcquisition(t *testing.T) {
 		// if we do not have access to the file
 		permDeniedFile = `C:\Windows\System32\config\SAM`
 		permDeniedError = `unable to read C:\Windows\System32\config\SAM : open C:\Windows\System32\config\SAM: The process cannot access the file because it is being used by another process`
-		testPattern = `test_files\\*.log` // the \ must be escaped for the yaml config
+		testPattern = `test_files\*.log`
 	}
 
 	tests := []struct {
@@ -409,9 +410,7 @@ force_inotify: true`, testPattern),
 
 			if tc.expectedLines != 0 {
 				fd, err := os.Create("test_files/stream.log")
-				if err != nil {
-					t.Fatalf("could not create test file : %s", err)
-				}
+				require.NoError(t, err, "could not create test file")
 
 				for i := 0; i < 5; i++ {
 					_, err = fmt.Fprintf(fd, "%d\n", i)
@@ -423,7 +422,7 @@ force_inotify: true`, testPattern),
 
 				fd.Close()
 				// we sleep to make sure we detect the new file
-				time.Sleep(1 * time.Second)
+				time.Sleep(3 * time.Second)
 				os.Remove("test_files/stream.log")
 				assert.Equal(t, tc.expectedLines, actualLines)
 			}

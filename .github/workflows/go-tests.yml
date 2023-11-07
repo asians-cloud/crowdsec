@@ -34,7 +34,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go-version: ["1.20.3"]
+        go-version: ["1.21.3"]
 
     name: "Build + tests"
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
           --health-retries 5
 
       kafka1:
-        image: crowdsecurity/kafka-ssl
+        image: asians-cloud/kafka-ssl
         ports:
           - "9093:9093"
           - "9092:9092"
@@ -110,35 +110,29 @@ jobs:
 
     steps:
 
-    - name: "Set up Go ${{ matrix.go-version }}"
-      uses: actions/setup-go@v3
-      with:
-        go-version: ${{ matrix.go-version }}
-
     - name: Check out CrowdSec repository
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
         submodules: false
 
-    - name: Cache Go modules
-      uses: actions/cache@v3
+    - name: "Set up Go ${{ matrix.go-version }}"
+      uses: actions/setup-go@v4
       with:
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-          ~/Library/Caches/go-build
-          %LocalAppData%\go-build
-        key: ${{ runner.os }}-${{ matrix.go-version }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.go-version }}-go-
+        go-version: ${{ matrix.go-version }}
 
-    - name: Build and run tests
+    - name: Build and run tests, static
       run: |
+        sudo apt -qq -y -o=Dpkg::Use-Pty=0 install build-essential libre2-dev
         go install github.com/ory/go-acc@v0.2.8
         go install github.com/kyoh86/richgo@v0.3.10
         set -o pipefail
-        make build
+        make build BUILD_STATIC=1
+        make go-acc | richgo testfilter
+
+    - name: Run tests again, dynamic
+      run: |
+        make clean build
         make go-acc | richgo testfilter
 
     - name: Upload unit coverage to Codecov
@@ -150,7 +144,7 @@ jobs:
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.51
+        version: v1.54
         args: --issues-exit-code=1 --timeout 10m
         only-new-issues: false
         # the cache is already managed above, enabling it here

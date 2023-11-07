@@ -11,16 +11,16 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-
-	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/asians-cloud/go-cs-lib/ptr"
 )
 
 const validApiKey = "my-api-key"
 
 // Copy pasted from actual API response
 var smokeResponses = map[string]string{
-	"1.1.1.1": `{"ip_range_score": 0, "ip": "1.1.1.1", "ip_range": "1.1.1.0/24", "as_name": "CLOUDFLARENET", "as_num": 13335, "location": {"country": null, "city": null, "latitude": null, "longitude": null}, "reverse_dns": "one.one.one.one", "behaviors": [{"name": "ssh:bruteforce", "label": "SSH Bruteforce", "description": "IP has been reported for performing brute force on ssh services."}, {"name": "tcp:scan", "label": "TCP Scan", "description": "IP has been reported for performing TCP port scanning."}, {"name": "http:scan", "label": "HTTP Scan", "description": "IP has been reported for performing actions related to HTTP vulnerability scanning and discovery."}], "history": {"first_seen": "2021-04-18T18:00:00+00:00", "last_seen": "2022-11-23T13:00:00+00:00", "full_age": 583, "days_age": 583}, "classifications": {"false_positives": [], "classifications": [{"name": "profile:insecure_services", "label": "Dangerous Services Exposed", "description": "IP exposes dangerous services (vnc, telnet, rdp), possibly due to a misconfiguration or because it's a honeypot."}, {"name": "profile:many_services", "label": "Many Services Exposed", "description": "IP exposes many open port, possibly due to a misconfiguration or because it's a honeypot."}]}, "attack_details": [{"name": "crowdsecurity/ssh-bf", "label": "SSH Bruteforce", "description": "Detect ssh brute force", "references": []}, {"name": "crowdsecurity/iptables-scan-multi_ports", "label": "Port Scanner", "description": "Detect tcp port scan", "references": []}, {"name": "crowdsecurity/ssh-slow-bf", "label": "Slow SSH Bruteforce", "description": "Detect slow ssh brute force", "references": []}, {"name": "crowdsecurity/http-probing", "label": "HTTP Scanner", "description": "Detect site scanning/probing from a single ip", "references": []}, {"name": "crowdsecurity/http-path-traversal-probing", "label": "Path Traversal Scanner", "description": "Detect path traversal attempt", "references": []}, {"name": "crowdsecurity/http-bad-user-agent", "label": "Known Bad User-Agent", "description": "Detect bad user-agents", "references": []}], "target_countries": {"DE": 33, "FR": 25, "US": 12, "CA": 8, "JP": 8, "AT": 4, "GB": 4, "AE": 4}, "background_noise_score": 4, "scores": {"overall": {"aggressiveness": 2, "threat": 2, "trust": 1, "anomaly": 2, "total": 2}, "last_day": {"aggressiveness": 0, "threat": 0, "trust": 0, "anomaly": 2, "total": 0}, "last_week": {"aggressiveness": 1, "threat": 2, "trust": 0, "anomaly": 2, "total": 1}, "last_month": {"aggressiveness": 3, "threat": 2, "trust": 0, "anomaly": 2, "total": 2}}, "references": []}`,
+	"1.1.1.1": `{"ip_range_score": 0, "ip": "1.1.1.1", "ip_range": "1.1.1.0/24", "as_name": "CLOUDFLARENET", "as_num": 13335, "location": {"country": null, "city": null, "latitude": null, "longitude": null}, "reverse_dns": "one.one.one.one", "behaviors": [{"name": "ssh:bruteforce", "label": "SSH Bruteforce", "description": "IP has been reported for performing brute force on ssh services."}, {"name": "tcp:scan", "label": "TCP Scan", "description": "IP has been reported for performing TCP port scanning."}, {"name": "http:scan", "label": "HTTP Scan", "description": "IP has been reported for performing actions related to HTTP vulnerability scanning and discovery."}], "history": {"first_seen": "2021-04-18T18:00:00+00:00", "last_seen": "2022-11-23T13:00:00+00:00", "full_age": 583, "days_age": 583}, "classifications": {"false_positives": [], "classifications": [{"name": "profile:insecure_services", "label": "Dangerous Services Exposed", "description": "IP exposes dangerous services (vnc, telnet, rdp), possibly due to a misconfiguration or because it's a honeypot."}, {"name": "profile:many_services", "label": "Many Services Exposed", "description": "IP exposes many open port, possibly due to a misconfiguration or because it's a honeypot."}]}, "attack_details": [{"name": "asians-cloud/ssh-bf", "label": "SSH Bruteforce", "description": "Detect ssh brute force", "references": []}, {"name": "asians-cloud/iptables-scan-multi_ports", "label": "Port Scanner", "description": "Detect tcp port scan", "references": []}, {"name": "asians-cloud/ssh-slow-bf", "label": "Slow SSH Bruteforce", "description": "Detect slow ssh brute force", "references": []}, {"name": "asians-cloud/http-probing", "label": "HTTP Scanner", "description": "Detect site scanning/probing from a single ip", "references": []}, {"name": "asians-cloud/http-path-traversal-probing", "label": "Path Traversal Scanner", "description": "Detect path traversal attempt", "references": []}, {"name": "asians-cloud/http-bad-user-agent", "label": "Known Bad User-Agent", "description": "Detect bad user-agents", "references": []}], "target_countries": {"DE": 33, "FR": 25, "US": 12, "CA": 8, "JP": 8, "AT": 4, "GB": 4, "AE": 4}, "background_noise_score": 4, "scores": {"overall": {"aggressiveness": 2, "threat": 2, "trust": 1, "anomaly": 2, "total": 2}, "last_day": {"aggressiveness": 0, "threat": 0, "trust": 0, "anomaly": 2, "total": 0}, "last_week": {"aggressiveness": 1, "threat": 2, "trust": 0, "anomaly": 2, "total": 1}, "last_month": {"aggressiveness": 3, "threat": 2, "trust": 0, "anomaly": 2, "total": 2}}, "references": []}`,
 }
 
 var fireResponses []string
@@ -202,12 +202,12 @@ func TestFireOk(t *testing.T) {
 	assert.Equal(t, len(data.Items), 3)
 	assert.Equal(t, data.Items[0].Ip, "1.2.3.4")
 	//page 1 is the default
-	data, err = cticlient.Fire(FireParams{Page: types.IntPtr(1)})
+	data, err = cticlient.Fire(FireParams{Page: ptr.Of(1)})
 	assert.Equal(t, err, nil)
 	assert.Equal(t, len(data.Items), 3)
 	assert.Equal(t, data.Items[0].Ip, "1.2.3.4")
 	//page 2
-	data, err = cticlient.Fire(FireParams{Page: types.IntPtr(2)})
+	data, err = cticlient.Fire(FireParams{Page: ptr.Of(2)})
 	assert.Equal(t, err, nil)
 	assert.Equal(t, len(data.Items), 3)
 	assert.Equal(t, data.Items[0].Ip, "4.2.3.4")
@@ -250,7 +250,7 @@ func TestSmokeInfoValidIP(t *testing.T) {
 	}
 
 	assert.Equal(t, "1.1.1.1", resp.Ip)
-	assert.Equal(t, types.StrPtr("1.1.1.0/24"), resp.IpRange)
+	assert.Equal(t, ptr.Of("1.1.1.0/24"), resp.IpRange)
 }
 
 func TestSmokeUnknownIP(t *testing.T) {

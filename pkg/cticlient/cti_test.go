@@ -46,8 +46,8 @@ package cticlient
 // 			{Name: "ssh:bruteforce", Label: "SSH Bruteforce", Description: "SSH Bruteforce"},
 // 		},
 // 		AttackDetails: []*CTIAttackDetails{
-// 			{Name: "crowdsecurity/ssh-bf", Label: "Example Attack"},
-// 			{Name: "crowdsecurity/ssh-slow-bf", Label: "Example Attack"},
+// 			{Name: "asians-cloud/ssh-bf", Label: "Example Attack"},
+// 			{Name: "asians-cloud/ssh-slow-bf", Label: "Example Attack"},
 // 		},
 // 	},
 // 	//1.2.3.7 is a ok guy, but part of a bad range
@@ -257,7 +257,7 @@ package cticlient
 // 	assert.Equal(t, ret.Ip, "1.2.3.6", "auth failed, empty answer")
 // 	//ssh:bruteforce
 // 	assert.Equal(t, []string{"ssh:bruteforce"}, ret.GetBehaviors(), "error matching behaviors")
-// 	assert.Equal(t, []string{"crowdsecurity/ssh-bf", "crowdsecurity/ssh-slow-bf"}, ret.GetAttackDetails(), "error matching behaviors")
+// 	assert.Equal(t, []string{"asians-cloud/ssh-bf", "asians-cloud/ssh-slow-bf"}, ret.GetAttackDetails(), "error matching behaviors")
 // 	assert.Equal(t, 10, ret.GetBackgroundNoiseScore(), "error matching bg noise")
 // }
 

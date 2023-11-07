@@ -8,14 +8,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
-	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apiserver/pkg/apis/audit"
+
+	"github.com/asians-cloud/go-cs-lib/trace"
+
+	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 type KubernetesAuditConfiguration struct {
@@ -64,7 +66,7 @@ func (ka *KubernetesAuditSource) UnmarshalConfig(yamlConfig []byte) error {
 	k8sConfig := KubernetesAuditConfiguration{}
 	err := yaml.UnmarshalStrict(yamlConfig, &k8sConfig)
 	if err != nil {
-		return errors.Wrap(err, "Cannot parse k8s-audit configuration")
+		return fmt.Errorf("cannot parse k8s-audit configuration: %w", err)
 	}
 
 	ka.config = k8sConfig
@@ -133,12 +135,12 @@ func (ka *KubernetesAuditSource) OneShotAcquisition(out chan types.Event, t *tom
 func (ka *KubernetesAuditSource) StreamingAcquisition(out chan types.Event, t *tomb.Tomb) error {
 	ka.outChan = out
 	t.Go(func() error {
-		defer types.CatchPanic("crowdsec/acquis/k8s-audit/live")
+		defer trace.CatchPanic("crowdsec/acquis/k8s-audit/live")
 		ka.logger.Infof("Starting k8s-audit server on %s:%d%s", ka.config.ListenAddr, ka.config.ListenPort, ka.config.WebhookPath)
 		t.Go(func() error {
 			err := ka.server.ListenAndServe()
 			if err != nil && err != http.ErrServerClosed {
-				return errors.Wrap(err, "k8s-audit server failed")
+				return fmt.Errorf("k8s-audit server failed: %w", err)
 			}
 			return nil
 		})

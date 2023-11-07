@@ -4,9 +4,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/asians-cloud/crowdsec/pkg/models"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
+
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 /*

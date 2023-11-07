@@ -1,20 +1,20 @@
 package leakybucket
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"sort"
 	"strconv"
 
+	"github.com/antonmedv/expr"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-openapi/strfmt"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/asians-cloud/crowdsec/pkg/alertcontext"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-openapi/strfmt"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-
-	"github.com/antonmedv/expr"
 )
 
 
@@ -54,7 +54,7 @@ func SourceFromEvent(evt types.Event, leaky *Leaky) (map[string]models.Source, e
 					if leaky.scopeType.RunTimeFilter != nil {
 						retValue, err := expr.Run(leaky.scopeType.RunTimeFilter, map[string]interface{}{"evt": &evt})
 						if err != nil {
-							return srcs, errors.Wrapf(err, "while running scope filter")
+							return srcs, fmt.Errorf("while running scope filter: %w", err)
 						}
 						value, ok := retValue.(string)
 						if !ok {
@@ -129,7 +129,7 @@ func SourceFromEvent(evt types.Event, leaky *Leaky) (map[string]models.Source, e
 			if leaky.scopeType.RunTimeFilter != nil {
 				retValue, err := expr.Run(leaky.scopeType.RunTimeFilter, map[string]interface{}{"evt": &evt})
 				if err != nil {
-					return srcs, errors.Wrapf(err, "while running scope filter")
+					return srcs, fmt.Errorf("while running scope filter: %w", err)
 				}
 
 				value, ok := retValue.(string)
@@ -146,7 +146,7 @@ func SourceFromEvent(evt types.Event, leaky *Leaky) (map[string]models.Source, e
 		}
 		retValue, err := expr.Run(leaky.scopeType.RunTimeFilter, map[string]interface{}{"evt": &evt})
 		if err != nil {
-			return srcs, errors.Wrapf(err, "while running scope filter")
+			return srcs, fmt.Errorf("while running scope filter: %w", err)
 		}
 
 		value, ok := retValue.(string)
@@ -218,7 +218,7 @@ func alertFormatSource(leaky *Leaky, queue *Queue) (map[string]models.Source, st
 	for _, evt := range queue.Queue {
 		srcs, err := SourceFromEvent(evt, leaky)
 		if err != nil {
-			return nil, "", errors.Wrapf(err, "while extracting scope from bucket %s", leaky.Name)
+			return nil, "", fmt.Errorf("while extracting scope from bucket %s: %w", leaky.Name, err)
 		}
 		for key, src := range srcs {
 			if source_type == types.Undefined {
@@ -255,6 +255,25 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 	leakSpeed := leaky.Leakspeed.String()
 	startAt := string(start_at)
 	stopAt := string(stop_at)
+
+	// New map[string]string
+	labels := make(map[string]string)
+	for key, value := range leaky.BucketConfig.Labels {
+		switch v := value.(type) {
+		case string:
+			labels[key] = v
+		case map[string]string:
+			jsonStr, err := json.Marshal(v)
+			if err != nil {
+				fmt.Println("Error marshalling map:", err)
+				continue
+			}
+			labels[key] = string(jsonStr)
+		default:
+			labels[key] = fmt.Sprintf("%v", v)
+		}
+	}
+
 	apiAlert := models.Alert{
 		Scenario:        &leaky.Name,
 		ScenarioHash:    &leaky.hash,
@@ -266,7 +285,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 		StartAt:         &startAt,
 		StopAt:          &stopAt,
 		Simulated:       &leaky.Simulated,
-                Labels:          leaky.BucketConfig.Labels,
+		Labels:          labels,
 	}
 	if leaky.BucketConfig == nil {
 		return runtimeAlert, fmt.Errorf("leaky.BucketConfig is nil")
@@ -278,7 +297,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 	//Get the sources from Leaky/Queue
 	sources, source_scope, err := alertFormatSource(leaky, queue)
 	if err != nil {
-		return runtimeAlert, errors.Wrap(err, "unable to collect sources from bucket")
+		return runtimeAlert, fmt.Errorf("unable to collect sources from bucket: %w", err)
 	}
 	runtimeAlert.Sources = sources
 	//Include source info in format string
@@ -306,7 +325,7 @@ func NewAlert(leaky *Leaky, queue *Queue) (types.RuntimeAlert, error) {
 		newApiAlert := apiAlert
 		srcCopy := srcValue
 		newApiAlert.Source = &srcCopy
-		if v, ok := leaky.BucketConfig.Labels["remediation"]; ok && v == "true" {
+		if v, ok := leaky.BucketConfig.Labels["remediation"]; ok && v == true {
 			newApiAlert.Remediation = true
 		}
 

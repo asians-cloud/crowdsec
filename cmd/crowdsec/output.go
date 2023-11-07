@@ -7,17 +7,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-openapi/strfmt"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/asians-cloud/go-cs-lib/version"
+
 	"github.com/asians-cloud/crowdsec/pkg/apiclient"
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	leaky "github.com/asians-cloud/crowdsec/pkg/leakybucket"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/parser"
 	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/go-openapi/strfmt"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 func dedupAlerts(alerts []types.RuntimeAlert) ([]*models.Alert, error) {
@@ -49,11 +50,11 @@ func PushAlerts(alerts []types.RuntimeAlert, client *apiclient.ApiClient) error 
 	alertsToPush, err := dedupAlerts(alerts)
 
 	if err != nil {
-		return errors.Wrap(err, "failed to transform alerts for api")
+		return fmt.Errorf("failed to transform alerts for api: %w", err)
 	}
 	_, _, err = client.Alerts.Add(ctx, alertsToPush)
 	if err != nil {
-		return errors.Wrap(err, "failed sending alert to LAPI")
+		return fmt.Errorf("failed sending alert to LAPI: %w", err)
 	}
 	return nil
 }
@@ -69,18 +70,18 @@ func runOutput(input chan types.Event, overflow chan types.Event, buckets *leaky
 	var cache []types.RuntimeAlert
 	var cacheMutex sync.Mutex
 
-	scenarios, err := cwhub.GetInstalledScenariosAsString()
+	scenarios, err := cwhub.GetInstalledItemsAsString(cwhub.SCENARIOS)
 	if err != nil {
-		return errors.Wrapf(err, "loading list of installed hub scenarios: %s", err)
+		return fmt.Errorf("loading list of installed hub scenarios: %w", err)
 	}
 
 	apiURL, err := url.Parse(apiConfig.URL)
 	if err != nil {
-		return errors.Wrapf(err, "parsing api url ('%s'): %s", apiConfig.URL, err)
+		return fmt.Errorf("parsing api url ('%s'): %w", apiConfig.URL, err)
 	}
 	papiURL, err := url.Parse(apiConfig.PapiURL)
 	if err != nil {
-		return errors.Wrapf(err, "parsing polling api url ('%s'): %s", apiConfig.PapiURL, err)
+		return fmt.Errorf("parsing polling api url ('%s'): %w", apiConfig.PapiURL, err)
 	}
 	password := strfmt.Password(apiConfig.Password)
 
@@ -88,14 +89,14 @@ func runOutput(input chan types.Event, overflow chan types.Event, buckets *leaky
 		MachineID:      apiConfig.Login,
 		Password:       password,
 		Scenarios:      scenarios,
-		UserAgent:      fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:      fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:            apiURL,
 		PapiURL:        papiURL,
 		VersionPrefix:  "v1",
-		UpdateScenario: cwhub.GetInstalledScenariosAsString,
+		UpdateScenario: func() ([]string, error) {return cwhub.GetInstalledItemsAsString(cwhub.SCENARIOS)},
 	})
 	if err != nil {
-		return errors.Wrapf(err, "new client api: %s", err)
+		return fmt.Errorf("new client api: %w", err)
 	}
 	authResp, _, err := Client.Auth.AuthenticateWatcher(context.Background(), models.WatcherAuthRequest{
 		MachineID: &apiConfig.Login,
@@ -103,11 +104,11 @@ func runOutput(input chan types.Event, overflow chan types.Event, buckets *leaky
 		Scenarios: scenarios,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "authenticate watcher (%s)", apiConfig.Login)
+		return fmt.Errorf("authenticate watcher (%s): %w", apiConfig.Login, err)
 	}
 
 	if err := Client.GetClient().Transport.(*apiclient.JWTTransport).Expiration.UnmarshalText([]byte(authResp.Expire)); err != nil {
-		return errors.Wrap(err, "unable to parse jwt expiration")
+		return fmt.Errorf("unable to parse jwt expiration: %w", err)
 	}
 
 	Client.GetClient().Transport.(*apiclient.JWTTransport).Token = authResp.Token

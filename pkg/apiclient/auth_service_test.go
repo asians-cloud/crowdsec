@@ -10,10 +10,12 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
-	"github.com/asians-cloud/crowdsec/pkg/models"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/asians-cloud/go-cs-lib/version"
+
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 type BasicMockPayload struct {
@@ -86,7 +88,7 @@ func TestWatcherRegister(t *testing.T) {
 	clientconfig := Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
 	}
@@ -128,10 +130,10 @@ func TestWatcherAuth(t *testing.T) {
 	clientConfig := &Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
-		Scenarios:     []string{"crowdsecurity/test"},
+		Scenarios:     []string{"asians-cloud/test"},
 	}
 	client, err := NewClient(clientConfig)
 
@@ -198,7 +200,7 @@ func TestWatcherUnregister(t *testing.T) {
 		buf := new(bytes.Buffer)
 		_, _ = buf.ReadFrom(r.Body)
 		newStr := buf.String()
-		if newStr == `{"machine_id":"test_login","password":"test_password","scenarios":["crowdsecurity/test"]}
+		if newStr == `{"machine_id":"test_login","password":"test_password","scenarios":["asians-cloud/test"]}
 ` {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, `{"code":200,"expire":"2029-11-30T14:14:24+01:00","token":"toto"}`)
@@ -216,10 +218,10 @@ func TestWatcherUnregister(t *testing.T) {
 	mycfg := &Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
-		Scenarios:     []string{"crowdsecurity/test"},
+		Scenarios:     []string{"asians-cloud/test"},
 	}
 	client, err := NewClient(mycfg)
 
@@ -270,10 +272,10 @@ func TestWatcherEnroll(t *testing.T) {
 	mycfg := &Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
-		Scenarios:     []string{"crowdsecurity/test"},
+		Scenarios:     []string{"asians-cloud/test"},
 	}
 	client, err := NewClient(mycfg)
 

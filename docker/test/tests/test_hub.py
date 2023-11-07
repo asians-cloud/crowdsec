@@ -21,7 +21,7 @@ def test_preinstalled_hub(crowdsec, flavor):
         assert res.exit_code == 0
         j = json.loads(res.output)
         collections = {c['name']: c for c in j['collections']}
-        assert collections['crowdsecurity/linux']['status'] == 'enabled'
+        assert collections['asians-cloud/linux']['status'] == 'enabled'
         parsers = {c['name']: c for c in j['parsers']}
-        assert parsers['crowdsecurity/whitelists']['status'] == 'enabled'
-        assert parsers['crowdsecurity/docker-logs']['status'] == 'enabled'
+        assert parsers['asians-cloud/whitelists']['status'] == 'enabled'
+        assert parsers['asians-cloud/docker-logs']['status'] == 'enabled'

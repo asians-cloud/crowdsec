@@ -2,7 +2,7 @@
 name: enforce_mfa
 #debug: true
 filters:
- - 'Alert.Remediation == true && Alert.GetScenario() == "crowdsecurity/ssh-enforce-mfa" && Alert.GetScope() == "username"'
+ - 'Alert.Remediation == true && Alert.GetScenario() == "asians-cloud/ssh-enforce-mfa" && Alert.GetScope() == "username"'
 decisions: #remediation vs decision
  - type: enforce_mfa
    scope: "username"

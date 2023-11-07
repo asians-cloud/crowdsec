@@ -1,0 +1,146 @@
+{
+    "collections": {
+        "asians-cloud/foobar": {
+            "path": "collections/asians-cloud/foobar.yaml",
+            "version": "0.1",
+            "versions": {
+                "0.1": {
+                    "digest": "786c9490e4dd234453e53aa9bb7d28c60668e31c3c0c71a7dd6d0abbfa60261a",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "foobar collection : foobar",
+            "author": "crowdsecurity",
+            "labels": null,
+            "collections": [
+                "asians-cloud/foobar_subcollection"
+            ],
+            "parsers": [
+                "asians-cloud/foobar_parser"
+            ],
+            "scenarios": [
+                "asians-cloud/foobar_scenario"
+            ]
+        },
+        "asians-cloud/test_collection": {
+            "path": "collections/asians-cloud/test_collection.yaml",
+            "version": "0.2",
+            "versions": {
+                "0.1": {
+                    "digest": "517d0f0764ab6eee9d00d31f50da2a6cdd2084232fea32a7cb9f1fe95e658f59",
+                    "deprecated": false
+                },
+                "0.2": {
+                    "digest": "045fbe3f4c4b60fb7c12e486138e901fe6008b5bada6b9f6199cb4760d8bf448",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "test_collection : foobar",
+            "author": "crowdsecurity",
+            "labels": null,
+            "scenarios": [
+                "asians-cloud/foobar_scenario",
+                "asians-cloud/barfoo_scenario"
+            ]
+        },
+        "asians-cloud/foobar_subcollection": {
+            "path": "collections/asians-cloud/foobar_subcollection.yaml",
+            "version": "0.1",
+            "versions": {
+                "0.1": {
+                    "digest": "786c9490e4dd234453e53aa9bb7d28c60668e31c3c0c71a7dd6d0abbfa60261a",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "foobar collection : foobar",
+            "author": "crowdsecurity",
+            "labels": null,
+            "parsers": [
+                "asians-cloud/foobar_subparser"
+            ]
+        }
+    },
+    "parsers": {
+        "asians-cloud/foobar_parser": {
+            "path": "parsers/s01-parse/asians-cloud/foobar_parser.yaml",
+            "stage": "s01-parse",
+            "version": "0.1",
+            "versions": {
+                "0.1": {
+                    "digest": "932973ba9ba99c98dbb27c207d4b3de36c9510d87cde82598b7f4b398cbdde83",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "A foobar parser",
+            "author": "crowdsecurity",
+            "labels": null
+        },
+        "asians-cloud/foobar_subparser": {
+            "path": "parsers/s01-parse/asians-cloud/foobar_subparser.yaml",
+            "stage": "s01-parse",
+            "version": "0.1",
+            "versions": {
+                "0.1": {
+                    "digest": "932973ba9ba99c98dbb27c207d4b3de36c9510d87cde82598b7f4b398cbdde83",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "A foobar parser",
+            "author": "crowdsecurity",
+            "labels": null
+        }
+    },
+    "postoverflows": {},
+    "scenarios": {
+        "asians-cloud/foobar_scenario": {
+            "path": "scenarios/asians-cloud/foobar_scenario.yaml",
+            "version": "0.1",
+            "versions": {
+                "0.1": {
+                    "digest": "a76b389db944ca7a9e5a3f3ae61ee2d4ee98167164ec9b971174b1d44f5a01c6",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "a foobar scenario",
+            "author": "crowdsecurity",
+            "labels": {
+                "remediation": "true",
+                "scope": "ip",
+                "service": "http",
+                "type": "web_attack"
+            }
+        },
+        "asians-cloud/barfoo_scenario": {
+            "path": "scenarios/asians-cloud/barfoo_scenario.yaml",
+            "version": "0.1",
+            "versions": {
+                "0.1": {
+                    "digest": "a76b389db944ca7a9e5a3f3ae61ee2d4ee98167164ec9b971174b1d44f5a01c6",
+                    "deprecated": false
+                }
+            },
+            "long_description": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "content": "bG9uZyBkZXNjcmlwdGlvbgo=",
+            "description": "a foobar scenario",
+            "author": "crowdsecurity",
+            "labels": {
+                "remediation": "true",
+                "scope": "ip",
+                "service": "http",
+                "type": "web_attack"
+            }
+        }
+    }
+}

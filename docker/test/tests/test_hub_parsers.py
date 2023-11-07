@@ -14,8 +14,8 @@ pytestmark = pytest.mark.docker
 
 def test_install_two_parsers(crowdsec, flavor):
     """Test installing parsers at startup"""
-    it1 = 'crowdsecurity/cpanel-logs'
-    it2 = 'crowdsecurity/cowrie-logs'
+    it1 = 'asians-cloud/cpanel-logs'
+    it2 = 'asians-cloud/cowrie-logs'
     env = {
         'PARSERS': f'{it1} {it2}'
     }
@@ -37,7 +37,7 @@ def test_install_two_parsers(crowdsec, flavor):
 # XXX check that the parser is preinstalled by default
 def test_disable_parser(crowdsec, flavor):
     """Test removing a pre-installed parser at startup"""
-    it = 'crowdsecurity/whitelists'
+    it = 'asians-cloud/whitelists'
     env = {
         'DISABLE_PARSERS': it
     }
@@ -56,7 +56,7 @@ def test_disable_parser(crowdsec, flavor):
 
 def test_install_and_disable_parser(crowdsec, flavor):
     """Declare a parser to install AND disable: disable wins"""
-    it = 'crowdsecurity/cpanel-logs'
+    it = 'asians-cloud/cpanel-logs'
     env = {
         'PARSERS': it,
         'DISABLE_PARSERS': it,

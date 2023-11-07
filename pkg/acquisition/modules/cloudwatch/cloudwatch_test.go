@@ -9,9 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
 	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"

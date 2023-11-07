@@ -3,14 +3,16 @@ package alertcontext
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/types"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -131,7 +133,7 @@ func EventToContext(events []types.Event) (models.Meta, []error) {
 					errors = append(errors, fmt.Errorf("unexpected return type for %s : %T", key, output))
 					continue
 				}
-				if val != "" && !types.InSlice(val, tmpContext[key]) {
+				if val != "" && !slices.Contains(tmpContext[key], val) {
 					tmpContext[key] = append(tmpContext[key], val)
 				}
 			}

@@ -35,7 +35,7 @@ ansible won't be able to see them.
   `TEST_SUITE_VERSION` (default "master"): repo URL and branch/tag/commit of
   the crowdsec sources containing the test fixture and scripts.
 
-- `TEST_SUITE_ZIP`: optional, archive of a `crowdsecurity/crowdsec` repository
+- `TEST_SUITE_ZIP`: optional, archive of a `asians-cloud/crowdsec` repository
   containing the test fixture and scripts. Overrides `TEST_SUITE_GIT` and
   `TEST_SUITE_VERSION`. It can be created with `zip -r crowdsec.zip .` from
   the root directory of the repository.

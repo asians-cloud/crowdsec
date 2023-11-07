@@ -3,23 +3,21 @@ package apiclient
 import (
 	"bytes"
 	"encoding/json"
-	"math/rand"
-	"sync"
-	"time"
-
-	//"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"sync"
+	"time"
 
-	"github.com/asians-cloud/crowdsec/pkg/fflag"
-	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	//"google.golang.org/appengine/log"
+
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 type APIKeyTransport struct {
@@ -98,10 +96,16 @@ func (r retryRoundTripper) ShouldRetry(statusCode int) bool {
 func (r retryRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	var resp *http.Response
 	var err error
+
 	backoff := 0
-	for i := 0; i < r.maxAttempts; i++ {
+	maxAttempts := r.maxAttempts
+	if fflag.DisableHttpRetryBackoff.IsEnabled() {
+		maxAttempts = 1
+	}
+
+	for i := 0; i < maxAttempts; i++ {
 		if i > 0 {
-			if r.withBackOff && !fflag.DisableHttpRetryBackoff.IsEnabled() {
+			if r.withBackOff {
 				backoff += 10 + rand.Intn(20)
 			}
 			log.Infof("retrying in %d seconds (attempt %d of %d)", backoff, i+1, r.maxAttempts)
@@ -117,7 +121,10 @@ func (r retryRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 		clonedReq := cloneRequest(req)
 		resp, err = r.next.RoundTrip(clonedReq)
 		if err != nil {
-			log.Errorf("error while performing request: %s; %d retries left", err, r.maxAttempts-i-1)
+			left := maxAttempts - i - 1
+			if left > 0 {
+				log.Errorf("error while performing request: %s; %d retries left", err, left)
+			}
 			continue
 		}
 		if !r.ShouldRetry(resp.StatusCode) {
@@ -169,11 +176,11 @@ func (t *JWTTransport) refreshJwtToken() error {
 	enc.SetEscapeHTML(false)
 	err = enc.Encode(auth)
 	if err != nil {
-		return errors.Wrap(err, "could not encode jwt auth body")
+		return fmt.Errorf("could not encode jwt auth body: %w", err)
 	}
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s/watchers/login", t.URL, t.VersionPrefix), buf)
 	if err != nil {
-		return errors.Wrap(err, "could not create request")
+		return fmt.Errorf("could not create request: %w", err)
 	}
 	req.Header.Add("Content-Type", "application/json")
 	client := &http.Client{
@@ -196,7 +203,7 @@ func (t *JWTTransport) refreshJwtToken() error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "could not get jwt token")
+		return fmt.Errorf("could not get jwt token: %w", err)
 	}
 	log.Debugf("auth-jwt : http %d", resp.StatusCode)
 
@@ -217,10 +224,10 @@ func (t *JWTTransport) refreshJwtToken() error {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return errors.Wrap(err, "unable to decode response")
+		return fmt.Errorf("unable to decode response: %w", err)
 	}
 	if err := t.Expiration.UnmarshalText([]byte(response.Expire)); err != nil {
-		return errors.Wrap(err, "unable to parse jwt expiration")
+		return fmt.Errorf("unable to parse jwt expiration: %w", err)
 	}
 	t.Token = response.Token
 
@@ -263,10 +270,12 @@ func (t *JWTTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		/*we had an error (network error for example, or 401 because token is refused), reset the token ?*/
 		t.Token = ""
-		return resp, errors.Wrapf(err, "performing jwt auth")
+		return resp, fmt.Errorf("performing jwt auth: %w", err)
 	}
 
-	log.Debugf("resp-jwt: %d", resp.StatusCode)
+	if resp != nil {
+		log.Debugf("resp-jwt: %d", resp.StatusCode)
+	}
 
 	return resp, nil
 }

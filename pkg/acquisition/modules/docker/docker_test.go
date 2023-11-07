@@ -11,7 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	"github.com/asians-cloud/crowdsec/pkg/types"
 	dockerTypes "github.com/docker/docker/api/types"
 	dockerContainer "github.com/docker/docker/api/types/container"
@@ -192,7 +193,7 @@ container_name_regexp:
 					actualLines++
 					ticker.Reset(1 * time.Second)
 				case <-ticker.C:
-					log.Infof("no more line to read")
+					log.Infof("no more lines to read")
 					dockerSource.t.Kill(nil)
 					return nil
 				}

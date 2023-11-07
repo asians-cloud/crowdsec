@@ -18,13 +18,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/asians-cloud/go-cs-lib/version"
+
+	"github.com/asians-cloud/crowdsec/cmd/crowdsec-cli/require"
 	"github.com/asians-cloud/crowdsec/pkg/apiclient"
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/fflag"
 	"github.com/asians-cloud/crowdsec/pkg/models"
-	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 const (
@@ -45,6 +47,14 @@ const (
 	SUPPORT_ACQUISITION_CONFIG_BASE_PATH = "config/acquis/"
 	SUPPORT_CROWDSEC_PROFILE_PATH        = "config/profiles.yaml"
 )
+
+// from https://github.com/acarl005/stripansi
+var reStripAnsi = regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
+
+func stripAnsiString(str string) string {
+	// the byte version doesn't strip correctly
+	return reStripAnsi.ReplaceAllString(str, "")
+}
 
 func collectMetrics() ([]byte, []byte, error) {
 	log.Info("Collecting prometheus metrics")
@@ -122,24 +132,6 @@ func collectOSInfo() ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-func initHub() error {
-	if err := csConfig.LoadHub(); err != nil {
-		return fmt.Errorf("cannot load hub: %s", err)
-	}
-	if csConfig.Hub == nil {
-		return fmt.Errorf("hub not configured")
-	}
-
-	if err := cwhub.SetHubBranch(); err != nil {
-		return fmt.Errorf("cannot set hub branch: %s", err)
-	}
-
-	if err := cwhub.GetHubIdx(csConfig.Hub); err != nil {
-		return fmt.Errorf("no hub index found: %s", err)
-	}
-	return nil
-}
-
 func collectHubItems(itemType string) []byte {
 	out := bytes.NewBuffer(nil)
 	log.Infof("Collecting %s list", itemType)
@@ -175,14 +167,14 @@ func collectAPIStatus(login string, password string, endpoint string, prefix str
 	if err != nil {
 		return []byte(fmt.Sprintf("cannot parse API URL: %s", err))
 	}
-	scenarios, err := cwhub.GetInstalledScenariosAsString()
+	scenarios, err := cwhub.GetInstalledItemsAsString(cwhub.SCENARIOS)
 	if err != nil {
 		return []byte(fmt.Sprintf("could not collect scenarios: %s", err))
 	}
 
 	Client, err = apiclient.NewDefaultClient(apiurl,
 		prefix,
-		fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		fmt.Sprintf("crowdsec/%s", version.String()),
 		nil)
 	if err != nil {
 		return []byte(fmt.Sprintf("could not init client: %s", err))
@@ -303,8 +295,7 @@ cscli support dump -f /tmp/crowdsec-support.zip
 				skipAgent = true
 			}
 
-			err = initHub()
-			if err != nil {
+			if err := require.Hub(csConfig); err != nil {
 				log.Warn("Could not init hub, running on LAPI ? Hub related information will not be collected")
 				skipHub = true
 				infos[SUPPORT_PARSERS_PATH] = []byte(err.Error())
@@ -398,7 +389,7 @@ cscli support dump -f /tmp/crowdsec-support.zip
 					log.Errorf("Could not add zip entry for %s: %s", filename, err)
 					continue
 				}
-				fw.Write([]byte(types.StripAnsiString(string(data))))
+				fw.Write([]byte(stripAnsiString(string(data))))
 			}
 
 			err = zipWriter.Close()

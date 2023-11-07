@@ -38,7 +38,7 @@ def test_cold_logs(crowdsec, tmp_path_factory, flavor):
         cs.wait_for_log([
             "*Adding file /var/log/toto.log to filelist*",
             "*reading /var/log/toto.log at once*",
-            "*Ip 1.1.1.172 performed 'crowdsecurity/ssh-bf' (6 events over 5s)*",
+            "*Ip 1.1.1.172 performed 'asians-cloud/ssh-bf' (6 events over 5s)*",
             "*crowdsec shutdown*"
         ])
 

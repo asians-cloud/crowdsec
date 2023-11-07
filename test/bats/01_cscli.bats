@@ -101,13 +101,13 @@ teardown() {
     # check that LAPI configuration is loaded (human and json, not shows in raw)
 
     rune -0 cscli config show -o human
-    assert_line --regexp ".*- URL\s+: http://127.0.0.1:8080/"
-    assert_line --regexp ".*- Login\s+: githubciXXXXXXXXXXXXXXXXXXXXXXXX"
-    assert_line --regexp ".*- Credentials File\s+: .*/local_api_credentials.yaml"
+    assert_line --regexp ".*- URL +: http://127.0.0.1:8080/"
+    assert_line --regexp ".*- Login +: githubciXXXXXXXXXXXXXXXXXXXXXXXX([a-zA-Z0-9]{16})?"
+    assert_line --regexp ".*- Credentials File +: .*/local_api_credentials.yaml"
 
     rune -0 cscli config show -o json
-    rune -0 jq -c '.API.Client.Credentials | [.url,.login]' <(output)
-    assert_output '["http://127.0.0.1:8080/","githubciXXXXXXXXXXXXXXXXXXXXXXXX"]'
+    rune -0 jq -c '.API.Client.Credentials | [.url,.login[0:32]]' <(output)
+    assert_json '["http://127.0.0.1:8080/","githubciXXXXXXXXXXXXXXXXXXXXXXXX"]'
 }
 
 @test "cscli config show-yaml" {
@@ -146,7 +146,7 @@ teardown() {
     # restore
     rm "${SIMULATION_YAML}"
     rune -0 cscli config restore "${backupdir}"
-    assert_file_exist "${SIMULATION_YAML}"
+    assert_file_exists "${SIMULATION_YAML}"
 
     # cleanup
     rm -rf -- "${backupdir:?}"
@@ -182,7 +182,7 @@ teardown() {
 
 @test "cscli - empty LAPI credentials file" {
     LOCAL_API_CREDENTIALS=$(config_get '.api.client.credentials_path')
-    truncate -s 0 "${LOCAL_API_CREDENTIALS}"
+    : > "${LOCAL_API_CREDENTIALS}"
     rune -1 cscli lapi status
     assert_stderr --partial "no credentials or URL found in api client configuration '${LOCAL_API_CREDENTIALS}'"
 
@@ -227,8 +227,7 @@ teardown() {
     rune -0 cscli metrics
     assert_output --partial "Route"
     assert_output --partial '/v1/watchers/login'
-    assert_output --partial "Local Api Metrics:"
-
+    assert_output --partial "Local API Metrics:"
 }
 
 @test "'cscli completion' with or without configuration file" {
@@ -251,40 +250,40 @@ teardown() {
     # use $PACKAGE_TESTING, so the order is not important.
 
     rune -0 cscli hub list -o human
-    assert_line --regexp '^ crowdsecurity/linux'
-    assert_line --regexp '^ crowdsecurity/sshd'
-    assert_line --regexp '^ crowdsecurity/dateparse-enrich'
-    assert_line --regexp '^ crowdsecurity/geoip-enrich'
-    assert_line --regexp '^ crowdsecurity/sshd-logs'
-    assert_line --regexp '^ crowdsecurity/syslog-logs'
-    assert_line --regexp '^ crowdsecurity/ssh-bf'
-    assert_line --regexp '^ crowdsecurity/ssh-slow-bf'
+    assert_line --regexp '^ asians-cloud/linux'
+    assert_line --regexp '^ asians-cloud/sshd'
+    assert_line --regexp '^ asians-cloud/dateparse-enrich'
+    assert_line --regexp '^ asians-cloud/geoip-enrich'
+    assert_line --regexp '^ asians-cloud/sshd-logs'
+    assert_line --regexp '^ asians-cloud/syslog-logs'
+    assert_line --regexp '^ asians-cloud/ssh-bf'
+    assert_line --regexp '^ asians-cloud/ssh-slow-bf'
 
     rune -0 cscli hub list -o raw
-    assert_line --regexp '^crowdsecurity/linux,enabled,[0-9]+\.[0-9]+,core linux support : syslog\+geoip\+ssh,collections$'
-    assert_line --regexp '^crowdsecurity/sshd,enabled,[0-9]+\.[0-9]+,sshd support : parser and brute-force detection,collections$'
-    assert_line --regexp '^crowdsecurity/dateparse-enrich,enabled,[0-9]+\.[0-9]+,,parsers$'
-    assert_line --regexp '^crowdsecurity/geoip-enrich,enabled,[0-9]+\.[0-9]+,"Populate event with geoloc info : as, country, coords, source range.",parsers$'
-    assert_line --regexp '^crowdsecurity/sshd-logs,enabled,[0-9]+\.[0-9]+,Parse openSSH logs,parsers$'
-    assert_line --regexp '^crowdsecurity/syslog-logs,enabled,[0-9]+\.[0-9]+,,parsers$'
-    assert_line --regexp '^crowdsecurity/ssh-bf,enabled,[0-9]+\.[0-9]+,Detect ssh bruteforce,scenarios$'
-    assert_line --regexp '^crowdsecurity/ssh-slow-bf,enabled,[0-9]+\.[0-9]+,Detect slow ssh bruteforce,scenarios$'
+    assert_line --regexp '^asians-cloud/linux,enabled,[0-9]+\.[0-9]+,core linux support : syslog\+geoip\+ssh,collections$'
+    assert_line --regexp '^asians-cloud/sshd,enabled,[0-9]+\.[0-9]+,sshd support : parser and brute-force detection,collections$'
+    assert_line --regexp '^asians-cloud/dateparse-enrich,enabled,[0-9]+\.[0-9]+,,parsers$'
+    assert_line --regexp '^asians-cloud/geoip-enrich,enabled,[0-9]+\.[0-9]+,"Populate event with geoloc info : as, country, coords, source range.",parsers$'
+    assert_line --regexp '^asians-cloud/sshd-logs,enabled,[0-9]+\.[0-9]+,Parse openSSH logs,parsers$'
+    assert_line --regexp '^asians-cloud/syslog-logs,enabled,[0-9]+\.[0-9]+,,parsers$'
+    assert_line --regexp '^asians-cloud/ssh-bf,enabled,[0-9]+\.[0-9]+,Detect ssh bruteforce,scenarios$'
+    assert_line --regexp '^asians-cloud/ssh-slow-bf,enabled,[0-9]+\.[0-9]+,Detect slow ssh bruteforce,scenarios$'
 
     rune -0 cscli hub list -o json
     rune -0 jq -r '.collections[].name, .parsers[].name, .scenarios[].name' <(output)
-    assert_line 'crowdsecurity/linux'
-    assert_line 'crowdsecurity/sshd'
-    assert_line 'crowdsecurity/dateparse-enrich'
-    assert_line 'crowdsecurity/geoip-enrich'
-    assert_line 'crowdsecurity/sshd-logs'
-    assert_line 'crowdsecurity/syslog-logs'
-    assert_line 'crowdsecurity/ssh-bf'
-    assert_line 'crowdsecurity/ssh-slow-bf'
+    assert_line 'asians-cloud/linux'
+    assert_line 'asians-cloud/sshd'
+    assert_line 'asians-cloud/dateparse-enrich'
+    assert_line 'asians-cloud/geoip-enrich'
+    assert_line 'asians-cloud/sshd-logs'
+    assert_line 'asians-cloud/syslog-logs'
+    assert_line 'asians-cloud/ssh-bf'
+    assert_line 'asians-cloud/ssh-slow-bf'
 }
 
 @test "cscli support dump (smoke test)" {
     rune -0 cscli support dump -f "$BATS_TEST_TMPDIR"/dump.zip
-    assert_file_exist "$BATS_TEST_TMPDIR"/dump.zip
+    assert_file_exists "$BATS_TEST_TMPDIR"/dump.zip
 }
 
 @test "cscli explain" {
@@ -322,14 +321,14 @@ teardown() {
     rune -0 cscli doc
     refute_output
     refute_stderr
-    assert_file_exist "doc/cscli.md"
+    assert_file_exists "doc/cscli.md"
     assert_file_not_exist "doc/cscli_setup.md"
 
     # commands guarded by feature flags are not documented unless the feature flag is set
 
     export CROWDSEC_FEATURE_CSCLI_SETUP="true"
     rune -0 cscli doc
-    assert_file_exist "doc/cscli_setup.md"
+    assert_file_exists "doc/cscli_setup.md"
 }
 
 @test "feature.yaml for subcommands" {

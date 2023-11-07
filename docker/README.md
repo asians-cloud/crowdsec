@@ -17,21 +17,17 @@ All the following images are available on Docker Hub for the architectures
 
 ### Alpine
 
- - `crowdsecurity/crowdsec:{version}`
+ - `asians-cloud/crowdsec:{version}`
 
-Recommended for production usage. Also available on GitHub (ghcr.io).
+Latest stable release recommended for production usage. Also available on GitHub (ghcr.io).
 
- - `crowdsecurity/crowdsec:dev`
-
-The latest stable release.
-
- - `crowdsecurity/crowdsec:dev`
+ - `asians-cloud/crowdsec:dev`
 
 For development and testing, from the master branch.
 
 since v1.4.2:
 
- - `crowdsecurity/crowdsec:slim`
+ - `asians-cloud/crowdsec:slim`
 
 Reduced size by 60%, it does not include the notifier plugins nor the GeoIP database.
 If you need these details on decisions, run `cscli hub upgrade` inside the
@@ -40,8 +36,8 @@ container to download the GeoIP database at runtime.
 
 ### Debian (since v1.3.3)
 
- - `crowdsecurity/crowdsec:{version}-debian`
- - `crowdsecurity/crowdsec:latest-debian`
+ - `asians-cloud/crowdsec:{version}-debian`
+ - `asians-cloud/crowdsec:latest-debian`
 
 The debian version includes support for systemd and journalctl.
 
@@ -81,7 +77,7 @@ Collections are a good place to start: https://docs.crowdsec.net/docs/collection
 
 Find collections, scenarios, parsers and postoverflows in the hub: https://hub.crowdsec.net
 
-* Specify collections | scenarios | parsers | postoverflows to install via the environment variables (by default [`crowdsecurity/linux`](https://hub.crowdsec.net/author/crowdsecurity/collections/linux) is installed)
+* Specify collections | scenarios | parsers | postoverflows to install via the environment variables (by default [`asians-cloud/linux`](https://hub.crowdsec.net/author/asians-cloud/collections/linux) is installed)
 * Mount volumes to specify which log files should be ingested by crowdsec
 
 
@@ -162,9 +158,9 @@ docker run -d \
     -v /var/log/auth.log:/logs/auth.log:ro \
     -v /var/log/syslog.log:/logs/syslog.log:ro \
     -v /var/log/apache:/logs/apache:ro \
-    -e COLLECTIONS="crowdsecurity/apache2 crowdsecurity/sshd" \
+    -e COLLECTIONS="asians-cloud/apache2 asians-cloud/sshd" \
     -p 8080:8080 -p 6060:6060 \
-    --name crowdsec crowdsecurity/crowdsec
+    --name crowdsec asians-cloud/crowdsec
 ```
 
 
@@ -189,6 +185,14 @@ It is not recommended anymore to bind-mount the full config.yaml file and you sh
 ## Notifications
 
 If you want to use the [notification system](https://docs.crowdsec.net/docs/notification_plugins/intro), you have to use the full image (not slim) and mount at least a custom `profiles.yaml` and a notification configuration to `/etc/crowdsec/notifications`
+
+```shell
+docker run -d \
+    -v ./profiles.yaml:/etc/crowdsec/profiles.yaml \
+    -v ./http_notification.yaml:/etc/crowdsec/notifications/http_notification.yaml \
+    -p 8080:8080 -p 6060:6060 \
+    --name crowdsec asians-cloud/crowdsec
+```
 
 # Deployment use cases
 
@@ -280,6 +284,7 @@ config.yaml) each time the container is run.
 | __LAPI__                | | (useless with DISABLE_LOCAL_API) |
 | `USE_WAL`               | false | Enable Write-Ahead Logging with SQLite |
 | `CUSTOM_HOSTNAME`       | localhost | Name for the local agent (running in the container with LAPI) |
+| `CAPI_WHITELISTS_PATH`  | | Path for capi_whitelists.yaml |
 |                         | | |
 | __Agent__               | | (these don't work with DISABLE_AGENT) |
 | `TYPE`                  | | [`Labels.type`](https://docs.crowdsec.net/Crowdsec/v1/references/acquisition/) for file in time-machine: `-e TYPE="<type>"` |
@@ -311,11 +316,11 @@ config.yaml) each time the container is run.
 | `BOUNCERS_ALLOWED_OU`   | bouncer-ou | OU values allowed for bouncers, separated by comma |
 |                         | | |
 | __Hub management__      | | |
-| `COLLECTIONS`           | | Collections to install, separated by space: `-e COLLECTIONS="crowdsecurity/linux crowdsecurity/apache2"` |
+| `COLLECTIONS`           | | Collections to install, separated by space: `-e COLLECTIONS="asians-cloud/linux asians-cloud/apache2"` |
 | `PARSERS`               | | Parsers to install, separated by space |
 | `SCENARIOS`             | | Scenarios to install, separated by space |
 | `POSTOVERFLOWS`         | | Postoverflows to install, separated by space |
-| `DISABLE_COLLECTIONS`   | | Collections to remove, separated by space: `-e DISABLE_COLLECTIONS="crowdsecurity/linux crowdsecurity/nginx"` |
+| `DISABLE_COLLECTIONS`   | | Collections to remove, separated by space: `-e DISABLE_COLLECTIONS="asians-cloud/linux asians-cloud/nginx"` |
 | `DISABLE_PARSERS`       | | Parsers to remove, separated by space |
 | `DISABLE_SCENARIOS`     | | Scenarios to remove, separated by space |
 | `DISABLE_POSTOVERFLOWS` | | Postoverflows to remove, separated by space |

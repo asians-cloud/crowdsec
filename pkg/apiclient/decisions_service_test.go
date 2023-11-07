@@ -8,13 +8,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
-	"github.com/asians-cloud/crowdsec/pkg/models"
-	"github.com/asians-cloud/crowdsec/pkg/modelscapi"
-	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/asians-cloud/go-cs-lib/ptr"
+	"github.com/asians-cloud/go-cs-lib/version"
+
+	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/asians-cloud/crowdsec/pkg/modelscapi"
 )
 
 func TestDecisionsList(t *testing.T) {
@@ -460,7 +462,7 @@ func TestDecisionsFromBlocklist(t *testing.T) {
 		Remediation: &tremediationBlocklist,
 		Name:        &tnameBlocklist,
 		Duration:    &tdurationBlocklist,
-	}, types.StrPtr("Sun, 01 Jan 2023 01:01:01 GMT"))
+	}, ptr.Of("Sun, 01 Jan 2023 01:01:01 GMT"))
 	require.NoError(t, err)
 	assert.False(t, isModified)
 	_, isModified, err = newcli.Decisions.GetDecisionsFromBlocklist(context.Background(), &modelscapi.BlocklistLink{
@@ -469,7 +471,7 @@ func TestDecisionsFromBlocklist(t *testing.T) {
 		Remediation: &tremediationBlocklist,
 		Name:        &tnameBlocklist,
 		Duration:    &tdurationBlocklist,
-	}, types.StrPtr("Mon, 02 Jan 2023 01:01:01 GMT"))
+	}, ptr.Of("Mon, 02 Jan 2023 01:01:01 GMT"))
 	require.NoError(t, err)
 	assert.True(t, isModified)
 }
@@ -495,7 +497,7 @@ func TestDeleteDecisions(t *testing.T) {
 	client, err := NewClient(&Config{
 		MachineID:     "test_login",
 		Password:      "test_password",
-		UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+		UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 		URL:           apiURL,
 		VersionPrefix: "v1",
 	})

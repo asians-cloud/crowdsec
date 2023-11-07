@@ -3,13 +3,16 @@ package main
 import (
 	"time"
 
-	"github.com/asians-cloud/crowdsec/pkg/apiserver"
-	"github.com/asians-cloud/crowdsec/pkg/database"
-	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/tomb.v2"
+
+	"github.com/asians-cloud/go-cs-lib/ptr"
+
+	"github.com/asians-cloud/crowdsec/pkg/apiserver"
+	"github.com/asians-cloud/crowdsec/pkg/database"
+
+	"github.com/asians-cloud/crowdsec/cmd/crowdsec-cli/require"
 )
 
 func NewPapiCmd() *cobra.Command {
@@ -19,14 +22,14 @@ func NewPapiCmd() *cobra.Command {
 		Args:              cobra.MinimumNArgs(1),
 		DisableAutoGenTag: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if err := csConfig.LoadAPIServer(); err != nil || csConfig.DisableAPI {
-				return errors.Wrap(err, "Local API is disabled, please run this command on the local API machine")
+			if err := require.LAPI(csConfig); err != nil {
+				return err
 			}
-			if csConfig.API.Server.OnlineClient == nil {
-				log.Fatalf("no configuration for Central API in '%s'", *csConfig.FilePath)
+			if err := require.CAPI(csConfig); err != nil {
+				return err
 			}
-			if csConfig.API.Server.OnlineClient.Credentials.PapiURL == "" {
-				log.Fatalf("no PAPI URL in configuration")
+			if err := require.PAPI(csConfig); err != nil {
+				return err
 			}
 			return nil
 		},
@@ -71,7 +74,7 @@ func NewPapiStatusCmd() *cobra.Command {
 			var lastTimestampStr *string
 			lastTimestampStr, err = dbClient.GetConfigItem(apiserver.PapiPullKey)
 			if err != nil {
-				lastTimestampStr = types.StrPtr("never")
+				lastTimestampStr = ptr.Of("never")
 			}
 			log.Infof("You can successfully interact with Polling API (PAPI)")
 			log.Infof("Console plan: %s", perms.Plan)

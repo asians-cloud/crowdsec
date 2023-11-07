@@ -24,7 +24,7 @@ teardown() {
 #----------
 
 @test "we can list collections" {
-    run -0 cscli collections list
+    rune -0 cscli collections list
 }
 
 @test "there are 2 collections (linux and sshd)" {
@@ -37,84 +37,84 @@ teardown() {
     # collection is not installed
     rune -0 cscli collections list -o json
     rune -0 jq -r '.collections[].name' <(output)
-    refute_line "crowdsecurity/mysql"
+    refute_line "asians-cloud/mysql"
 
     # we install it
-    rune -0 cscli collections install crowdsecurity/mysql -o human
-    assert_stderr --partial "Enabled crowdsecurity/mysql"
+    rune -0 cscli collections install asians-cloud/mysql -o human
+    assert_stderr --partial "Enabled asians-cloud/mysql"
 
     # it has been installed
     rune -0 cscli collections list -o json
     rune -0 jq -r '.collections[].name' <(output)
-    assert_line "crowdsecurity/mysql"
+    assert_line "asians-cloud/mysql"
 
     # we install it
-    rune -0 cscli collections remove crowdsecurity/mysql -o human
-    assert_stderr --partial "Removed symlink [crowdsecurity/mysql]"
+    rune -0 cscli collections remove asians-cloud/mysql -o human
+    assert_stderr --partial "Removed symlink [asians-cloud/mysql]"
 
     # it has been removed
     rune -0 cscli collections list -o json
     rune -0 jq -r '.collections[].name' <(output)
-    refute_line "crowdsecurity/mysql"
+    refute_line "asians-cloud/mysql"
 }
 
 @test "must use --force to remove a collection that belongs to another, which becomes tainted" {
     # we expect no error since we may have multiple collections, some removed and some not
-    rune -0 cscli collections remove crowdsecurity/sshd
-    assert_stderr --partial "crowdsecurity/sshd belongs to other collections"
-    assert_stderr --partial "[crowdsecurity/linux]"
+    rune -0 cscli collections remove asians-cloud/sshd
+    assert_stderr --partial "asians-cloud/sshd belongs to other collections"
+    assert_stderr --partial "[asians-cloud/linux]"
 
-    rune -0 cscli collections remove crowdsecurity/sshd --force
-    assert_stderr --partial "Removed symlink [crowdsecurity/sshd]"
-    rune -0 cscli collections inspect crowdsecurity/linux -o json
+    rune -0 cscli collections remove asians-cloud/sshd --force
+    assert_stderr --partial "Removed symlink [asians-cloud/sshd]"
+    rune -0 cscli collections inspect asians-cloud/linux -o json
     rune -0 jq -r '.tainted' <(output)
     assert_output "true"
 }
 
 @test "can remove a collection" {
-    rune -0 cscli collections remove crowdsecurity/linux
+    rune -0 cscli collections remove asians-cloud/linux
     assert_stderr --partial "Removed"
     assert_stderr --regexp   ".*for the new configuration to be effective."
-    rune -0 cscli collections inspect crowdsecurity/linux -o human
+    rune -0 cscli collections inspect asians-cloud/linux -o human
     assert_line 'installed: false'
 }
 
 @test "collections delete is an alias for collections remove" {
-    rune -0 cscli collections delete crowdsecurity/linux
+    rune -0 cscli collections delete asians-cloud/linux
     assert_stderr --partial "Removed"
     assert_stderr --regexp   ".*for the new configuration to be effective."
 }
 
 @test "removing a collection that does not exist is noop" {
-    rune -0 cscli collections remove crowdsecurity/apache2
+    rune -0 cscli collections remove asians-cloud/apache2
     refute_stderr --partial "Removed"
     assert_stderr --regexp   ".*for the new configuration to be effective."
 }
 
 @test "can remove a removed collection" {
-    rune -0 cscli collections install crowdsecurity/mysql
-    rune -0 cscli collections remove crowdsecurity/mysql
+    rune -0 cscli collections install asians-cloud/mysql
+    rune -0 cscli collections remove asians-cloud/mysql
     assert_stderr --partial "Removed"
-    rune -0 cscli collections remove crowdsecurity/mysql
+    rune -0 cscli collections remove asians-cloud/mysql
     refute_stderr --partial "Removed"
 }
 
 @test "can remove all collections" {
     # we may have this too, from package installs
-    rune cscli parsers delete crowdsecurity/whitelists
+    rune cscli parsers delete asians-cloud/whitelists
     rune -0 cscli collections remove --all
-    assert_stderr --partial "Removed symlink [crowdsecurity/sshd]"
-    assert_stderr --partial "Removed symlink [crowdsecurity/linux]"
-    rune -0 --separate-stderr cscli hub list -o json
+    assert_stderr --partial "Removed symlink [asians-cloud/sshd]"
+    assert_stderr --partial "Removed symlink [asians-cloud/linux]"
+    rune -0 cscli hub list -o json
     assert_json '{collections:[],parsers:[],postoverflows:[],scenarios:[]}'
     rune -0 cscli collections remove --all
     assert_stderr --partial 'Disabled 0 items'
 }
 
 @test "a taint bubbles up to the top collection" {
-    coll=crowdsecurity/nginx
-    subcoll=crowdsecurity/base-http-scenarios
-    scenario=crowdsecurity/http-crawl-non_statics
+    coll=asians-cloud/nginx
+    subcoll=asians-cloud/base-http-scenarios
+    scenario=asians-cloud/http-crawl-non_statics
 
     # install a collection with dependencies
     rune -0 cscli collections install "$coll"

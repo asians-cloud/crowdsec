@@ -79,7 +79,7 @@ teardown() {
 
     rune -0 ./instance-crowdsec start-pid
     PID="$output"
-    assert_file_exist "$log_old"
+    assert_file_exists "$log_old"
     assert_file_contains "$log_old" "Starting processing data"
 
     logdir2=$(TMPDIR="${BATS_TEST_TMPDIR}" mktemp -u)
@@ -113,7 +113,7 @@ teardown() {
 
     sleep 5
 
-    assert_file_exist "$log_new"
+    assert_file_exists "$log_new"
 
     for ((i=0; i<10; i++)); do
         sleep 1
@@ -151,9 +151,10 @@ teardown() {
     rm -f "$ACQUIS_DIR"
 
     config_set '.common.log_media="stdout"'
-    rune -124 timeout 2s "${CROWDSEC}"
+    rune -1 timeout 2s "${CROWDSEC}"
     # check warning
-    assert_stderr_line --partial "no acquisition file found"
+    assert_stderr --partial "no acquisition file found"
+    assert_stderr --partial "crowdsec init: while loading acquisition config: no datasource enabled"
 }
 
 @test "crowdsec (error if acquisition_path and acquisition_dir are not defined)" {
@@ -166,19 +167,62 @@ teardown() {
     config_set '.crowdsec_service.acquisition_dir=""'
 
     config_set '.common.log_media="stdout"'
-    rune -124 timeout 2s "${CROWDSEC}"
+    rune -1 timeout 2s "${CROWDSEC}"
     # check warning
-    assert_stderr_line --partial "no acquisition_path or acquisition_dir specified"
+    assert_stderr --partial "no acquisition_path or acquisition_dir specified"
+    assert_stderr --partial "crowdsec init: while loading acquisition config: no datasource enabled"
 }
 
 @test "crowdsec (no error if acquisition_path is empty string but acquisition_dir is not empty)" {
     ACQUIS_YAML=$(config_get '.crowdsec_service.acquisition_path')
-    rm -f "$ACQUIS_YAML"
     config_set '.crowdsec_service.acquisition_path=""'
 
     ACQUIS_DIR=$(config_get '.crowdsec_service.acquisition_dir')
     mkdir -p "$ACQUIS_DIR"
-    touch "$ACQUIS_DIR"/foo.yaml
+    mv "$ACQUIS_YAML" "$ACQUIS_DIR"/foo.yaml
 
     rune -124 timeout 2s "${CROWDSEC}"
+
+    # now, if foo.yaml is empty instead, there won't be valid datasources.
+
+    cat /dev/null >"$ACQUIS_DIR"/foo.yaml
+
+    rune -1 timeout 2s "${CROWDSEC}"
+    assert_stderr --partial "crowdsec init: while loading acquisition config: no datasource enabled"
 }
+
+@test "crowdsec (disabled datasources)" {
+    if is_package_testing; then
+        # we can't hide journalctl in package testing
+        # because crowdsec is run from systemd
+        skip "n/a for package testing"
+    fi
+
+    config_set '.common.log_media="stdout"'
+
+    # a datasource cannot run - missing journalctl command
+
+    ACQUIS_DIR=$(config_get '.crowdsec_service.acquisition_dir')
+    mkdir -p "$ACQUIS_DIR"
+    cat >"$ACQUIS_DIR"/foo.yaml <<-EOT
+	source: journalctl
+	journalctl_filter:
+	 - "_SYSTEMD_UNIT=ssh.service"
+	labels:
+	  type: syslog
+	EOT
+
+    rune -124 timeout 2s env PATH='' "${CROWDSEC}"
+    #shellcheck disable=SC2016
+    assert_stderr --partial 'datasource '\''journalctl'\'' is not available: exec: "journalctl": executable file not found in $PATH'
+
+    # if all datasources are disabled, crowdsec should exit
+
+    ACQUIS_YAML=$(config_get '.crowdsec_service.acquisition_path')
+    rm -f "$ACQUIS_YAML"
+    config_set '.crowdsec_service.acquisition_path=""'
+
+    rune -1 timeout 2s env PATH='' "${CROWDSEC}"
+    assert_stderr --partial "crowdsec init: while loading acquisition config: no datasource enabled"
+}
+

@@ -6,7 +6,7 @@ version: 1.0
 detect:
 
   #
-  # crowdsecurity/apache2
+  # asians-cloud/apache2
   #
 
   # XXX some distro is using this path?
@@ -18,7 +18,7 @@ detect:
       - PathExists("/etc/debian_version")
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: file
       filenames:
@@ -32,7 +32,7 @@ detect:
       - PathExists("/etc/redhat-release")
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: file
       filenames:
@@ -42,7 +42,7 @@ detect:
         type: apache2
 
   #
-  # crowdsecurity/asterisk
+  # asians-cloud/asterisk
   #
 
   asterisk-systemd:
@@ -50,7 +50,7 @@ detect:
       - UnitFound("asterisk.service")
     install:
       collections:
-        - crowdsecurity/asterisk
+        - asians-cloud/asterisk
     datasource:
       source: file
       labels:
@@ -59,7 +59,7 @@ detect:
         - /var/log/asterisk/*.log
 
   #
-  # crowdsecurity/caddy
+  # asians-cloud/caddy
   #
 
   caddy-systemd:
@@ -67,7 +67,7 @@ detect:
       - UnitFound("caddy.service")
     install:
       collections:
-        - crowdsecurity/caddy
+        - asians-cloud/caddy
     datasource:
       source: file
       labels:
@@ -76,7 +76,7 @@ detect:
         - /var/log/caddy/*.log
 
   #
-  # crowdsecurity/dovecot
+  # asians-cloud/dovecot
   #
 
   dovecot-systemd:
@@ -84,7 +84,7 @@ detect:
       - UnitFound("dovecot.service")
     install:
       collections:
-        - crowdsecurity/dovecot
+        - asians-cloud/dovecot
     datasource:
       source: file
       labels:
@@ -110,7 +110,7 @@ detect:
         - /var/log/embyserver.txt
 
   #
-  # crowdsecurity/endlessh
+  # asians-cloud/endlessh
   #
 
   endlessh-systemd:
@@ -118,7 +118,7 @@ detect:
       - UnitFound("endlessh.service")
     install:
       collections:
-        - crowdsecurity/endlessh
+        - asians-cloud/endlessh
     datasource:
       source: journalctl
       labels:
@@ -128,7 +128,7 @@ detect:
         - "_SYSTEMD_UNIT=endlessh.service"
 
   #
-  # crowdsecurity/gitea
+  # asians-cloud/gitea
   #
 
   # XXX untested
@@ -138,7 +138,7 @@ detect:
       - UnitFound("gitea.service")
     install:
       collections:
-        - crowdsecurity/gitea
+        - asians-cloud/gitea
     datasource:
       source: file
       labels:
@@ -147,7 +147,7 @@ detect:
         - /var/log/gitea.log
 
   #
-  # crowdsecurity/haproxy
+  # asians-cloud/haproxy
   #
 
   haproxy-systemd:
@@ -155,7 +155,7 @@ detect:
       - UnitFound("haproxy.service")
     install:
       collections:
-        - crowdsecurity/haproxy
+        - asians-cloud/haproxy
     datasource:
       source: file
       labels:
@@ -179,7 +179,7 @@ detect:
     #    type: syslog
 
   #
-  # crowdsecurity/mariadb
+  # asians-cloud/mariadb
   #
 
   mariadb-systemd:
@@ -187,7 +187,7 @@ detect:
       - UnitFound("mariadb.service")
     install:
       collections:
-        - crowdsecurity/mariadb
+        - asians-cloud/mariadb
     datasource:
       source: file
       labels:
@@ -196,7 +196,7 @@ detect:
         - /var/log/mysql/error.log
 
   #
-  # crowdsecurity/mysql
+  # asians-cloud/mysql
   #
 
   mysql-systemd:
@@ -204,7 +204,7 @@ detect:
       - UnitFound("mysql.service")
     install:
       collections:
-        - crowdsecurity/mysql
+        - asians-cloud/mysql
     datasource:
       source: file
       labels:
@@ -213,7 +213,7 @@ detect:
         - /var/log/mysql/error.log
 
   #
-  # crowdsecurity/nginx
+  # asians-cloud/nginx
   #
 
   nginx-systemd:
@@ -221,7 +221,7 @@ detect:
       - UnitFound("nginx.service")
     install:
       collections:
-        - crowdsecurity/nginx
+        - asians-cloud/nginx
     datasource:
       source: file
       labels:
@@ -234,7 +234,7 @@ detect:
       - UnitFound("openresty.service")
     install:
       collections:
-        - crowdsecurity/nginx
+        - asians-cloud/nginx
     datasource:
       source: file
       labels:
@@ -243,7 +243,7 @@ detect:
         - /usr/local/openresty/nginx/logs/*.log
 
   #
-  # crowdsecurity/odoo
+  # asians-cloud/odoo
   #
 
   odoo-systemd:
@@ -251,7 +251,7 @@ detect:
       - UnitFound("odoo.service")
     install:
       collections:
-        - crowdsecurity/odoo
+        - asians-cloud/odoo
     datasource:
       source: file
       labels:
@@ -282,7 +282,7 @@ detect:
         - /var/log/ombi/log-*.txt
 
   #
-  # crowdsecurity/pgsql
+  # asians-cloud/pgsql
   #
 
   pgsql-systemd-deb:
@@ -291,7 +291,7 @@ detect:
       - PathExists("/etc/debian_version")
     install:
       collections:
-        - crowdsecurity/pgsql
+        - asians-cloud/pgsql
     datasource:
       source: file
       labels:
@@ -305,7 +305,7 @@ detect:
       - PathExists("/etc/redhat-release")
     install:
       collections:
-        - crowdsecurity/pgsql
+        - asians-cloud/pgsql
     datasource:
       source: file
       labels:
@@ -314,7 +314,7 @@ detect:
         - /var/lib/pgsql/data/log/*.log
 
   #
-  # crowdsecurity/postfix
+  # asians-cloud/postfix
   #
 
   postfix-systemd:
@@ -322,7 +322,7 @@ detect:
       - UnitFound("postfix.service")
     install:
       collections:
-        - crowdsecurity/postfix
+        - asians-cloud/postfix
     datasource:
       source: file
       labels:
@@ -331,7 +331,7 @@ detect:
         - /var/log/mail.log
 
   #
-  # crowdsecurity/proftpd
+  # asians-cloud/proftpd
   #
 
   proftpd-systemd:
@@ -339,7 +339,7 @@ detect:
       - UnitFound("proftpd.service")
     install:
       collections:
-        - crowdsecurity/proftpd
+        - asians-cloud/proftpd
     datasource:
       source: file
       labels:
@@ -366,7 +366,7 @@ detect:
         - /var/log/pure-ftpd/*.log
 
   #
-  # crowdsecurity/smb
+  # asians-cloud/smb
   #
 
   smb-systemd:
@@ -376,7 +376,7 @@ detect:
       - UnitFound("smbd.service") or UnitFound("smb.service")
     install:
       collections:
-        - crowdsecurity/smb
+        - asians-cloud/smb
     datasource:
       source: file
       labels:
@@ -385,7 +385,7 @@ detect:
         - /var/log/samba*.log
 
   #
-  # crowdsecurity/sshd
+  # asians-cloud/sshd
   #
 
   sshd-systemd:
@@ -395,7 +395,7 @@ detect:
       - UnitFound("ssh.service") or UnitFound("sshd.service") or UnitFound("ssh.socket") or UnitFound("sshd.socket")
     install:
       collections:
-        - crowdsecurity/sshd
+        - asians-cloud/sshd
     datasource:
       source: file
       labels:
@@ -406,7 +406,7 @@ detect:
         - /var/log/secure
 
   #
-  # crowdsecurity/suricata
+  # asians-cloud/suricata
   #
 
   suricata-systemd:
@@ -414,7 +414,7 @@ detect:
       - UnitFound("suricata.service")
     install:
       collections:
-        - crowdsecurity/suricata
+        - asians-cloud/suricata
     datasource:
       source: file
       labels:
@@ -423,7 +423,7 @@ detect:
         - /var/log/suricata/eve.json
 
   #
-  # crowdsecurity/vsftpd
+  # asians-cloud/vsftpd
   #
 
   vsftpd-systemd:
@@ -431,7 +431,7 @@ detect:
       - UnitFound("vsftpd.service")
     install:
       collections:
-        - crowdsecurity/vsftpd
+        - asians-cloud/vsftpd
     datasource:
       source: file
       labels:
@@ -448,7 +448,7 @@ detect:
       - OS.Family == "linux"
     install:
       collections:
-        - crowdsecurity/linux
+        - asians-cloud/linux
     datasource:
       source: file
       labels:
@@ -463,14 +463,14 @@ detect:
       - OS.Family == "freebsd"
     install:
       collections:
-        - crowdsecurity/freebsd
+        - asians-cloud/freebsd
 
   windows:
     when:
       - OS.Family == "windows"
     install:
       collections:
-        - crowdsecurity/windows
+        - asians-cloud/windows
 
   #
   # anti-lockout
@@ -479,4 +479,4 @@ detect:
   whitelists:
     install:
       parsers:
-        - crowdsecurity/whitelists
+        - asians-cloud/whitelists

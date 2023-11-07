@@ -9,7 +9,7 @@
                 "id": 1,
                 "duration": "1h",
                 "origin": "test1",
-                "scenario": "crowdsecurity/http_bf",
+                "scenario": "asians-cloud/http_bf",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -38,7 +38,7 @@
                 "value": "test"
             }
         ],
-        "scenario": "crowdsecurity/http_bf",
+        "scenario": "asians-cloud/http_bf",
         "scenario_hash": "hashtest",
         "scenario_version": "v1",
         "simulated": false,
@@ -66,7 +66,7 @@
                 "id": 2,
                 "duration": "1h",
                 "origin": "test2",
-                "scenario": "crowdsecurity/ssh_bf",
+                "scenario": "asians-cloud/ssh_bf",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -95,7 +95,7 @@
                 "value": "test"
             }
         ],
-        "scenario": "crowdsecurity/ssh_bf",
+        "scenario": "asians-cloud/ssh_bf",
         "scenario_hash": "hashtest",
         "scenario_version": "v1",
         "simulated": false,
@@ -123,7 +123,7 @@
                 "id": 3,
                 "duration": "1h",
                 "origin": "test3",
-                "scenario": "crowdsecurity/ddos",
+                "scenario": "asians-cloud/ddos",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -152,7 +152,7 @@
                 "value": "test"
             }
         ],
-        "scenario": "crowdsecurity/ddos",
+        "scenario": "asians-cloud/ddos",
         "scenario_hash": "hashtest",
         "scenario_version": "v1",
         "simulated": false,

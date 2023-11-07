@@ -11,11 +11,11 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
-	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
-	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+
+	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 type ScenarioAssert struct {
@@ -55,7 +55,6 @@ func (s *ScenarioAssert) AutoGenFromFile(filename string) (string, error) {
 }
 
 func (s *ScenarioAssert) LoadTest(filename string, bucketpour string) error {
-	var err error
 	bucketDump, err := LoadScenarioDump(filename)
 	if err != nil {
 		return fmt.Errorf("loading scenario dump file '%s': %+v", filename, err)
@@ -149,7 +148,7 @@ func (s *ScenarioAssert) RunExpression(expression string) (interface{}, error) {
 	env := map[string]interface{}{"results": *s.TestData}
 
 	if runtimeFilter, err = expr.Compile(expression, exprhelpers.GetExprOptions(env)...); err != nil {
-		return output, err
+		return nil, err
 	}
 	// if debugFilter, err = exprhelpers.NewDebugger(assert, expr.Env(env)); err != nil {
 	// 	log.Warningf("Failed building debugher for %s : %s", assert, err)
@@ -162,7 +161,7 @@ func (s *ScenarioAssert) RunExpression(expression string) (interface{}, error) {
 	if err != nil {
 		log.Warningf("running : %s", expression)
 		log.Warningf("runtime error : %s", err)
-		return output, errors.Wrapf(err, "while running expression %s", expression)
+		return nil, fmt.Errorf("while running expression %s: %w", expression, err)
 	}
 	return output, nil
 }
@@ -206,7 +205,7 @@ func (s *ScenarioAssert) AutoGenScenarioAssert() string {
 		}
 		for evtIndex, evt := range event.Overflow.Alert.Events {
 			for _, meta := range evt.Meta {
-				ret += fmt.Sprintf(`results[%d].Overflow.Alert.Events[%d].GetMeta("%s") == "%s"`+"\n", eventIndex, evtIndex, meta.Key, meta.Value)
+				ret += fmt.Sprintf(`results[%d].Overflow.Alert.Events[%d].GetMeta("%s") == "%s"`+"\n", eventIndex, evtIndex, meta.Key, Escape(meta.Value))
 			}
 		}
 		ret += fmt.Sprintf(`results[%d].Overflow.Alert.GetScenario() == "%s"`+"\n", eventIndex, *event.Overflow.Alert.Scenario)

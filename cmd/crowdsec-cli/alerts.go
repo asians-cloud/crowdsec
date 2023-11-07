@@ -15,16 +15,18 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/go-openapi/strfmt"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	"github.com/asians-cloud/go-cs-lib/version"
+
 	"github.com/asians-cloud/crowdsec/pkg/apiclient"
-	"github.com/asians-cloud/crowdsec/pkg/cwversion"
 	"github.com/asians-cloud/crowdsec/pkg/database"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/types"
+
+	"github.com/asians-cloud/crowdsec/cmd/crowdsec-cli/require"
 )
 
 func DecisionsFromAlert(alert *models.Alert) string {
@@ -124,6 +126,12 @@ func AlertsToTable(alerts *models.GetAlertsResponse, printMachine bool) error {
 		}
 		csvwriter.Flush()
 	} else if csConfig.Cscli.Output == "json" {
+		if *alerts == nil {
+			// avoid returning "null" in json
+			// could be cleaner if we used slice of alerts directly
+			fmt.Println("[]")
+			return nil
+		}
 		x, _ := json.MarshalIndent(alerts, "", " ")
 		fmt.Printf("%s", string(x))
 	} else if csConfig.Cscli.Output == "human" {
@@ -153,7 +161,6 @@ var alertTemplate = `
  - UUID         : {{.UUID}}
 
 `
-
 
 func DisplayOneAlert(alert *models.Alert, withDetail bool) error {
 	if csConfig.Cscli.Output == "human" {
@@ -207,25 +214,26 @@ func NewAlertsCmd() *cobra.Command {
 		Short:             "Manage alerts",
 		Args:              cobra.MinimumNArgs(1),
 		DisableAutoGenTag: true,
+		Aliases:           []string{"alert"},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			if err := csConfig.LoadAPIClient(); err != nil {
-				return errors.Wrap(err, "loading api client")
+				return fmt.Errorf("loading api client: %w", err)
 			}
 			apiURL, err := url.Parse(csConfig.API.Client.Credentials.URL)
 			if err != nil {
-				return errors.Wrapf(err, "parsing api url %s", apiURL)
+				return fmt.Errorf("parsing api url %s: %w", apiURL, err)
 			}
 			Client, err = apiclient.NewClient(&apiclient.Config{
 				MachineID:     csConfig.API.Client.Credentials.Login,
 				Password:      strfmt.Password(csConfig.API.Client.Credentials.Password),
-				UserAgent:     fmt.Sprintf("crowdsec/%s", cwversion.VersionStr()),
+				UserAgent:     fmt.Sprintf("crowdsec/%s", version.String()),
 				URL:           apiURL,
 				VersionPrefix: "v1",
 			})
 
 			if err != nil {
-				return errors.Wrap(err, "new api client")
+				return fmt.Errorf("new api client: %w", err)
 			}
 			return nil
 		},
@@ -261,7 +269,7 @@ func NewAlertsListCmd() *cobra.Command {
 		Example: `cscli alerts list
 cscli alerts list --ip 1.2.3.4
 cscli alerts list --range 1.2.3.0/24
-cscli alerts list -s crowdsecurity/ssh-bf
+cscli alerts list -s asians-cloud/ssh-bf
 cscli alerts list --type ban`,
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -350,7 +358,7 @@ cscli alerts list --type ban`,
 	cmdAlertsList.Flags().StringVar(alertListFilter.Until, "until", "", "restrict to alerts older than until (ie. 4h, 30d)")
 	cmdAlertsList.Flags().StringVar(alertListFilter.Since, "since", "", "restrict to alerts newer than since (ie. 4h, 30d)")
 	cmdAlertsList.Flags().StringVarP(alertListFilter.IPEquals, "ip", "i", "", "restrict to alerts from this source ip (shorthand for --scope ip --value <IP>)")
-	cmdAlertsList.Flags().StringVarP(alertListFilter.ScenarioEquals, "scenario", "s", "", "the scenario (ie. crowdsecurity/ssh-bf)")
+	cmdAlertsList.Flags().StringVarP(alertListFilter.ScenarioEquals, "scenario", "s", "", "the scenario (ie. asians-cloud/ssh-bf)")
 	cmdAlertsList.Flags().StringVarP(alertListFilter.RangeEquals, "range", "r", "", "restrict to alerts from this range (shorthand for --scope range --value <RANGE/X>)")
 	cmdAlertsList.Flags().StringVar(alertListFilter.TypeEquals, "type", "", "restrict to alerts with given decision type (ie. ban, captcha)")
 	cmdAlertsList.Flags().StringVar(alertListFilter.ScopeEquals, "scope", "", "restrict to alerts of this scope (ie. ip,range)")
@@ -381,7 +389,7 @@ func NewAlertsDeleteCmd() *cobra.Command {
 /!\ This command can be use only on the same machine than the local API.`,
 		Example: `cscli alerts delete --ip 1.2.3.4
 cscli alerts delete --range 1.2.3.0/24
-cscli alerts delete -s crowdsecurity/ssh-bf"`,
+cscli alerts delete -s asians-cloud/ssh-bf"`,
 		DisableAutoGenTag: true,
 		Aliases:           []string{"remove"},
 		Args:              cobra.ExactArgs(0),
@@ -456,7 +464,7 @@ cscli alerts delete -s crowdsecurity/ssh-bf"`,
 	cmdAlertsDelete.Flags().SortFlags = false
 	cmdAlertsDelete.Flags().StringVar(alertDeleteFilter.ScopeEquals, "scope", "", "the scope (ie. ip,range)")
 	cmdAlertsDelete.Flags().StringVarP(alertDeleteFilter.ValueEquals, "value", "v", "", "the value to match for in the specified scope")
-	cmdAlertsDelete.Flags().StringVarP(alertDeleteFilter.ScenarioEquals, "scenario", "s", "", "the scenario (ie. crowdsecurity/ssh-bf)")
+	cmdAlertsDelete.Flags().StringVarP(alertDeleteFilter.ScenarioEquals, "scenario", "s", "", "the scenario (ie. asians-cloud/ssh-bf)")
 	cmdAlertsDelete.Flags().StringVarP(alertDeleteFilter.IPEquals, "ip", "i", "", "Source ip (shorthand for --scope ip --value <IP>)")
 	cmdAlertsDelete.Flags().StringVarP(alertDeleteFilter.RangeEquals, "range", "r", "", "Range source ip (shorthand for --scope range --value <RANGE>)")
 	cmdAlertsDelete.Flags().StringVar(&delAlertByID, "id", "", "alert ID")
@@ -526,8 +534,8 @@ func NewAlertsFlushCmd() *cobra.Command {
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			if err := csConfig.LoadAPIServer(); err != nil || csConfig.DisableAPI {
-				return fmt.Errorf("local API is disabled, please run this command on the local API machine")
+			if err := require.LAPI(csConfig); err != nil {
+				return err
 			}
 			dbClient, err = database.NewClient(csConfig.DbConfig)
 			if err != nil {

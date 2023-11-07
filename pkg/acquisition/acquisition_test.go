@@ -13,9 +13,10 @@ import (
 	tomb "gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
 	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
@@ -166,7 +167,7 @@ log_level: debug
 source: mock_cant_run
 wowo: ajsajasjas
 `,
-			ExpectedError: "datasource mock_cant_run cannot be run: can't run bro",
+			ExpectedError: "datasource 'mock_cant_run' is not available: can't run bro",
 		},
 	}
 

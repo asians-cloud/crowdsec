@@ -6,12 +6,13 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
 	"github.com/asians-cloud/crowdsec/pkg/models"
 	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 type Runtime struct {
@@ -47,10 +48,10 @@ func NewProfile(profilesCfg []*csconfig.ProfileCfg) ([]*Runtime, error) {
 		runtime.DebugFilters = make([]*exprhelpers.ExprDebugger, len(profile.Filters))
 		runtime.Cfg = profile
 		if runtime.Cfg.OnSuccess != "" && runtime.Cfg.OnSuccess != "continue" && runtime.Cfg.OnSuccess != "break" {
-			return []*Runtime{}, errors.Wrapf(err, "invalid 'on_success' for '%s' : %s", profile.Name, runtime.Cfg.OnSuccess)
+			return []*Runtime{}, fmt.Errorf("invalid 'on_success' for '%s': %s", profile.Name, runtime.Cfg.OnSuccess)
 		}
 		if runtime.Cfg.OnFailure != "" && runtime.Cfg.OnFailure != "continue" && runtime.Cfg.OnFailure != "break" && runtime.Cfg.OnFailure != "apply" {
-			return []*Runtime{}, errors.Wrapf(err, "invalid 'on_failure' for '%s' : %s", profile.Name, runtime.Cfg.OnFailure)
+			return []*Runtime{}, fmt.Errorf("invalid 'on_failure' for '%s' : %s", profile.Name, runtime.Cfg.OnFailure)
 		}
 		for fIdx, filter := range profile.Filters {
 
@@ -85,8 +86,15 @@ func NewProfile(profilesCfg []*csconfig.ProfileCfg) ([]*Runtime, error) {
 
 		for _, decision := range profile.Decisions {
 			if runtime.RuntimeDurationExpr == nil {
-				if _, err := time.ParseDuration(*decision.Duration); err != nil {
-					return []*Runtime{}, errors.Wrapf(err, "error parsing duration '%s' of %s", *decision.Duration, profile.Name)
+				var duration string
+				if decision.Duration != nil {
+					duration = *decision.Duration
+				} else {
+					runtime.Logger.Warningf("No duration specified for %s, using default duration %s", profile.Name, defaultDuration)
+					duration = defaultDuration
+				}
+				if _, err := time.ParseDuration(duration); err != nil {
+					return []*Runtime{}, errors.Wrapf(err, "error parsing duration '%s' of %s", duration, profile.Name)
 				}
 			}
 		}
@@ -101,7 +109,7 @@ func (Profile *Runtime) GenerateDecisionFromProfile(Alert *models.Alert) ([]*mod
 
 	for _, refDecision := range Profile.Cfg.Decisions {
 		decision := models.Decision{}
-		/*the reference decision from profile is in sumulated mode */
+		/*the reference decision from profile is in simulated mode */
 		if refDecision.Simulated != nil && *refDecision.Simulated {
 			decision.Simulated = new(bool)
 			*decision.Simulated = true
@@ -167,7 +175,7 @@ func (Profile *Runtime) EvaluateProfile(Alert *models.Alert) ([]*models.Decision
 	for eIdx, expression := range Profile.RuntimeFilters {
 		output, err := expr.Run(expression, map[string]interface{}{"Alert": Alert})
 		if err != nil {
-			Profile.Logger.Warningf("failed to run whitelist expr : %v", err)
+			Profile.Logger.Warningf("failed to run profile expr for %s : %v", Profile.Cfg.Name, err)
 			return nil, matched, errors.Wrapf(err, "while running expression %s", Profile.Cfg.Filters[eIdx])
 		}
 		switch out := output.(type) {

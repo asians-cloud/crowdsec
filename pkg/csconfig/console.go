@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/asians-cloud/crowdsec/pkg/fflag"
-	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+
+	"github.com/asians-cloud/go-cs-lib/ptr"
+
+	"github.com/asians-cloud/crowdsec/pkg/fflag"
 )
 
 const (
@@ -35,11 +36,11 @@ func (c *LocalApiServerCfg) LoadConsoleConfig() error {
 	c.ConsoleConfig = &ConsoleConfig{}
 	if _, err := os.Stat(c.ConsoleConfigPath); err != nil && os.IsNotExist(err) {
 		log.Debugf("no console configuration to load")
-		c.ConsoleConfig.ShareCustomScenarios = types.BoolPtr(true)
-		c.ConsoleConfig.ShareTaintedScenarios = types.BoolPtr(true)
-		c.ConsoleConfig.ShareManualDecisions = types.BoolPtr(false)
-		c.ConsoleConfig.ConsoleManagement = types.BoolPtr(false)
-		c.ConsoleConfig.ShareContext = types.BoolPtr(false)
+		c.ConsoleConfig.ShareCustomScenarios = ptr.Of(true)
+		c.ConsoleConfig.ShareTaintedScenarios = ptr.Of(true)
+		c.ConsoleConfig.ShareManualDecisions = ptr.Of(false)
+		c.ConsoleConfig.ConsoleManagement = ptr.Of(false)
+		c.ConsoleConfig.ShareContext = ptr.Of(false)
 		return nil
 	}
 
@@ -54,50 +55,30 @@ func (c *LocalApiServerCfg) LoadConsoleConfig() error {
 
 	if c.ConsoleConfig.ShareCustomScenarios == nil {
 		log.Debugf("no share_custom scenarios found, setting to true")
-		c.ConsoleConfig.ShareCustomScenarios = types.BoolPtr(true)
+		c.ConsoleConfig.ShareCustomScenarios = ptr.Of(true)
 	}
 	if c.ConsoleConfig.ShareTaintedScenarios == nil {
 		log.Debugf("no share_tainted scenarios found, setting to true")
-		c.ConsoleConfig.ShareTaintedScenarios = types.BoolPtr(true)
+		c.ConsoleConfig.ShareTaintedScenarios = ptr.Of(true)
 	}
 	if c.ConsoleConfig.ShareManualDecisions == nil {
 		log.Debugf("no share_manual scenarios found, setting to false")
-		c.ConsoleConfig.ShareManualDecisions = types.BoolPtr(false)
+		c.ConsoleConfig.ShareManualDecisions = ptr.Of(false)
 	}
 
 	if !fflag.PapiClient.IsEnabled() {
-		c.ConsoleConfig.ConsoleManagement = types.BoolPtr(false)
+		c.ConsoleConfig.ConsoleManagement = ptr.Of(false)
 	} else if c.ConsoleConfig.ConsoleManagement == nil {
 		log.Debugf("no console_management found, setting to false")
-		c.ConsoleConfig.ConsoleManagement = types.BoolPtr(false)
+		c.ConsoleConfig.ConsoleManagement = ptr.Of(false)
 	}
 
 	if c.ConsoleConfig.ShareContext == nil {
 		log.Debugf("no 'context' found, setting to false")
-		c.ConsoleConfig.ShareContext = types.BoolPtr(false)
+		c.ConsoleConfig.ShareContext = ptr.Of(false)
 	}
 
 	log.Debugf("Console configuration '%s' loaded successfully", c.ConsoleConfigPath)
-
-	return nil
-}
-
-func (c *LocalApiServerCfg) DumpConsoleConfig() error {
-	var out []byte
-	var err error
-
-	if out, err = yaml.Marshal(c.ConsoleConfig); err != nil {
-		return errors.Wrapf(err, "while marshaling ConsoleConfig (for %s)", c.ConsoleConfigPath)
-	}
-	if c.ConsoleConfigPath == "" {
-		c.ConsoleConfigPath = DefaultConsoleConfigFilePath
-		log.Debugf("Empty console_path, defaulting to %s", c.ConsoleConfigPath)
-
-	}
-
-	if err := os.WriteFile(c.ConsoleConfigPath, out, 0600); err != nil {
-		return errors.Wrapf(err, "while dumping console config to %s", c.ConsoleConfigPath)
-	}
 
 	return nil
 }

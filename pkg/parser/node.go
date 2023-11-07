@@ -1,24 +1,23 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
-	"net"
 	"strings"
 	"time"
 
 	"github.com/antonmedv/expr"
-	"github.com/crowdsecurity/grokky"
-	"github.com/pkg/errors"
+	"github.com/antonmedv/expr/vm"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/antonmedv/expr/vm"
+	"github.com/asians-cloud/grokky"
+
 	"github.com/asians-cloud/crowdsec/pkg/cache"
 	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
 	"github.com/asians-cloud/crowdsec/pkg/types"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
-	log "github.com/sirupsen/logrus"
 )
 
 type Node struct {
@@ -56,11 +55,11 @@ type Node struct {
 	SubGroks yaml.MapSlice `yaml:"pattern_syntax,omitempty"`
 
 	//Holds a grok pattern
-	Grok types.GrokPattern `yaml:"grok,omitempty"`
+	Grok GrokPattern `yaml:"grok,omitempty"`
 	//Statics can be present in any type of node and is executed last
-	Statics []types.ExtraField `yaml:"statics,omitempty"`
+	Statics []ExtraField `yaml:"statics,omitempty"`
 	//Stash allows to capture data from the log line and store it in an accessible cache
-	Stash []types.DataCapture `yaml:"stash,omitempty"`
+	Stash []DataCapture `yaml:"stash,omitempty"`
 	//Whitelists
 	Whitelist Whitelist           `yaml:"whitelist,omitempty"`
 	Data      []*types.DataSource `yaml:"data,omitempty"`
@@ -172,78 +171,24 @@ func (n *Node) process(p *types.Event, ctx UnixParserCtx, expressionEnv map[stri
 	if n.Name != "" {
 		NodesHits.With(prometheus.Labels{"source": p.Line.Src, "type": p.Line.Module, "name": n.Name}).Inc()
 	}
-	isWhitelisted := false
-	hasWhitelist := false
-	var srcs []net.IP
-	/*overflow and log don't hold the source ip in the same field, should be changed */
-	/* perform whitelist checks for ips, cidr accordingly */
-	/* TODO move whitelist elsewhere */
-	if p.Type == types.LOG {
-		if _, ok := p.Meta["source_ip"]; ok {
-			srcs = append(srcs, net.ParseIP(p.Meta["source_ip"]))
-		}
-	} else if p.Type == types.OVFLW {
-		for k := range p.Overflow.Sources {
-			srcs = append(srcs, net.ParseIP(k))
-		}
+	exprErr := error(nil)
+	isWhitelisted := n.CheckIPsWL(p.ParseIPSources())
+	if !isWhitelisted {
+		isWhitelisted, exprErr = n.CheckExprWL(cachedExprEnv)
 	}
-	for _, src := range srcs {
-		if isWhitelisted {
-			break
-		}
-		for _, v := range n.Whitelist.B_Ips {
-			if v.Equal(src) {
-				clog.Debugf("Event from [%s] is whitelisted by IP (%s), reason [%s]", src, v, n.Whitelist.Reason)
-				isWhitelisted = true
-			} else {
-				clog.Tracef("whitelist: %s is not eq [%s]", src, v)
-			}
-			hasWhitelist = true
-		}
-		for _, v := range n.Whitelist.B_Cidrs {
-			if v.Contains(src) {
-				clog.Debugf("Event from [%s] is whitelisted by CIDR (%s), reason [%s]", src, v, n.Whitelist.Reason)
-				isWhitelisted = true
-			} else {
-				clog.Tracef("whitelist: %s not in [%s]", src, v)
-			}
-			hasWhitelist = true
-		}
+	if exprErr != nil {
+		// Previous code returned nil if there was an error, so we keep this behavior
+		return false, nil //nolint:nilerr
 	}
 
-	if isWhitelisted {
+	if isWhitelisted && !p.Whitelisted {
 		p.Whitelisted = true
-	}
-	/* run whitelist expression tests anyway */
-	for eidx, e := range n.Whitelist.B_Exprs {
-		output, err := expr.Run(e.Filter, cachedExprEnv)
-		if err != nil {
-			clog.Warningf("failed to run whitelist expr : %v", err)
-			clog.Debug("Event leaving node : ko")
-			return false, nil
-		}
-		switch out := output.(type) {
-		case bool:
-			if n.Debug {
-				e.ExprDebugger.Run(clog, out, cachedExprEnv)
-			}
-			if out {
-				clog.Debugf("Event is whitelisted by expr, reason [%s]", n.Whitelist.Reason)
-				p.Whitelisted = true
-				isWhitelisted = true
-			}
-			hasWhitelist = true
-		default:
-			log.Errorf("unexpected type %t (%v) while running '%s'", output, output, n.Whitelist.Exprs[eidx])
-		}
-	}
-	if isWhitelisted {
 		p.WhitelistReason = n.Whitelist.Reason
 		/*huglily wipe the ban order if the event is whitelisted and it's an overflow */
 		if p.Type == types.OVFLW { /*don't do this at home kids */
 			ips := []string{}
-			for _, src := range srcs {
-				ips = append(ips, src.String())
+			for k := range p.Overflow.Sources {
+				ips = append(ips, k)
 			}
 			clog.Infof("Ban for %s whitelisted, reason [%s]", strings.Join(ips, ","), n.Whitelist.Reason)
 			p.Overflow.Whitelisted = true
@@ -356,29 +301,27 @@ func (n *Node) process(p *types.Event, ctx UnixParserCtx, expressionEnv map[stri
 	}
 
 	//Iterate on leafs
-	if len(n.LeavesNodes) > 0 {
-		for _, leaf := range n.LeavesNodes {
-			ret, err := leaf.process(p, ctx, cachedExprEnv)
-			if err != nil {
-				clog.Tracef("\tNode (%s) failed : %v", leaf.rn, err)
-				clog.Debugf("Event leaving node : ko")
-				return false, err
+	for _, leaf := range n.LeavesNodes {
+		ret, err := leaf.process(p, ctx, cachedExprEnv)
+		if err != nil {
+			clog.Tracef("\tNode (%s) failed : %v", leaf.rn, err)
+			clog.Debugf("Event leaving node : ko")
+			return false, err
+		}
+		clog.Tracef("\tsub-node (%s) ret : %v (strategy:%s)", leaf.rn, ret, n.OnSuccess)
+		if ret {
+			NodeState = true
+			/* if child is successful, stop processing */
+			if n.OnSuccess == "next_stage" {
+				clog.Debugf("child is success, OnSuccess=next_stage, skip")
+				break
 			}
-			clog.Tracef("\tsub-node (%s) ret : %v (strategy:%s)", leaf.rn, ret, n.OnSuccess)
-			if ret {
-				NodeState = true
-				/* if child is successful, stop processing */
-				if n.OnSuccess == "next_stage" {
-					clog.Debugf("child is success, OnSuccess=next_stage, skip")
-					break
-				}
-			} else if !NodeHasOKGrok {
-				/*
-					If the parent node has a successful grok pattern, it's state will stay successful even if one or more chil fails.
-					If the parent node is a skeleton node (no grok pattern), then at least one child must be successful for it to be a success.
-				*/
-				NodeState = false
-			}
+		} else if !NodeHasOKGrok {
+			/*
+				If the parent node has a successful grok pattern, it's state will stay successful even if one or more chil fails.
+				If the parent node is a skeleton node (no grok pattern), then at least one child must be successful for it to be a success.
+			*/
+			NodeState = false
 		}
 	}
 	/*todo : check if a node made the state change ?*/
@@ -398,10 +341,12 @@ func (n *Node) process(p *types.Event, ctx UnixParserCtx, expressionEnv map[stri
 	if n.Name != "" {
 		NodesHitsOk.With(prometheus.Labels{"source": p.Line.Src, "type": p.Line.Module, "name": n.Name}).Inc()
 	}
+
 	/*
-		Please kill me. this is to apply statics when the node *has* whitelists that successfully matched the node.
+		This is to apply statics when the node either was whitelisted, or is not a whitelist (it has no expr/ips wl)
+		It is overconvoluted and should be simplified
 	*/
-	if hasWhitelist && isWhitelisted && len(n.Statics) > 0 || len(n.Statics) > 0 && !hasWhitelist {
+	if len(n.Statics) > 0 && (isWhitelisted || !n.ContainsWLs()) {
 		clog.Debugf("+ Processing %d statics", len(n.Statics))
 		// if all else is good in whitelist, process node's statics
 		err := n.ProcessStatics(n.Statics, p)
@@ -449,8 +394,8 @@ func (n *Node) compile(pctx *UnixParserCtx, ectx EnricherCtx) error {
 	/* if the node has debugging enabled, create a specific logger with debug
 	that will be used only for processing this node ;) */
 	if n.Debug {
-		var clog = logrus.New()
-		if err := types.ConfigureLogger(clog); err != nil {
+		var clog = log.New()
+		if err = types.ConfigureLogger(clog); err != nil {
 			log.Fatalf("While creating bucket-specific logger : %s", err)
 		}
 		clog.SetLevel(log.DebugLevel)
@@ -489,7 +434,7 @@ func (n *Node) compile(pctx *UnixParserCtx, ectx EnricherCtx) error {
 	/* handle pattern_syntax and groks */
 	for _, pattern := range n.SubGroks {
 		n.Logger.Tracef("Adding subpattern '%s' : '%s'", pattern.Key, pattern.Value)
-		if err := pctx.Grok.Add(pattern.Key.(string), pattern.Value.(string)); err != nil {
+		if err = pctx.Grok.Add(pattern.Key.(string), pattern.Value.(string)); err != nil {
 			if errors.Is(err, grokky.ErrAlreadyExist) {
 				n.Logger.Warningf("grok '%s' already registred", pattern.Key)
 				continue
@@ -532,20 +477,18 @@ func (n *Node) compile(pctx *UnixParserCtx, ectx EnricherCtx) error {
 		n.Grok.RunTimeValue, err = expr.Compile(n.Grok.ExpValue,
 			exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
 		if err != nil {
-			return errors.Wrap(err, "while compiling grok's expression")
+			return fmt.Errorf("while compiling grok's expression: %w", err)
 		}
 	}
 
 	/* load grok statics */
-	if len(n.Grok.Statics) > 0 {
-		//compile expr statics if present
-		for idx := range n.Grok.Statics {
-			if n.Grok.Statics[idx].ExpValue != "" {
-				n.Grok.Statics[idx].RunTimeValue, err = expr.Compile(n.Grok.Statics[idx].ExpValue,
-					exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
-				if err != nil {
-					return err
-				}
+	//compile expr statics if present
+	for idx := range n.Grok.Statics {
+		if n.Grok.Statics[idx].ExpValue != "" {
+			n.Grok.Statics[idx].RunTimeValue, err = expr.Compile(n.Grok.Statics[idx].ExpValue,
+				exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
+			if err != nil {
+				return err
 			}
 		}
 		valid = true
@@ -556,54 +499,53 @@ func (n *Node) compile(pctx *UnixParserCtx, ectx EnricherCtx) error {
 		n.Stash[i].ValueExpression, err = expr.Compile(stash.Value,
 			exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
 		if err != nil {
-			return errors.Wrap(err, "while compiling stash value expression")
+			return fmt.Errorf("while compiling stash value expression: %w", err)
 		}
 
 		n.Stash[i].KeyExpression, err = expr.Compile(stash.Key,
 			exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
 		if err != nil {
-			return errors.Wrap(err, "while compiling stash key expression")
+			return fmt.Errorf("while compiling stash key expression: %w", err)
 		}
 
 		n.Stash[i].TTLVal, err = time.ParseDuration(stash.TTL)
 		if err != nil {
-			return errors.Wrap(err, "while parsing stash ttl")
+			return fmt.Errorf("while parsing stash ttl: %w", err)
 		}
 
 		logLvl := n.Logger.Logger.GetLevel()
 		//init the cache, does it make sense to create it here just to be sure everything is fine ?
-		if err := cache.CacheInit(cache.CacheCfg{
+		if err = cache.CacheInit(cache.CacheCfg{
 			Size:     n.Stash[i].MaxMapSize,
 			TTL:      n.Stash[i].TTLVal,
 			Name:     n.Stash[i].Name,
 			Strategy: n.Stash[i].Strategy,
 			LogLevel: &logLvl,
 		}); err != nil {
-			return errors.Wrap(err, "while initializing cache")
+			return fmt.Errorf("while initializing cache: %w", err)
 		}
 	}
 
 	/* compile leafs if present */
-	if len(n.LeavesNodes) > 0 {
-		for idx := range n.LeavesNodes {
-			if n.LeavesNodes[idx].Name == "" {
-				n.LeavesNodes[idx].Name = fmt.Sprintf("child-%s", n.Name)
-			}
-			/*propagate debug/stats to child nodes*/
-			if !n.LeavesNodes[idx].Debug && n.Debug {
-				n.LeavesNodes[idx].Debug = true
-			}
-			if !n.LeavesNodes[idx].Profiling && n.Profiling {
-				n.LeavesNodes[idx].Profiling = true
-			}
-			n.LeavesNodes[idx].Stage = n.Stage
-			err = n.LeavesNodes[idx].compile(pctx, ectx)
-			if err != nil {
-				return err
-			}
+	for idx := range n.LeavesNodes {
+		if n.LeavesNodes[idx].Name == "" {
+			n.LeavesNodes[idx].Name = fmt.Sprintf("child-%s", n.Name)
+		}
+		/*propagate debug/stats to child nodes*/
+		if !n.LeavesNodes[idx].Debug && n.Debug {
+			n.LeavesNodes[idx].Debug = true
+		}
+		if !n.LeavesNodes[idx].Profiling && n.Profiling {
+			n.LeavesNodes[idx].Profiling = true
+		}
+		n.LeavesNodes[idx].Stage = n.Stage
+		err = n.LeavesNodes[idx].compile(pctx, ectx)
+		if err != nil {
+			return err
 		}
 		valid = true
 	}
+
 	/* load statics if present */
 	for idx := range n.Statics {
 		if n.Statics[idx].ExpValue != "" {
@@ -617,34 +559,11 @@ func (n *Node) compile(pctx *UnixParserCtx, ectx EnricherCtx) error {
 	}
 
 	/* compile whitelists if present */
-	for _, v := range n.Whitelist.Ips {
-		n.Whitelist.B_Ips = append(n.Whitelist.B_Ips, net.ParseIP(v))
-		n.Logger.Debugf("adding ip %s to whitelists", net.ParseIP(v))
-		valid = true
+	whitelistValid, err := n.CompileWLs()
+	if err != nil {
+		return err
 	}
-	for _, v := range n.Whitelist.Cidrs {
-		_, tnet, err := net.ParseCIDR(v)
-		if err != nil {
-			n.Logger.Fatalf("Unable to parse cidr whitelist '%s' : %v.", v, err)
-		}
-		n.Whitelist.B_Cidrs = append(n.Whitelist.B_Cidrs, tnet)
-		n.Logger.Debugf("adding cidr %s to whitelists", tnet)
-		valid = true
-	}
-	for _, filter := range n.Whitelist.Exprs {
-		expression := &ExprWhitelist{}
-		expression.Filter, err = expr.Compile(filter, exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
-		if err != nil {
-			n.Logger.Fatalf("Unable to compile whitelist expression '%s' : %v.", filter, err)
-		}
-		expression.ExprDebugger, err = exprhelpers.NewDebugger(filter, exprhelpers.GetExprOptions(map[string]interface{}{"evt": &types.Event{}})...)
-		if err != nil {
-			log.Errorf("unable to build debug filter for '%s' : %s", filter, err)
-		}
-		n.Whitelist.B_Exprs = append(n.Whitelist.B_Exprs, expression)
-		n.Logger.Debugf("adding expression %s to whitelists", filter)
-		valid = true
-	}
+	valid = valid || whitelistValid
 
 	if !valid {
 		/* node is empty, error force return */
@@ -656,5 +575,6 @@ func (n *Node) compile(pctx *UnixParserCtx, ectx EnricherCtx) error {
 	if err := n.validate(pctx, ectx); err != nil {
 		return err
 	}
+
 	return nil
 }

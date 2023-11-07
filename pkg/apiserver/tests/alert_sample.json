@@ -9,7 +9,7 @@
                 "id": 1,
                 "duration": "1h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -18,7 +18,7 @@
                 "id": 2,
                 "duration": "2h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -27,7 +27,7 @@
                 "id": 3,
                 "duration": "3h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -56,7 +56,7 @@
                 "value": "test"
             }
         ],
-        "scenario": "crowdsecurity/test",
+        "scenario": "asians-cloud/test",
         "scenario_hash": "hashtest",
         "scenario_version": "v1",
         "simulated": false,

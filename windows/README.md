@@ -35,7 +35,7 @@ After installing CrowdSec, the binaries are in `C:\Program Files\CrowdSec\`:
 ```powershell
 PS C:\Users\johndoe\src\crowdsec> & 'C:\Program Files\CrowdSec\cscli.exe' metrics
 [...]
-PS C:\Users\johndoe\src\crowdsec> & 'C:\Program Files\CrowdSec\cscli.exe' parsers install crowdsecurity/syslog-logs
+PS C:\Users\johndoe\src\crowdsec> & 'C:\Program Files\CrowdSec\cscli.exe' parsers install asians-cloud/syslog-logs
 [...]
 ```
 

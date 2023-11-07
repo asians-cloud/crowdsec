@@ -12,13 +12,12 @@ import (
 
 	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/tomb.v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/crowdsecurity/dlog"
+	"github.com/asians-cloud/dlog"
 
 	"github.com/asians-cloud/crowdsec/pkg/acquisition/configuration"
 	"github.com/asians-cloud/crowdsec/pkg/types"
@@ -80,7 +79,7 @@ func (d *DockerSource) UnmarshalConfig(yamlConfig []byte) error {
 
 	err := yaml.UnmarshalStrict(yamlConfig, &d.Config)
 	if err != nil {
-		return errors.Wrap(err, "Cannot parse DockerAcquisition configuration")
+		return fmt.Errorf("while parsing DockerAcquisition configuration: %w", err)
 	}
 
 	if d.logger != nil {
@@ -214,7 +213,7 @@ func (d *DockerSource) ConfigureByDSN(dsn string, labels map[string]string, logg
 
 	parameters, err := url.ParseQuery(args[1])
 	if err != nil {
-		return errors.Wrapf(err, "while parsing parameters %s: %s", dsn, err)
+		return fmt.Errorf("while parsing parameters %s: %w", dsn, err)
 	}
 
 	for k, v := range parameters {
@@ -225,7 +224,7 @@ func (d *DockerSource) ConfigureByDSN(dsn string, labels map[string]string, logg
 			}
 			lvl, err := log.ParseLevel(v[0])
 			if err != nil {
-				return errors.Wrapf(err, "unknown level %s", v[0])
+				return fmt.Errorf("unknown level %s: %w", v[0], err)
 			}
 			d.logger.Logger.SetLevel(lvl)
 		case "until":
@@ -393,14 +392,14 @@ func (d *DockerSource) EvalContainer(container dockerTypes.Container) (*Containe
 	}
 
 	for _, cont := range d.compiledContainerID {
-		if matched := cont.Match([]byte(container.ID)); matched {
+		if matched := cont.MatchString(container.ID); matched {
 			return &ContainerConfig{ID: container.ID, Name: container.Names[0], Labels: d.Config.Labels, Tty: d.getContainerTTY(container.ID)}, true
 		}
 	}
 
 	for _, cont := range d.compiledContainerName {
 		for _, name := range container.Names {
-			if matched := cont.Match([]byte(name)); matched {
+			if matched := cont.MatchString(name); matched {
 				return &ContainerConfig{ID: container.ID, Name: name, Labels: d.Config.Labels, Tty: d.getContainerTTY(container.ID)}, true
 			}
 		}

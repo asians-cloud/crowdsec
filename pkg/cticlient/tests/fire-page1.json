@@ -48,25 +48,25 @@
       },
       "attack_details": [
         {
-          "name": "crowdsecurity/http-wordpress_user-enum",
+          "name": "asians-cloud/http-wordpress_user-enum",
           "label": "WordPress Bruteforce",
           "description": "Detect wordpress brute force",
           "references": []
         },
         {
-          "name": "crowdsecurity/http-probing",
+          "name": "asians-cloud/http-probing",
           "label": "HTTP Scanner",
           "description": "Detect site scanning/probing from a single ip",
           "references": []
         },
         {
-          "name": "crowdsecurity/http-bf-wordpress_bf_xmlrpc",
+          "name": "asians-cloud/http-bf-wordpress_bf_xmlrpc",
           "label": "WordPress XMLRPC Bruteforce",
           "description": "Detect wordpress brute force on xmlrpc",
           "references": []
         },
         {
-          "name": "crowdsecurity/http-bad-user-agent",
+          "name": "asians-cloud/http-bad-user-agent",
           "label": "Known Bad User-Agent",
           "description": "Detect bad user-agents",
           "references": []
@@ -161,19 +161,19 @@
       },
       "attack_details": [
         {
-          "name": "crowdsecurity/jira_cve-2021-26086",
+          "name": "asians-cloud/jira_cve-2021-26086",
           "label": "Atlassian Jira CVE-2021-26086",
           "description": "Detect Atlassian Jira CVE-2021-26086 exploitation attemps",
           "references": []
         },
         {
-          "name": "crowdsecurity/http-probing",
+          "name": "asians-cloud/http-probing",
           "label": "HTTP Scanner",
           "description": "Detect site scanning/probing from a single ip",
           "references": []
         },
         {
-          "name": "crowdsecurity/CVE-2022-40684",
+          "name": "asians-cloud/CVE-2022-40684",
           "label": "CVE-2022-40684",
           "description": "Detect CVE-2022-40684 exploitation attempts (fortinet)",
           "references": [
@@ -181,7 +181,7 @@
           ]
         },
         {
-          "name": "crowdsecurity/http-crawl-non_statics",
+          "name": "asians-cloud/http-crawl-non_statics",
           "label": "HTTP Crawler",
           "description": "Detect aggressive crawl from single ip",
           "references": []
@@ -272,7 +272,7 @@
       },
       "attack_details": [
         {
-          "name": "crowdsecurity/smb-bf",
+          "name": "asians-cloud/smb-bf",
           "label": "Samba Bruteforce",
           "description": "Detect smb brute force",
           "references": []

@@ -1,9 +1,10 @@
 package database
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
 	"github.com/asians-cloud/crowdsec/pkg/database/ent/configitem"
-	"github.com/pkg/errors"
 )
 
 func (c *Client) GetConfigItem(key string) (*string, error) {

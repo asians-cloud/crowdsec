@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	"github.com/asians-cloud/crowdsec/cmd/crowdsec-cli/require"
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 )
 
@@ -17,7 +19,7 @@ func addToExclusion(name string) error {
 }
 
 func removeFromExclusion(name string) error {
-	index := indexOf(name, csConfig.Cscli.SimulationConfig.Exclusions)
+	index := slices.Index(csConfig.Cscli.SimulationConfig.Exclusions, name)
 
 	// Remove element from the slice
 	csConfig.Cscli.SimulationConfig.Exclusions[index] = csConfig.Cscli.SimulationConfig.Exclusions[len(csConfig.Cscli.SimulationConfig.Exclusions)-1]
@@ -103,8 +105,8 @@ func NewSimulationCmds() *cobra.Command {
 		Use:   "simulation [command]",
 		Short: "Manage simulation status of scenarios",
 		Example: `cscli simulation status
-cscli simulation enable crowdsecurity/ssh-bf
-cscli simulation disable crowdsecurity/ssh-bf`,
+cscli simulation enable asians-cloud/ssh-bf
+cscli simulation disable asians-cloud/ssh-bf`,
 		DisableAutoGenTag: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := csConfig.LoadSimulation(); err != nil {
@@ -143,12 +145,8 @@ func NewSimulationEnableCmd() *cobra.Command {
 		Example:           `cscli simulation enable`,
 		DisableAutoGenTag: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := csConfig.LoadHub(); err != nil {
+			if err := require.Hub(csConfig); err != nil {
 				log.Fatal(err)
-			}
-			if err := cwhub.GetHubIdx(csConfig.Hub); err != nil {
-				log.Info("Run 'sudo cscli hub update' to get the hub index")
-				log.Fatalf("Failed to get Hub index : %v", err)
 			}
 
 			if len(args) > 0 {
@@ -161,7 +159,7 @@ func NewSimulationEnableCmd() *cobra.Command {
 					if !item.Installed {
 						log.Warningf("'%s' isn't enabled", scenario)
 					}
-					isExcluded := inSlice(scenario, csConfig.Cscli.SimulationConfig.Exclusions)
+					isExcluded := slices.Contains(csConfig.Cscli.SimulationConfig.Exclusions, scenario)
 					if *csConfig.Cscli.SimulationConfig.Simulation && !isExcluded {
 						log.Warning("global simulation is already enabled")
 						continue
@@ -210,7 +208,7 @@ func NewSimulationDisableCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) > 0 {
 				for _, scenario := range args {
-					isExcluded := inSlice(scenario, csConfig.Cscli.SimulationConfig.Exclusions)
+					isExcluded := slices.Contains(csConfig.Cscli.SimulationConfig.Exclusions, scenario)
 					if !*csConfig.Cscli.SimulationConfig.Simulation && !isExcluded {
 						log.Warningf("%s isn't in simulation mode", scenario)
 						continue

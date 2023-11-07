@@ -5,10 +5,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/exprhelpers"
 	"github.com/asians-cloud/crowdsec/pkg/models"
-	"gotest.tools/v3/assert"
 )
 
 var (
@@ -85,6 +86,19 @@ func TestNewProfile(t *testing.T) {
 			},
 			expectedNbProfile: 1,
 		},
+		{
+			name: "filter ok and no duration",
+			profileCfg: &csconfig.ProfileCfg{
+				Filters: []string{
+					"1==1",
+				},
+				Debug: &boolTrue,
+				Decisions: []models.Decision{
+					{Type: &typ, Scope: &scope, Simulated: &boolFalse},
+				},
+			},
+			expectedNbProfile: 1,
+		},
 	}
 
 	for _, test := range tests {
@@ -95,7 +109,7 @@ func TestNewProfile(t *testing.T) {
 			}
 			profile, _ := NewProfile(profilesCfg)
 			fmt.Printf("expected : %+v | result : %+v", test.expectedNbProfile, len(profile))
-			assert.Equal(t, test.expectedNbProfile, len(profile))
+			require.Len(t, profile, test.expectedNbProfile)
 		})
 	}
 }
@@ -199,7 +213,7 @@ func TestEvaluateProfile(t *testing.T) {
 				t.Errorf("EvaluateProfile() got1 = %v, want %v", got1, tt.expectedMatchStatus)
 			}
 			if tt.expectedDuration != "" {
-				assert.Equal(t, tt.expectedDuration, *got[0].Duration, "The two durations should be the same")
+				require.Equal(t, tt.expectedDuration, *got[0].Duration, "The two durations should be the same")
 			}
 		})
 	}

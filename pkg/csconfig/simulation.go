@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/asians-cloud/crowdsec/pkg/yamlpatch"
 	"gopkg.in/yaml.v2"
+
+	"github.com/asians-cloud/go-cs-lib/yamlpatch"
 )
 
 type SimulationConfig struct {

@@ -13,8 +13,8 @@ pytestmark = pytest.mark.docker
 
 def test_install_two_postoverflows(crowdsec, flavor):
     """Test installing postoverflows at startup"""
-    it1 = 'crowdsecurity/cdn-whitelist'
-    it2 = 'crowdsecurity/ipv6_to_range'
+    it1 = 'asians-cloud/cdn-whitelist'
+    it2 = 'asians-cloud/ipv6_to_range'
     env = {
         'POSTOVERFLOWS': f'{it1} {it2}'
     }
@@ -40,7 +40,7 @@ def test_disable_postoverflow():
 
 def test_install_and_disable_postoverflow(crowdsec, flavor):
     """Declare a postoverflow to install AND disable: disable wins"""
-    it = 'crowdsecurity/cdn-whitelist'
+    it = 'asians-cloud/cdn-whitelist'
     env = {
         'POSTOVERFLOWS': it,
         'DISABLE_POSTOVERFLOWS': it,

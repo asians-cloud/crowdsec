@@ -10,7 +10,8 @@ import (
 	"github.com/lithammer/dedent"
 	"github.com/stretchr/testify/require"
 
-	"github.com/asians-cloud/crowdsec/pkg/cstest"
+	"github.com/asians-cloud/go-cs-lib/cstest"
+
 	"github.com/asians-cloud/crowdsec/pkg/setup"
 )
 
@@ -56,7 +57,7 @@ func TestSetupHelperProcess(t *testing.T) {
 	os.Exit(0)
 }
 
-func tempYAML(t *testing.T, content string) string {
+func tempYAML(t *testing.T, content string) os.File {
 	t.Helper()
 	require := require.New(t)
 	file, err := os.CreateTemp("", "")
@@ -68,7 +69,10 @@ func tempYAML(t *testing.T, content string) string {
 	err = file.Close()
 	require.NoError(err)
 
-	return file.Name()
+	file, err = os.Open(file.Name())
+	require.NoError(err)
+
+	return *file
 }
 
 func TestPathExists(t *testing.T) {
@@ -116,16 +120,16 @@ func TestVersionCheck(t *testing.T) {
 		{"1", ">1", false, ""},
 		{"1", ">=1", true, ""},
 		{"1.0", "<1.0", false, ""},
-		{"1", "<1", true, ""},       // XXX why?
-		{"1.3.5", "1.3", false, ""}, // XXX ok?
+		{"1", "<1", false, ""},
+		{"1.3.5", "1.3", true, ""},
 		{"1.0", "<1.0", false, ""},
 		{"1.0", "<=1.0", true, ""},
 		{"2", ">1, <3", true, ""},
 		{"2", "<=2, >=2.2", false, ""},
 		{"2.3", "~2", true, ""},
 		{"2.3", "=2", true, ""},
-		{"1.1.1", "=1.1", false, ""},
-		{"1.1.1", "1.1", false, ""},
+		{"1.1.1", "=1.1", true, ""},
+		{"1.1.1", "1.1", true, ""},
 		{"1.1", "!=1.1.1", true, ""},
 		{"1.1", "~1.1.1", false, ""},
 		{"1.1.1", "~1.1", true, ""},
@@ -135,7 +139,7 @@ func TestVersionCheck(t *testing.T) {
 		{"19.04", "=19.4", true, ""},
 		{"19.04", "~19.4", true, ""},
 		{"1.2.3", "~1.2", true, ""},
-		{"1.2.3", "!=1.2", true, ""},
+		{"1.2.3", "!=1.2", false, ""},
 		{"1.2.3", "1.1.1 - 1.3.4", true, ""},
 		{"1.3.5", "1.1.1 - 1.3.4", false, ""},
 		{"1.3.5", "=1", true, ""},
@@ -237,7 +241,7 @@ func TestListSupported(t *testing.T) {
 			"invalid yaml: bad version",
 			"version: 2.0",
 			nil,
-			"unsupported version tag '2.0' (must be 1.0)",
+			"invalid version tag '2.0' (must be 1.0)",
 		},
 	}
 
@@ -246,8 +250,8 @@ func TestListSupported(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			f := tempYAML(t, tc.yml)
-			defer os.Remove(f)
-			supported, err := setup.ListSupported(f)
+			defer os.Remove(f.Name())
+			supported, err := setup.ListSupported(&f)
 			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			require.ElementsMatch(t, tc.expected, supported)
 		})
@@ -371,9 +375,9 @@ func TestDetectSimpleRule(t *testing.T) {
 	      - false
 	  ugly:
 	`)
-	defer os.Remove(f)
+	defer os.Remove(f.Name())
 
-	detected, err := setup.Detect(f, setup.DetectOptions{})
+	detected, err := setup.Detect(&f, setup.DetectOptions{})
 	require.NoError(err)
 
 	expected := []setup.ServiceSetup{
@@ -418,9 +422,9 @@ detect:
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			f := tempYAML(t, tc.config)
-			defer os.Remove(f)
+			defer os.Remove(f.Name())
 
-			detected, err := setup.Detect(f, setup.DetectOptions{})
+			detected, err := setup.Detect(&f, setup.DetectOptions{})
 			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			require.Equal(tc.expected, detected)
 		})
@@ -512,9 +516,9 @@ detect:
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			f := tempYAML(t, tc.config)
-			defer os.Remove(f)
+			defer os.Remove(f.Name())
 
-			detected, err := setup.Detect(f, setup.DetectOptions{})
+			detected, err := setup.Detect(&f, setup.DetectOptions{})
 			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			require.Equal(tc.expected, detected)
 		})
@@ -540,9 +544,9 @@ func TestDetectForcedUnit(t *testing.T) {
 	      journalctl_filter:
 	        - _SYSTEMD_UNIT=crowdsec-setup-forced.service
 	`)
-	defer os.Remove(f)
+	defer os.Remove(f.Name())
 
-	detected, err := setup.Detect(f, setup.DetectOptions{ForcedUnits: []string{"crowdsec-setup-forced.service"}})
+	detected, err := setup.Detect(&f, setup.DetectOptions{ForcedUnits: []string{"crowdsec-setup-forced.service"}})
 	require.NoError(err)
 
 	expected := setup.Setup{
@@ -578,9 +582,9 @@ func TestDetectForcedProcess(t *testing.T) {
 	    when:
 	      - ProcessRunning("foobar")
 	`)
-	defer os.Remove(f)
+	defer os.Remove(f.Name())
 
-	detected, err := setup.Detect(f, setup.DetectOptions{ForcedProcesses: []string{"foobar"}})
+	detected, err := setup.Detect(&f, setup.DetectOptions{ForcedProcesses: []string{"foobar"}})
 	require.NoError(err)
 
 	expected := setup.Setup{
@@ -608,9 +612,9 @@ func TestDetectSkipService(t *testing.T) {
 	    when:
 	      - ProcessRunning("foobar")
 	`)
-	defer os.Remove(f)
+	defer os.Remove(f.Name())
 
-	detected, err := setup.Detect(f, setup.DetectOptions{ForcedProcesses: []string{"foobar"}, SkipServices: []string{"wizard"}})
+	detected, err := setup.Detect(&f, setup.DetectOptions{ForcedProcesses: []string{"foobar"}, SkipServices: []string{"wizard"}})
 	require.NoError(err)
 
 	expected := setup.Setup{[]setup.ServiceSetup{}}
@@ -824,9 +828,9 @@ func TestDetectForcedOS(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			f := tempYAML(t, tc.config)
-			defer os.Remove(f)
+			defer os.Remove(f.Name())
 
-			detected, err := setup.Detect(f, setup.DetectOptions{ForcedOS: tc.forced})
+			detected, err := setup.Detect(&f, setup.DetectOptions{ForcedOS: tc.forced})
 			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			require.Equal(tc.expected, detected)
 		})
@@ -880,7 +884,7 @@ func TestDetectDatasourceValidation(t *testing.T) {
 				    datasource:
 				    source: file`,
 			expected:    setup.Setup{Setup: []setup.ServiceSetup{}},
-			expectedErr: "while parsing {{.DetectYaml}}: yaml: unmarshal errors:\n  line 6: field source not found in type setup.Service",
+			expectedErr: "yaml: unmarshal errors:\n  line 6: field source not found in type setup.Service",
 		}, {
 			name: "source is mismatched",
 			config: `
@@ -999,18 +1003,10 @@ func TestDetectDatasourceValidation(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			detectYaml := tempYAML(t, tc.config)
-			defer os.Remove(detectYaml)
-
-			data := map[string]string{
-				"DetectYaml": detectYaml,
-			}
-
-			expectedErr, err := cstest.Interpolate(tc.expectedErr, data)
-			require.NoError(err)
-
-			detected, err := setup.Detect(detectYaml, setup.DetectOptions{})
-			cstest.RequireErrorContains(t, err, expectedErr)
+			f := tempYAML(t, tc.config)
+			defer os.Remove(f.Name())
+			detected, err := setup.Detect(&f, setup.DetectOptions{})
+			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			require.Equal(tc.expected, detected)
 		})
 	}

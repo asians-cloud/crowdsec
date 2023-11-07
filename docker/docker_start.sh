@@ -56,7 +56,7 @@ conf_get() {
     if [ $# -ge 2 ]; then
         yq e "$1" "$2"
     else
-        yq e "$1" "$CONFIG_FILE"
+        cscli config show-yaml | yq e "$1"
     fi
 }
 
@@ -187,7 +187,6 @@ fi
 
 lapi_credentials_path=$(conf_get '.api.client.credentials_path')
 
-
 if isfalse "$DISABLE_LOCAL_API"; then
     # generate local agent credentials (even if agent is disabled, cscli needs a
     # connection to the API)
@@ -244,7 +243,7 @@ if istrue "$DISABLE_ONLINE_API"; then
 fi
 
 # registration to online API for signal push
-if isfalse "$DISABLE_ONLINE_API" ; then
+if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" ; then
     CONFIG_DIR=$(conf_get '.config_paths.config_dir')
     export CONFIG_DIR
     config_exists=$(conf_get '.api.server.online_client | has("credentials_path")')
@@ -256,7 +255,7 @@ if isfalse "$DISABLE_ONLINE_API" ; then
 fi
 
 # Enroll instance if enroll key is provided
-if isfalse "$DISABLE_ONLINE_API" && [ "$ENROLL_KEY" != "" ]; then
+if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" && [ "$ENROLL_KEY" != "" ]; then
     enroll_args=""
     if [ "$ENROLL_INSTANCE_NAME" != "" ]; then
         enroll_args="--name $ENROLL_INSTANCE_NAME"
@@ -274,13 +273,14 @@ fi
 # crowdsec sqlite database permissions
 if [ "$GID" != "" ]; then
     if istrue "$(conf_get '.db_config.type == "sqlite"')"; then
-        chown ":$GID" "$(conf_get '.db_config.db_path')"
-        echo "sqlite database permissions updated"
+        # don't fail if the db is not there yet
+        chown -f ":$GID" "$(conf_get '.db_config.db_path')" 2>/dev/null \
+            && echo "sqlite database permissions updated" \
+            || true
     fi
 fi
 
-# XXX only with LAPI
-if istrue "$USE_TLS"; then
+if isfalse "$DISABLE_LOCAL_API" && istrue "$USE_TLS"; then
     agents_allowed_yaml=$(csv2yaml "$AGENTS_ALLOWED_OU")
     export agents_allowed_yaml
     bouncers_allowed_yaml=$(csv2yaml "$BOUNCERS_ALLOWED_OU")
@@ -299,10 +299,10 @@ conf_set_if "$PLUGIN_DIR" '.config_paths.plugin_dir = strenv(PLUGIN_DIR)'
 ## Install collections, parsers, scenarios & postoverflows
 cscli hub update
 
-cscli_if_clean collections upgrade crowdsecurity/linux
-cscli_if_clean parsers upgrade crowdsecurity/whitelists
-cscli_if_clean parsers install crowdsecurity/docker-logs
-cscli_if_clean parsers install crowdsecurity/cri-logs
+cscli_if_clean collections upgrade asians-cloud/linux
+cscli_if_clean parsers upgrade asians-cloud/whitelists
+cscli_if_clean parsers install asians-cloud/docker-logs
+cscli_if_clean parsers install asians-cloud/cri-logs
 
 if [ "$COLLECTIONS" != "" ]; then
     # shellcheck disable=SC2086
@@ -359,11 +359,22 @@ shopt -s nullglob extglob
 for BOUNCER in /run/secrets/@(bouncer_key|BOUNCER_KEY)* ; do
     KEY=$(cat "${BOUNCER}")
     NAME=$(echo "${BOUNCER}" | awk -F "/" '{printf $NF}' | cut -d_  -f2-)
-    if [[ -n $KEY ]] && [[ -n $NAME ]]; then    
+    if [[ -n $KEY ]] && [[ -n $NAME ]]; then
         register_bouncer "$NAME" "$KEY"
     fi
 done
 shopt -u nullglob extglob
+
+# set all options before validating the configuration
+
+conf_set_if "$CAPI_WHITELISTS_PATH" '.api.server.capi_whitelists_path = strenv(CAPI_WHITELISTS_PATH)'
+conf_set_if "$METRICS_PORT" '.prometheus.listen_port=env(METRICS_PORT)'
+
+if istrue "$DISABLE_LOCAL_API"; then
+    conf_set '.api.server.enable=false'
+else
+    conf_set '.api.server.enable=true'
+fi
 
 ARGS=""
 if [ "$CONFIG_FILE" != "" ]; then
@@ -386,10 +397,6 @@ if istrue "$DISABLE_AGENT"; then
     ARGS="$ARGS -no-cs"
 fi
 
-if istrue "$DISABLE_LOCAL_API"; then
-    ARGS="$ARGS -no-api"
-fi
-
 if istrue "$LEVEL_TRACE"; then
     ARGS="$ARGS -trace"
 fi
@@ -401,8 +408,6 @@ fi
 if istrue "$LEVEL_INFO"; then
     ARGS="$ARGS -info"
 fi
-
-conf_set_if "$METRICS_PORT" '.prometheus.listen_port=env(METRICS_PORT)'
 
 # shellcheck disable=SC2086
 exec crowdsec $ARGS

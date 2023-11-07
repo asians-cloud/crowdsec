@@ -10,20 +10,19 @@ import (
 	"github.com/asians-cloud/crowdsec/pkg/csconfig"
 	"github.com/asians-cloud/crowdsec/pkg/cwhub"
 	"github.com/asians-cloud/crowdsec/pkg/parser"
-	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 type HubTestItemConfig struct {
-	Parsers         []string           `yaml:"parsers"`
-	Scenarios       []string           `yaml:"scenarios"`
-	PostOVerflows   []string           `yaml:"postoverflows"`
-	LogFile         string             `yaml:"log_file"`
-	LogType         string             `yaml:"log_type"`
-	Labels          map[string]string  `yaml:"labels"`
-	IgnoreParsers   bool               `yaml:"ignore_parsers"`   // if we test a scenario, we don't want to assert on Parser
-	OverrideStatics []types.ExtraField `yaml:"override_statics"` //Allow to override statics. Executed before s00
+	Parsers         []string            `yaml:"parsers"`
+	Scenarios       []string            `yaml:"scenarios"`
+	PostOVerflows   []string            `yaml:"postoverflows"`
+	LogFile         string              `yaml:"log_file"`
+	LogType         string              `yaml:"log_type"`
+	Labels          map[string]string   `yaml:"labels"`
+	IgnoreParsers   bool                `yaml:"ignore_parsers"`   // if we test a scenario, we don't want to assert on Parser
+	OverrideStatics []parser.ExtraField `yaml:"override_statics"` //Allow to override statics. Executed before s00
 }
 
 type HubIndex struct {
@@ -98,7 +97,7 @@ func NewTest(name string, hubTest *HubTest) (*HubTestItem, error) {
 	}
 	err = yaml.Unmarshal(yamlFile, configFileData)
 	if err != nil {
-		return nil, fmt.Errorf("Unmarshal: %v", err)
+		return nil, fmt.Errorf("unmarshal: %v", err)
 	}
 
 	parserAssertFilePath := filepath.Join(testPath, ParserAssertFileName)
@@ -123,10 +122,10 @@ func NewTest(name string, hubTest *HubTest) (*HubTestItem, error) {
 		ScenarioResultFile:        filepath.Join(resultPath, ScenarioResultFileName),
 		BucketPourResultFile:      filepath.Join(resultPath, BucketPourResultFileName),
 		RuntimeHubConfig: &csconfig.Hub{
-			HubDir:       runtimeHubFolder,
-			ConfigDir:    runtimeFolder,
-			HubIndexFile: hubTest.HubIndexFile,
-			DataDir:      filepath.Join(runtimeFolder, "data"),
+			HubDir:         runtimeHubFolder,
+			HubIndexFile:   hubTest.HubIndexFile,
+			InstallDir:     runtimeFolder,
+			InstallDataDir: filepath.Join(runtimeFolder, "data"),
 		},
 		Config:                 configFileData,
 		HubPath:                hubTest.HubPath,
@@ -156,7 +155,7 @@ func (t *HubTestItem) InstallHub() error {
 			}
 			parserFileName := filepath.Base(parserSource)
 
-			// runtime/hub/parsers/s00-raw/crowdsecurity/
+			// runtime/hub/parsers/s00-raw/asians-cloud/
 			hubDirParserDest := filepath.Join(t.RuntimeHubPath, filepath.Dir(hubParser.RemotePath))
 
 			// runtime/parsers/s00-raw/
@@ -169,7 +168,7 @@ func (t *HubTestItem) InstallHub() error {
 				return fmt.Errorf("unable to create folder '%s': %s", parserDirDest, err)
 			}
 
-			// runtime/hub/parsers/s00-raw/crowdsecurity/syslog-logs.yaml
+			// runtime/hub/parsers/s00-raw/asians-cloud/syslog-logs.yaml
 			hubDirParserPath := filepath.Join(hubDirParserDest, parserFileName)
 			if err := Copy(parserSource, hubDirParserPath); err != nil {
 				return fmt.Errorf("unable to copy '%s' to '%s': %s", parserSource, hubDirParserPath, err)
@@ -240,7 +239,7 @@ func (t *HubTestItem) InstallHub() error {
 			}
 			scenarioFileName := filepath.Base(scenarioSource)
 
-			// runtime/hub/scenarios/crowdsecurity/
+			// runtime/hub/scenarios/asians-cloud/
 			hubDirScenarioDest := filepath.Join(t.RuntimeHubPath, filepath.Dir(hubScenario.RemotePath))
 
 			// runtime/parsers/scenarios/
@@ -253,7 +252,7 @@ func (t *HubTestItem) InstallHub() error {
 				return fmt.Errorf("unable to create folder '%s': %s", scenarioDirDest, err)
 			}
 
-			// runtime/hub/scenarios/crowdsecurity/ssh-bf.yaml
+			// runtime/hub/scenarios/asians-cloud/ssh-bf.yaml
 			hubDirScenarioPath := filepath.Join(hubDirScenarioDest, scenarioFileName)
 			if err := Copy(scenarioSource, hubDirScenarioPath); err != nil {
 				return fmt.Errorf("unable to copy '%s' to '%s': %s", scenarioSource, hubDirScenarioPath, err)
@@ -309,7 +308,7 @@ func (t *HubTestItem) InstallHub() error {
 			}
 			postoverflowFileName := filepath.Base(postoverflowSource)
 
-			// runtime/hub/postoverflows/s00-enrich/crowdsecurity/
+			// runtime/hub/postoverflows/s00-enrich/asians-cloud/
 			hubDirPostoverflowDest := filepath.Join(t.RuntimeHubPath, filepath.Dir(hubPostOverflow.RemotePath))
 
 			// runtime/postoverflows/s00-enrich
@@ -322,7 +321,7 @@ func (t *HubTestItem) InstallHub() error {
 				return fmt.Errorf("unable to create folder '%s': %s", postoverflowDirDest, err)
 			}
 
-			// runtime/hub/postoverflows/s00-enrich/crowdsecurity/rdns.yaml
+			// runtime/hub/postoverflows/s00-enrich/asians-cloud/rdns.yaml
 			hubDirPostoverflowPath := filepath.Join(hubDirPostoverflowDest, postoverflowFileName)
 			if err := Copy(postoverflowSource, hubDirPostoverflowPath); err != nil {
 				return fmt.Errorf("unable to copy '%s' to '%s': %s", postoverflowSource, hubDirPostoverflowPath, err)
@@ -517,7 +516,7 @@ func (t *HubTestItem) Run() error {
 		return fmt.Errorf("unable to stat log file '%s': %s", logFile, err)
 	}
 	if logFileStat.Size() == 0 {
-		return fmt.Errorf("Log file '%s' is empty, please fill it with log", logFile)
+		return fmt.Errorf("log file '%s' is empty, please fill it with log", logFile)
 	}
 
 	cmdArgs := []string{"-c", t.RuntimeConfigFilePath, "machines", "add", "testMachine", "--auto"}
@@ -531,7 +530,7 @@ func (t *HubTestItem) Run() error {
 		}
 	}
 
-	cmdArgs = []string{"-c", t.RuntimeConfigFilePath, "-type", logType, "-dsn", dsn, "-dump-data", t.ResultsPath}
+	cmdArgs = []string{"-c", t.RuntimeConfigFilePath, "-type", logType, "-dsn", dsn, "-dump-data", t.ResultsPath, "-order-event"}
 	for labelKey, labelValue := range t.Config.Labels {
 		arg := fmt.Sprintf("%s:%s", labelKey, labelValue)
 		cmdArgs = append(cmdArgs, "-label", arg)
@@ -556,7 +555,7 @@ func (t *HubTestItem) Run() error {
 		if os.IsNotExist(err) {
 			parserAssertFile, err := os.Create(t.ParserAssert.File)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			parserAssertFile.Close()
 		}
@@ -592,7 +591,7 @@ func (t *HubTestItem) Run() error {
 		if os.IsNotExist(err) {
 			scenarioAssertFile, err := os.Create(t.ScenarioAssert.File)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			scenarioAssertFile.Close()
 		}

@@ -1,15 +1,16 @@
 line: Sep 19 18:33:22 scw-d95986 sshd[24347]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=1.2.3.4
 	├ s00-raw
-	|	└ 🟢 crowdsecurity/syslog-logs (+12 ~9)
+	|	└ 🟢 asians-cloud/syslog-logs (+12 ~9)
 	├ s01-parse
-	|	└ 🟢 crowdsecurity/sshd-logs (+8 ~1)
+	|	└ 🟢 asians-cloud/sshd-logs (+8 ~1)
 	├ s02-enrich
-	|	├ 🟢 crowdsecurity/dateparse-enrich (+2 ~2)
-	|	└ 🟢 crowdsecurity/geoip-enrich (+10)
+	|	├ 🟢 asians-cloud/dateparse-enrich (+2 ~2)
+	|	├ 🟢 asians-cloud/geoip-enrich (+10)
+	|	└ 🟢 asians-cloud/whitelists (unchanged)
 	├-------- parser success 🟢
 	├ Scenarios
-		├ 🟢 crowdsecurity/ssh-bf
-		├ 🟢 crowdsecurity/ssh-bf_user-enum
-		├ 🟢 crowdsecurity/ssh-slow-bf
-		└ 🟢 crowdsecurity/ssh-slow-bf_user-enum
+		├ 🟢 asians-cloud/ssh-bf
+		├ 🟢 asians-cloud/ssh-bf_user-enum
+		├ 🟢 asians-cloud/ssh-slow-bf
+		└ 🟢 asians-cloud/ssh-slow-bf_user-enum
 

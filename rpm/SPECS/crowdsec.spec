@@ -12,8 +12,6 @@ Patch0:         crowdsec.unit.patch
 Patch1:         user.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  git
-BuildRequires:  make
 BuildRequires:  systemd
 Requires: crontabs
 %{?fc33:BuildRequires: systemd-rpm-macros}
@@ -27,7 +25,6 @@ Requires: crontabs
 
 %define version_number  %(echo $VERSION)
 %define releasever  %(echo $RELEASEVER)
-%global local_version v%{version_number}-%{releasever}-rpm
 %global name crowdsec
 %global __mangle_shebangs_exclude_from /usr/bin/env
 
@@ -38,7 +35,6 @@ Requires: crontabs
 %patch1
 
 %build
-BUILD_VERSION=%{local_version} make build
 sed -i "s#/usr/local/lib/crowdsec/plugins/#%{_libdir}/%{name}/plugins/#g" config/config.yaml
 
 %install
@@ -67,15 +63,18 @@ install -m 644 -D config/context.yaml %{buildroot}%{_sysconfdir}/crowdsec/consol
 install -m 750 -D config/%{name}.cron.daily %{buildroot}%{_sysconfdir}/cron.daily/%{name}
 install -m 644 -D %{SOURCE1} %{buildroot}%{_presetdir}
 
-install -m 551 plugins/notifications/slack/notification-slack %{buildroot}%{_libdir}/%{name}/plugins/
-install -m 551 plugins/notifications/http/notification-http %{buildroot}%{_libdir}/%{name}/plugins/
-install -m 551 plugins/notifications/splunk/notification-splunk %{buildroot}%{_libdir}/%{name}/plugins/
-install -m 551 plugins/notifications/email/notification-email %{buildroot}%{_libdir}/%{name}/plugins/
+install -m 551 cmd/notification-slack/notification-slack %{buildroot}%{_libdir}/%{name}/plugins/
+install -m 551 cmd/notification-http/notification-http %{buildroot}%{_libdir}/%{name}/plugins/
+install -m 551 cmd/notification-splunk/notification-splunk %{buildroot}%{_libdir}/%{name}/plugins/
+install -m 551 cmd/notification-email/notification-email %{buildroot}%{_libdir}/%{name}/plugins/
+install -m 551 cmd/notification-sentinel/notification-sentinel %{buildroot}%{_libdir}/%{name}/plugins/
 
-install -m 600 plugins/notifications/slack/slack.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
-install -m 600 plugins/notifications/http/http.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
-install -m 600 plugins/notifications/splunk/splunk.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
-install -m 600 plugins/notifications/email/email.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
+install -m 600 cmd/notification-slack/slack.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
+install -m 600 cmd/notification-http/http.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
+install -m 600 cmd/notification-splunk/splunk.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
+install -m 600 cmd/notification-email/email.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
+install -m 600 cmd/notification-sentinel/sentinel.yaml %{buildroot}%{_sysconfdir}/crowdsec/notifications/
+
 
 %clean
 rm -rf %{buildroot}
@@ -89,6 +88,7 @@ rm -rf %{buildroot}
 %{_libdir}/%{name}/plugins/notification-http
 %{_libdir}/%{name}/plugins/notification-splunk
 %{_libdir}/%{name}/plugins/notification-email
+%{_libdir}/%{name}/plugins/notification-sentinel
 %{_sysconfdir}/%{name}/patterns/linux-syslog
 %{_sysconfdir}/%{name}/patterns/ruby
 %{_sysconfdir}/%{name}/patterns/nginx
@@ -123,6 +123,7 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/%{name}/notifications/slack.yaml
 %config(noreplace) %{_sysconfdir}/%{name}/notifications/splunk.yaml
 %config(noreplace) %{_sysconfdir}/%{name}/notifications/email.yaml
+%config(noreplace) %{_sysconfdir}/%{name}/notifications/sentinel.yaml
 %config(noreplace) %{_sysconfdir}/cron.daily/%{name}
 
 %{_unitdir}/%{name}.service
@@ -130,6 +131,7 @@ rm -rf %{buildroot}
 %ghost %{_sysconfdir}/%{name}/hub/.index.json
 %ghost %{_localstatedir}/log/%{name}.log
 %dir /var/lib/%{name}/data/
+%dir %{_sysconfdir}/%{name}/hub
 
 %ghost %{_sysconfdir}/crowdsec/local_api_credentials.yaml
 %ghost %{_sysconfdir}/crowdsec/online_api_credentials.yaml

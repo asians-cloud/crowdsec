@@ -27,7 +27,7 @@ stages:
           - task: GoTool@0
             displayName: "Install Go 1.20"
             inputs:
-                version: '1.20.3'
+                version: '1.21.3'
 
           - pwsh: |
               choco install -y make
@@ -38,7 +38,7 @@ stages:
               pwsh: true
               #we are not calling make windows_installer because we want to sign the binaries before they are added to the MSI
               script: |
-                make build
+                make build BUILD_RE2_WASM=1
           - task: AzureKeyVault@2
             inputs:
               azureSubscription: 'Azure subscription 1(8a93ab40-7e99-445e-ad47-0f6a3e2ef546)'
@@ -107,7 +107,7 @@ stages:
             deploy:
               steps:
                 - bash: |
-                    tag=$(curl -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/crowdsecurity/crowdsec/releases | jq -r '. | map(select(.prerelease==true)) | sort_by(.created_at) | reverse | .[0].tag_name')
+                    tag=$(curl -H "Accept: application/vnd.github.v3+json"   https://api.github.com/repos/asians-cloud/crowdsec/releases | jq -r '. | map(select(.prerelease==true)) | sort_by(.created_at) | reverse | .[0].tag_name')
                     echo "##vso[task.setvariable variable=LatestPreRelease;isOutput=true]$tag"
                   name: GetLatestPrelease
                 - task: GitHubRelease@1

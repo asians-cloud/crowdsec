@@ -2,13 +2,15 @@ package csconfig
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 
-	"github.com/asians-cloud/crowdsec/pkg/models"
-	"github.com/asians-cloud/crowdsec/pkg/yamlpatch"
-	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+
+	"github.com/asians-cloud/go-cs-lib/yamlpatch"
+
+	"github.com/asians-cloud/crowdsec/pkg/models"
 )
 
 // var OnErrorDefault = OnErrorIgnore
@@ -42,7 +44,6 @@ func (c *LocalApiServerCfg) LoadProfiles() error {
 	}
 	reader := bytes.NewReader(fcontent)
 
-	//process the yaml
 	dec := yaml.NewDecoder(reader)
 	dec.SetStrict(true)
 	for {
@@ -52,7 +53,7 @@ func (c *LocalApiServerCfg) LoadProfiles() error {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			return errors.Wrapf(err, "while decoding %s", c.ProfilesPath)
+			return fmt.Errorf("while decoding %s: %w", c.ProfilesPath, err)
 		}
 		c.Profiles = append(c.Profiles, &t)
 	}

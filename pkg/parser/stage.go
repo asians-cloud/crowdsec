@@ -75,7 +75,7 @@ func LoadStages(stageFiles []Stagefile, pctx *UnixParserCtx, ectx EnricherCtx) (
 
 			//check for empty bucket
 			if node.Name == "" && node.Description == "" && node.Author == "" {
-				log.Infof("Node in %s has no name,author or description. Skipping.", stageFile.Filename)
+				log.Infof("Node in %s has no name, author or description. Skipping.", stageFile.Filename)
 				continue
 			}
 			//check compat
@@ -83,7 +83,7 @@ func LoadStages(stageFiles []Stagefile, pctx *UnixParserCtx, ectx EnricherCtx) (
 				log.Tracef("no version in %s, assuming '1.0'", node.Name)
 				node.FormatVersion = "1.0"
 			}
-			ok, err := cwversion.Statisfies(node.FormatVersion, cwversion.Constraint_parser)
+			ok, err := cwversion.Satisfies(node.FormatVersion, cwversion.Constraint_parser)
 			if err != nil {
 				log.Fatalf("Failed to check version : %s", err)
 			}
@@ -109,17 +109,16 @@ func LoadStages(stageFiles []Stagefile, pctx *UnixParserCtx, ectx EnricherCtx) (
 				continue
 			}
 
-			if len(node.Data) > 0 {
-				for _, data := range node.Data {
-					err = exprhelpers.FileInit(pctx.DataFolder, data.DestPath, data.Type)
-					if err != nil {
-						log.Error(err)
-					}
-					if data.Type == "regexp" { //cache only makes sense for regexp
-						exprhelpers.RegexpCacheInit(data.DestPath, *data)
-					}
+			for _, data := range node.Data {
+				err = exprhelpers.FileInit(pctx.DataFolder, data.DestPath, data.Type)
+				if err != nil {
+					log.Error(err)
+				}
+				if data.Type == "regexp" { //cache only makes sense for regexp
+					exprhelpers.RegexpCacheInit(data.DestPath, *data)
 				}
 			}
+
 			nodes = append(nodes, node)
 			nodesCount++
 		}

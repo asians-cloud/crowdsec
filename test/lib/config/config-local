@@ -61,8 +61,6 @@ config_generate() {
        ../config/online_api_credentials.yaml \
        "${CONFIG_DIR}/"
 
-    cp ../config/context.yaml "${CONFIG_DIR}/console/"
-
     cp ../config/detect.yaml \
        "${HUB_DIR}"
 
@@ -76,7 +74,7 @@ config_generate() {
 	    type: syslog
 	EOT
 
-    cp ../plugins/notifications/*/{http,email,slack,splunk,dummy}.yaml \
+    cp ../cmd/notification-*/*.yaml \
        "${CONFIG_DIR}/notifications/"
 
     yq e '
@@ -99,8 +97,7 @@ config_generate() {
     .api.client.credentials_path=strenv(CONFIG_DIR)+"/local_api_credentials.yaml" |
     .api.server.profiles_path=strenv(CONFIG_DIR)+"/profiles.yaml" |
     .api.server.console_path=strenv(CONFIG_DIR)+"/console.yaml" |
-    .crowdsec_service.console_context_path=strenv(CONFIG_DIR) + "/console/context.yaml" |
-    .api.server.online_client.credentials_path=strenv(CONFIG_DIR)+"/online_api_credentials.yaml"
+    del(.api.server.online_client)
     ' ../config/config.yaml >"${CONFIG_DIR}/config.yaml"
 }
 
@@ -113,25 +110,23 @@ make_init_data() {
     mkdir -p "${CONFIG_DIR}/notifications"
     mkdir -p "${CONFIG_DIR}/hub"
     mkdir -p "${CONFIG_DIR}/patterns"
-    mkdir -p "${CONFIG_DIR}/console"
     cp -a "../config/patterns" "${CONFIG_DIR}/"
     config_generate
     # XXX errors from instance-db should be reported...
     ./instance-db config-yaml
     ./instance-db setup
 
-    "$CSCLI" machines add githubciXXXXXXXXXXXXXXXXXXXXXXXX --auto
-    "$CSCLI" hub update
-    "$CSCLI" collections install crowdsecurity/linux
+    "$CSCLI" --warning machines add githubciXXXXXXXXXXXXXXXXXXXXXXXX --auto
+    "$CSCLI" --warning hub update
+    "$CSCLI" --warning collections install asians-cloud/linux
+    # the whitelists are installed by the deb & rpm packages, so we test with the same config
+    "$CSCLI" --warning parsers install asians-cloud/whitelists
 
     mkdir -p "$LOCAL_INIT_DIR"
 
     ./instance-db dump "${LOCAL_INIT_DIR}/database"
 
     echo "${DB_BACKEND}" > "${LOCAL_INIT_DIR}/.backend"
-
-    # disable CAPI by default
-    yq e 'del(.api.server.online_client)' -i "${CONFIG_DIR}/config.yaml"
 
     "${TAR}" -C "${LOCAL_DIR}" --create \
         --exclude "${REL_DATA_DIR}"/crowdsec.db \

@@ -3,8 +3,9 @@ package parser
 import (
 	"encoding/json"
 
-	"github.com/asians-cloud/crowdsec/pkg/types"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/asians-cloud/crowdsec/pkg/types"
 )
 
 func unmarshalJSON(field string, p *types.Event, ctx interface{}, plog *log.Entry) (map[string]string, error) {

@@ -1,4 +1,4 @@
-# TODO: windows, use_time_machine, event support (see https://hub.crowdsec.net/author/crowdsecurity/collections/iis)
+# TODO: windows, use_time_machine, event support (see https://hub.crowdsec.net/author/asians-cloud/collections/iis)
 
 ---
 version: 1.0
@@ -9,7 +9,7 @@ detect:
       - ProcessRunning("apache2")
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: file
       labels:
@@ -25,7 +25,7 @@ detect:
       - OS.ID != "centos"
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: journalctl
       journalctl_filter:
@@ -39,7 +39,7 @@ detect:
       - OS.ID == "centos"
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: journalctl
       journalctl_filter:
@@ -50,7 +50,7 @@ detect:
       - UnitFound("ssh.service") or UnitFound("ssh.socket")
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: journalctl
       journalctl_filter:
@@ -63,7 +63,7 @@ detect:
       - OS.Family == "linux"
     install:
       collections:
-        - crowdsecurity/linux
+        - asians-cloud/linux
     datasource:
       source: file
       labels:
@@ -78,11 +78,11 @@ detect:
       - OS.Family == "freebsd"
     install:
       collections:
-        - crowdsecurity/freebsd
+        - asians-cloud/freebsd
 
   windows:
     when:
       - OS.Family == "windows"
     install:
       collections:
-        - crowdsecurity/windows
+        - asians-cloud/windows

@@ -9,7 +9,7 @@
                 "id": 1,
                 "duration": "1h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -38,7 +38,7 @@
                 "value": "test"
             }
         ],
-        "scenario": "crowdsecurity/test",
+        "scenario": "asians-cloud/test",
         "scenario_hash": "hashtest",
         "scenario_version": "v1",
         "simulated": false,

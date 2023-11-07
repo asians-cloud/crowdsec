@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/asians-cloud/crowdsec/pkg/protobufs"
 	plugin "github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
+
+	"github.com/asians-cloud/crowdsec/pkg/protobufs"
 )
 
 type Notifier interface {

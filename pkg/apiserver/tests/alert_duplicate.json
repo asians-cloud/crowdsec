@@ -8,7 +8,7 @@
             {
                 "duration": "1h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -28,7 +28,7 @@
         "scenario_hash": "hashtest",
         "scenario_version": "v1",
         "simulated": false,
-        "scenario": "crowdsecurity/test",
+        "scenario": "asians-cloud/test",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -40,7 +40,7 @@
             {
                 "duration": "3h",
                 "origin": "another_origin",
-                "scenario": "crowdsecurity/ssh_bf",
+                "scenario": "asians-cloud/ssh_bf",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -61,7 +61,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/ssh_bf",
+        "scenario": "asians-cloud/ssh_bf",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -73,7 +73,7 @@
             {
                 "duration": "5h",
                 "origin": "test",
-                "scenario": "crowdsecurity/longest",
+                "scenario": "asians-cloud/longest",
                 "scope": "Ip",
                 "value": "127.0.0.1",
                 "type": "ban"
@@ -94,7 +94,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/longest",
+        "scenario": "asians-cloud/longest",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -106,7 +106,7 @@
             {
                 "duration": "3h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.2",
                 "type": "ban"
@@ -127,7 +127,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/test",
+        "scenario": "asians-cloud/test",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -139,7 +139,7 @@
             {
                 "duration": "3h",
                 "origin": "test",
-                "scenario": "crowdsecurity/ssh_bf",
+                "scenario": "asians-cloud/ssh_bf",
                 "scope": "Ip",
                 "value": "127.0.0.2",
                 "type": "ban"
@@ -160,7 +160,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/ssh_bf",
+        "scenario": "asians-cloud/ssh_bf",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -172,7 +172,7 @@
             {
                 "duration": "1h",
                 "origin": "test",
-                "scenario": "crowdsecurity/ssh_bf",
+                "scenario": "asians-cloud/ssh_bf",
                 "scope": "Ip",
                 "value": "127.0.0.2",
                 "type": "ban"
@@ -193,7 +193,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/ssh_bf",
+        "scenario": "asians-cloud/ssh_bf",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -205,7 +205,7 @@
             {
                 "duration": "2h",
                 "origin": "another_origin",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.2",
                 "type": "ban"
@@ -226,7 +226,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/test",
+        "scenario": "asians-cloud/test",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     },
@@ -238,7 +238,7 @@
             {
                 "duration": "3h",
                 "origin": "test",
-                "scenario": "crowdsecurity/test",
+                "scenario": "asians-cloud/test",
                 "scope": "Ip",
                 "value": "127.0.0.2",
                 "type": "captcha"
@@ -259,7 +259,7 @@
         "scenario_version": "v1",
         "simulated": false,
         "capacity": 1,
-        "scenario": "crowdsecurity/test",
+        "scenario": "asians-cloud/test",
         "start_at": "2020-10-09T10:00:01Z",
         "stop_at": "2020-10-09T10:00:05Z"
     }

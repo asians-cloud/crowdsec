@@ -56,21 +56,21 @@ See what was found.
 
 ```console
 # cscli setup install-hub setup.yaml --dry-run
-dry-run: would install collection crowdsecurity/apache2
-dry-run: would install collection crowdsecurity/linux
-dry-run: would install collection crowdsecurity/pgsql
-dry-run: would install parser crowdsecurity/whitelists
+dry-run: would install collection asians-cloud/apache2
+dry-run: would install collection asians-cloud/linux
+dry-run: would install collection asians-cloud/pgsql
+dry-run: would install parser asians-cloud/whitelists
 ```
 
 Install the objects (parsers, scenarios...) required to support the detected services:
 
 ```console
 # cscli setup install-hub setup.yaml
-INFO[29-06-2022 03:16:14 PM] crowdsecurity/apache2-logs : OK              
-INFO[29-06-2022 03:16:14 PM] Enabled parsers : crowdsecurity/apache2-logs 
-INFO[29-06-2022 03:16:14 PM] crowdsecurity/http-logs : OK             
+INFO[29-06-2022 03:16:14 PM] asians-cloud/apache2-logs : OK              
+INFO[29-06-2022 03:16:14 PM] Enabled parsers : asians-cloud/apache2-logs 
+INFO[29-06-2022 03:16:14 PM] asians-cloud/http-logs : OK             
 [...]
-INFO[29-06-2022 03:16:18 PM] Enabled crowdsecurity/linux      
+INFO[29-06-2022 03:16:18 PM] Enabled asians-cloud/linux      
 ```
 
 Generate the datasource configuration:
@@ -113,7 +113,7 @@ services:
       - ProcessRunning("apache2")
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasources:
       source: file
       labels:
@@ -156,7 +156,7 @@ services:
       - OS.ID != "centos"
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: file
       labels:
@@ -170,7 +170,7 @@ services:
       - OS.ID == "centos"
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       source: file
       labels:
@@ -244,7 +244,7 @@ services:
       - OS.Family == "linux"
     install:
       collections:
-        - crowdsecurity/linux
+        - asians-cloud/linux
     datasource:
       type: file
       labels:
@@ -259,14 +259,14 @@ services:
       - OS.Family == "freebsd"
     install:
       collections:
-        - crowdsecurity/freebsd
+        - asians-cloud/freebsd
 
   windows:
     when:
       - OS.Family == "windows"
     install:
       collections:
-        - crowdsecurity/windows
+        - asians-cloud/windows
 ```
 
 The OS object contains a methods to check for version numbers:
@@ -293,7 +293,7 @@ setup:
   - detected_service: apache2-systemd-deb
     install:
       collections:
-        - crowdsecurity/apache2
+        - asians-cloud/apache2
     datasource:
       filenames:
         - /var/log/apache2/*.log
@@ -302,7 +302,7 @@ setup:
   - detected_service: linux
     install:
       collections:
-        - crowdsecurity/linux
+        - asians-cloud/linux
     datasource:
       filenames:
         - /var/log/syslog
@@ -313,7 +313,7 @@ setup:
   - detected_service: whitelists
     install:
       parsers:
-        - crowdsecurity/whitelists
+        - asians-cloud/whitelists
 ```
 
 The default output format is JSON, which is compatible with YAML but less readable to humans.

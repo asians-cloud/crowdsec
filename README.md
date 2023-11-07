@@ -8,15 +8,15 @@
 <p align="center">
 <img src="https://github.com/asians-cloud/crowdsec/actions/workflows/go-tests.yml/badge.svg">
 <img src="https://github.com/asians-cloud/crowdsec/actions/workflows/bats.yml/badge.svg">
-<a href="https://codecov.io/gh/crowdsecurity/crowdsec">
-  <img src="https://codecov.io/gh/crowdsecurity/crowdsec/branch/master/graph/badge.svg?token=CQGSPNY3PT"/>
+<a href="https://codecov.io/gh/asians-cloud/crowdsec">
+  <img src="https://codecov.io/gh/asians-cloud/crowdsec/branch/master/graph/badge.svg?token=CQGSPNY3PT"/>
 </a>
 <img src="https://goreportcard.com/badge/github.com/asians-cloud/crowdsec">
-<img src="https://img.shields.io/github/license/crowdsecurity/crowdsec">
+<img src="https://img.shields.io/github/license/asians-cloud/crowdsec">
 <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AlteredCoder/ed74e50c43e3b17bdfc4d93149f23d37/raw/crowdsec_parsers_badge.json">
 <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AlteredCoder/ed74e50c43e3b17bdfc4d93149f23d37/raw/crowdsec_scenarios_badge.json">
-<a href="https://hub.docker.com/r/crowdsecurity/crowdsec">
-  <img src="https://img.shields.io/docker/pulls/crowdsecurity/crowdsec?logo=docker">
+<a href="https://hub.docker.com/r/asians-cloud/crowdsec">
+  <img src="https://img.shields.io/docker/pulls/asians-cloud/crowdsec?logo=docker">
 </a>
 <a href="https://discord.com/invite/crowdsec">
   <img src="https://img.shields.io/discord/921520481163673640?label=Discord&logo=discord">
@@ -102,7 +102,7 @@ Signals sent to the curation platform are limited to the very strict minimum: IP
 Crowdsec is available for various platforms :
 
  - [Use our debian repositories](https://doc.crowdsec.net/docs/getting_started/install_crowdsec) or the [official debian packages](https://packages.debian.org/search?keywords=crowdsec&searchon=names&suite=stable&section=all)
- - An [image](https://hub.docker.com/r/crowdsecurity/crowdsec) is available for docker
+ - An [image](https://hub.docker.com/r/asians-cloud/crowdsec) is available for docker
  - [Prebuilt release packages](https://github.com/asians-cloud/crowdsec/releases) are also available (suitable for `amd64`)
  - You can as well [build it from source](https://doc.crowdsec.net/docs/user_guides/building)
 
