@@ -16,6 +16,10 @@ require (
 	github.com/antonmedv/expr v1.12.5
 	github.com/appleboy/gin-jwt/v2 v2.8.0
 	github.com/aquasecurity/table v1.8.0
+	github.com/asians-cloud/dlog v0.0.2
+	github.com/asians-cloud/go-cs-lib v0.0.5
+	github.com/asians-cloud/grokky v0.0.1
+	github.com/asians-cloud/machineid v0.0.1
 	github.com/aws/aws-lambda-go v1.38.0
 	github.com/aws/aws-sdk-go v1.42.25
 	github.com/beevik/etree v1.1.0
@@ -24,10 +28,6 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/c-robinson/iplib v1.0.3
 	github.com/cespare/xxhash/v2 v2.2.0
-	github.com/asians-cloud/dlog v0.0.0-20170105205344-4fb5f8204f26
-	github.com/asians-cloud/go-cs-lib v0.0.4
-	github.com/asians-cloud/grokky v0.2.1
-	github.com/asians-cloud/machineid v1.0.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dghubble/sling v1.3.0
 	github.com/docker/docker v24.0.4+incompatible
@@ -55,6 +55,7 @@ require (
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/jarcoal/httpmock v1.1.0
+	github.com/json-iterator/go v1.1.12
 	github.com/jszwec/csvutil v1.5.1
 	github.com/lithammer/dedent v1.1.0
 	github.com/mattn/go-isatty v0.0.19
@@ -94,7 +95,6 @@ require (
 	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/ahmetalpbalkan/dlog v0.0.0-20170105205344-4fb5f8204f26 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -103,6 +103,7 @@ require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/creack/pty v1.1.18 // indirect
+	github.com/crowdsecurity/dlog v0.0.2 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect

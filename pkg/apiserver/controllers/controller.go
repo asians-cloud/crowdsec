@@ -71,7 +71,7 @@ func (c *Controller) NewV1() error {
 		ProfilesCfg:        c.Profiles,
 		DecisionDeleteChan: c.DecisionDeleteChan,
 		AlertsAddChan:      c.AlertsAddChan,
-                Stream:             c.Stream,
+                // Stream:             c.Stream,
 		PluginChannel:      c.PluginChannel,
 		ConsoleConfig:      *c.ConsoleConfig,
 		TrustedIPs:         c.TrustedIPs,

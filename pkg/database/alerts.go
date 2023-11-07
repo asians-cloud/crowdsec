@@ -104,17 +104,6 @@ func formatAlertAsString(machineID string, alert *models.Alert) []string {
 		domain = alert.Labels["domain"]
 	}
 
-        cname := "-"
-        domain := "-"
-        
-        if alert.Labels["cname"] != "" {
-          cname = alert.Labels["cname"]
-        }
-
-        if alert.Labels["domain"] != "" {
-          domain = alert.Labels["domain"]
-        }
-
 	var retStr []string
 
 	if alert.Decisions[0].Origin != nil && *alert.Decisions[0].Origin == types.CscliImportOrigin {

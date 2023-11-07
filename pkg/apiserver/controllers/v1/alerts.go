@@ -11,7 +11,7 @@ import (
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/google/uuid"
-        jsoniter "github.com/json-iterator/go"
+        // jsoniter "github.com/json-iterator/go"
 
 	"github.com/asians-cloud/crowdsec/pkg/csplugin"
 	"github.com/asians-cloud/crowdsec/pkg/database/ent"
@@ -136,7 +136,7 @@ func normalizeScope(scope string) string {
 func (c *Controller) CreateAlert(gctx *gin.Context) {
 
 	var input models.AddAlertsRequest
-        var json = jsoniter.ConfigCompatibleWithStandardLibrary
+        // var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	claims := jwt.ExtractClaims(gctx)
 	// TBD: use defined rather than hardcoded key to find back owner
@@ -190,18 +190,18 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if decision.Origin != nil && *decision.Origin == types.CscliImportOrigin {
 				stopFlush = true
 			}
-                        ret := make(map[string][]*models.Decision, 0)
-                        ret["new"] = alert.Decisions
-                        ret["deleted"] = []*models.Decision{} 
-                        byteSlice, err := json.Marshal(ret)     
-                        if err != nil {
-                          log.Print(err)
-                        }
-                        select {
-                          case c.Stream.Message <- string(byteSlice):
-                            log.Print("broadcast alert to all client using SSE")
-                          default:
-                        }		
+                        /* ret := make(map[string][]*models.Decision, 0) */
+                        /* ret["new"] = alert.Decisions */
+                        /* ret["deleted"] = []*models.Decision{}  */
+                        /* byteSlice, err := json.Marshal(ret)      */
+                        /* if err != nil { */
+                          /* log.Print(err) */
+                        /* } */
+                        /* select { */
+                          /* case c.Stream.Message <- string(byteSlice): */
+                            /* log.Print("broadcast alert to all client using SSE") */
+                          /* default: */
+                        /* } */		
                         continue
 		}
 
@@ -234,18 +234,18 @@ func (c *Controller) CreateAlert(gctx *gin.Context) {
 			if len(alert.Decisions) == 0 { // non manual decision
 				alert.Decisions = append(alert.Decisions, profileDecisions...)
 			}
-                        ret := make(map[string][]*models.Decision, 0)
-                        ret["new"] = alert.Decisions
-                        ret["deleted"] = []*models.Decision{}
-                        byteSlice, err := json.Marshal(ret)
-                        if err != nil {
-                          log.Print(err)
-                        }
-                        select {
-                          case c.Stream.Message <- string(byteSlice):
-                            log.Print("broadcast alert to all client using SSE")
-                          default:
-                        }
+                        /* ret := make(map[string][]*models.Decision, 0) */
+                        /* ret["new"] = alert.Decisions */
+                        /* ret["deleted"] = []*models.Decision{} */
+                        /* byteSlice, err := json.Marshal(ret) */
+                        /* if err != nil { */
+                          /* log.Print(err) */
+                        /* } */
+                        /* select { */
+                          /* case c.Stream.Message <- string(byteSlice): */
+                            /* log.Print("broadcast alert to all client using SSE") */
+                          /* default: */
+                        /* } */
 
 			profileAlert := *alert
 			c.sendAlertToPluginChannel(&profileAlert, uint(pIdx))

@@ -80,7 +80,7 @@ func (c *Controller) GetDecision(gctx *gin.Context) {
 }
 
 func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
-        var json = jsoniter.ConfigCompatibleWithStandardLibrary
+        // var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var err error
 
 	decisionIDStr := gctx.Param("decision_id")
@@ -97,20 +97,20 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
         
-        if deletedDecisions != nil {
-          ret := make(map[string][]*models.Decision, 0)
-          ret["new"] = []*models.Decision{}
-          ret["deleted"] = deletedDecisions 
-          byteSlice, err := json.Marshal(ret)     
-          if err != nil {
-            log.Print(err)
-          }
-          select {
-            case c.Stream.Message <- string(byteSlice):
-              log.Print("broadcast alert to all client using SSE")
-            default:
-          }
-        }
+        /* if deletedDecisions != nil { */
+          /* ret := make(map[string][]*models.Decision, 0) */
+          /* ret["new"] = []*models.Decision{} */
+          /* ret["deleted"] = deletedDecisions  */
+          /* byteSlice, err := json.Marshal(ret)      */
+          /* if err != nil { */
+            /* log.Print(err) */
+          /* } */
+          /* select { */
+            /* case c.Stream.Message <- string(byteSlice): */
+              /* log.Print("broadcast alert to all client using SSE") */
+            /* default: */
+          /* } */
+        /* } */
 
 	if c.DecisionDeleteChan != nil {
 		c.DecisionDeleteChan <- deletedDecisions
@@ -124,7 +124,7 @@ func (c *Controller) DeleteDecisionById(gctx *gin.Context) {
 }
 
 func (c *Controller) DeleteDecisions(gctx *gin.Context) {
-        var json = jsoniter.ConfigCompatibleWithStandardLibrary
+        // var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var err error
 	nbDeleted, deletedFromDB, err := c.DBClient.SoftDeleteDecisionsWithFilter(gctx.Request.URL.Query())
 	if err != nil {
@@ -134,20 +134,20 @@ func (c *Controller) DeleteDecisions(gctx *gin.Context) {
 	//transform deleted decisions to be sendable to capi
 	deletedDecisions := FormatDecisions(deletedFromDB)
         
-        if deletedDecisions != nil {
-          ret := make(map[string][]*models.Decision, 0)
-          ret["new"] = []*models.Decision{}
-          ret["deleted"] = deletedDecisions 
-          byteSlice, err := json.Marshal(ret)     
-          if err != nil {
-            log.Print(err)
-          }
-          select {
-            case c.Stream.Message <- string(byteSlice):
-              log.Print("broadcast alert to all client using SSE")
-            default:
-          }
-        }
+        /* if deletedDecisions != nil { */
+          /* ret := make(map[string][]*models.Decision, 0) */
+          /* ret["new"] = []*models.Decision{} */
+          /* ret["deleted"] = deletedDecisions  */
+          /* byteSlice, err := json.Marshal(ret)      */
+          /* if err != nil { */
+            /* log.Print(err) */
+          /* } */
+          /* select { */
+            /* case c.Stream.Message <- string(byteSlice): */
+              /* log.Print("broadcast alert to all client using SSE") */
+            /* default: */
+          /* } */
+        /* } */
 
 	if c.DecisionDeleteChan != nil {
 		c.DecisionDeleteChan <- deletedDecisions
