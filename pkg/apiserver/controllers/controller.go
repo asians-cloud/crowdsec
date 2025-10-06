@@ -88,6 +88,7 @@ func (c *Controller) NewV1() error {
 	groupV1 := c.Router.Group("/v1")
 	groupV1.POST("/watchers", c.HandlerV1.AbortRemoteIf(c.DisableRemoteLapiRegistration), c.HandlerV1.CreateMachine)
 	groupV1.POST("/watchers/login", c.HandlerV1.Middlewares.JWT.Middleware.LoginHandler)
+	groupV1.POST("/watchers/validate", c.HandlerV1.ValidateMachine)
 
 	jwtAuth := groupV1.Group("")
 	jwtAuth.GET("/refresh_token", c.HandlerV1.Middlewares.JWT.Middleware.RefreshHandler)
