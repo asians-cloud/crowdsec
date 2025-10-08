@@ -83,6 +83,28 @@ func (c *Client) StartFlushScheduler(config *csconfig.FlushDBCfg) (*gocron.Sched
 	}
 
 	baJob.SingletonMode()
+
+	// Cronjob runs every minute for stale machines cleanup
+	if config.MachinesHeartbeatTimeout != nil && *config.MachinesHeartbeatTimeout != "" {
+		heartbeatTimeout, err := ParseDuration(*config.MachinesHeartbeatTimeout)
+		if err != nil {
+			return nil, fmt.Errorf("while parsing machines heartbeat timeout: %w", err)
+		}
+
+		protectedMachines := config.ProtectedMachines
+		if protectedMachines == nil {
+			protectedMachines = []string{}
+		}
+
+		staleMachinesJob, err := scheduler.Every(1).Minute().Do(c.FlushStaleMachines, heartbeatTimeout, protectedMachines)
+		if err != nil {
+			return nil, fmt.Errorf("while starting FlushStaleMachines scheduler: %w", err)
+		}
+
+		staleMachinesJob.SingletonMode()
+		log.Infof("Stale machines cleanup enabled (timeout: %s, protected: %v)", heartbeatTimeout, protectedMachines)
+	}
+
 	scheduler.StartAsync()
 
 	return scheduler, nil
@@ -274,5 +296,39 @@ func (c *Client) FlushAlerts(MaxAge string, MaxItems int) error {
 	if deletedByAge > 0 {
 		c.Log.Infof("flushed %d/%d alerts because they were created %s ago or more", deletedByAge, totalAlerts, MaxAge)
 	}
+	return nil
+}
+
+func (c *Client) FlushStaleMachines(heartbeatTimeout time.Duration, protectedMachines []string) error {
+	if heartbeatTimeout == 0 {
+		return nil
+	}
+
+	c.Log.Debugf("Starting stale machine cleanup (timeout: %s)", heartbeatTimeout)
+
+	cutoffTime := time.Now().UTC().Add(-heartbeatTimeout)
+	deleteQuery := c.Ent.Machine.Delete().Where(
+		machine.LastHeartbeatLTE(cutoffTime),
+	).Where(
+		machine.IsValidatedEQ(true),
+	)
+
+	if len(protectedMachines) > 0 {
+		deleteQuery = deleteQuery.Where(
+			machine.Not(machine.MachineIdIn(protectedMachines...)),
+		)
+		c.Log.Debugf("Protected machines from deletion: %v", protectedMachines)
+	}
+
+	deletionCount, err := deleteQuery.Exec(c.CTX)
+	if err != nil {
+		c.Log.Errorf("while auto-deleting stale machines: %s", err)
+		return fmt.Errorf("unable to delete stale machines: %w", err)
+	}
+
+	if deletionCount > 0 {
+		c.Log.Infof("deleted %d stale machines (heartbeat timeout: %s)", deletionCount, heartbeatTimeout)
+	}
+
 	return nil
 }
