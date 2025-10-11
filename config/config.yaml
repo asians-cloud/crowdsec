@@ -36,9 +36,11 @@ db_config:
   flush:
     max_items: 5000
     max_age: 7d
-    machines_heartbeat_timeout: 30m   
+    machines_heartbeat_timeout: 5m
+    machines_bouncers_cleanup_interval: 10s
     protected_machines:               
       - gaius-internal
+    bouncers_last_pull_timeout: 5m
     
 plugin_config:
   user: nobody # plugin process would be ran on behalf of this user
