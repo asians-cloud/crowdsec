@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	middlewares "github.com/crowdsecurity/crowdsec/pkg/apiserver/middlewares/v1"
-	"github.com/crowdsecurity/crowdsec/pkg/types"
+	middlewares "github.com/asians-cloud/crowdsec/pkg/apiserver/middlewares/v1"
+	"github.com/asians-cloud/crowdsec/pkg/types"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
