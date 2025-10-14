@@ -83,6 +83,45 @@ func (c *Client) StartFlushScheduler(config *csconfig.FlushDBCfg) (*gocron.Sched
 	}
 
 	baJob.SingletonMode()
+
+	// Cronjob runs for stale machines and bouncers cleanup
+	if config.MachinesHeartbeatTimeout != nil && *config.MachinesHeartbeatTimeout != "" {
+		heartbeatTimeout, err := ParseDuration(*config.MachinesHeartbeatTimeout)
+		if err != nil {
+			return nil, fmt.Errorf("while parsing machines heartbeat timeout: %w", err)
+		}
+
+		protectedMachines := config.ProtectedMachines
+		if protectedMachines == nil {
+			protectedMachines = []string{}
+		}
+
+		cleanupInterval := time.Minute
+		if config.MachinesBouncersCleanupInterval != nil && *config.MachinesBouncersCleanupInterval != "" {
+			cleanupInterval, err = ParseDuration(*config.MachinesBouncersCleanupInterval)
+			if err != nil {
+				return nil, fmt.Errorf("while parsing machines/bouncers cleanup interval: %w", err)
+			}
+		}
+
+		bouncerTimeout := heartbeatTimeout 
+		if config.BouncersLastPullTimeout != nil && *config.BouncersLastPullTimeout != "" {
+			bouncerTimeout, err = ParseDuration(*config.BouncersLastPullTimeout)
+			if err != nil {
+				return nil, fmt.Errorf("while parsing bouncers last pull timeout: %w", err)
+			}
+		}
+
+		staleMachinesJob, err := scheduler.Every(cleanupInterval).Do(c.FlushStaleMachines, heartbeatTimeout, bouncerTimeout, protectedMachines)
+		if err != nil {
+			return nil, fmt.Errorf("while starting FlushStaleMachines scheduler: %w", err)
+		}
+
+		staleMachinesJob.SingletonMode()
+		log.Infof("Stale machines cleanup enabled (interval: %s, timeout: %s, protected: %v)", cleanupInterval, heartbeatTimeout, protectedMachines)
+		log.Infof("Stale bouncers cleanup enabled (interval: %s, timeout: %s)", cleanupInterval, bouncerTimeout)
+	}
+
 	scheduler.StartAsync()
 
 	return scheduler, nil
@@ -274,5 +313,60 @@ func (c *Client) FlushAlerts(MaxAge string, MaxItems int) error {
 	if deletedByAge > 0 {
 		c.Log.Infof("flushed %d/%d alerts because they were created %s ago or more", deletedByAge, totalAlerts, MaxAge)
 	}
+	return nil
+}
+
+func (c *Client) FlushStaleMachines(heartbeatTimeout time.Duration, bouncerTimeout time.Duration, protectedMachines []string) error {
+	if heartbeatTimeout == 0 && bouncerTimeout == 0 {
+		return nil
+	}
+
+	if heartbeatTimeout > 0 {
+		c.Log.Debugf("Starting stale machine cleanup (timeout: %s)", heartbeatTimeout)
+
+		cutoffTime := time.Now().UTC().Add(-heartbeatTimeout)
+		deleteQuery := c.Ent.Machine.Delete().Where(
+			machine.LastHeartbeatLTE(cutoffTime),
+		).Where(
+			machine.IsValidatedEQ(true),
+		)
+
+		if len(protectedMachines) > 0 {
+			deleteQuery = deleteQuery.Where(
+				machine.Not(machine.MachineIdIn(protectedMachines...)),
+			)
+			c.Log.Debugf("Protected machines from deletion: %v", protectedMachines)
+		}
+
+		deletionCount, err := deleteQuery.Exec(c.CTX)
+		if err != nil {
+			c.Log.Errorf("while auto-deleting stale machines: %s", err)
+			return fmt.Errorf("unable to delete stale machines: %w", err)
+		}
+
+		if deletionCount > 0 {
+			c.Log.Infof("deleted %d stale machines (heartbeat timeout: %s)", deletionCount, heartbeatTimeout)
+		}
+	}
+
+	if bouncerTimeout > 0 {
+		c.Log.Debugf("Starting stale bouncer cleanup (timeout: %s)", bouncerTimeout)
+		
+		bouncerCutoffTime := time.Now().UTC().Add(-bouncerTimeout)
+		bouncerDeleteQuery := c.Ent.Bouncer.Delete().Where(
+			bouncer.LastPullLTE(bouncerCutoffTime),
+		)
+
+		bouncerDeletionCount, err := bouncerDeleteQuery.Exec(c.CTX)
+		if err != nil {
+			c.Log.Errorf("while auto-deleting stale bouncers: %s", err)
+			return fmt.Errorf("unable to delete stale bouncers: %w", err)
+		}
+
+		if bouncerDeletionCount > 0 {
+			c.Log.Infof("deleted %d stale bouncers (last pull timeout: %s)", bouncerDeletionCount, bouncerTimeout)
+		}
+	}
+
 	return nil
 }

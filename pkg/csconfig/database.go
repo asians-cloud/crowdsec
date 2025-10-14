@@ -44,10 +44,14 @@ type AuthGCCfg struct {
 }
 
 type FlushDBCfg struct {
-	MaxItems   *int       `yaml:"max_items,omitempty"`
-	MaxAge     *string    `yaml:"max_age,omitempty"`
-	BouncersGC *AuthGCCfg `yaml:"bouncers_autodelete,omitempty"`
-	AgentsGC   *AuthGCCfg `yaml:"agents_autodelete,omitempty"`
+	MaxItems                        *int       `yaml:"max_items,omitempty"`
+	MaxAge                          *string    `yaml:"max_age,omitempty"`
+	BouncersGC                      *AuthGCCfg `yaml:"bouncers_autodelete,omitempty"`
+	AgentsGC                        *AuthGCCfg `yaml:"agents_autodelete,omitempty"`
+	MachinesHeartbeatTimeout        *string    `yaml:"machines_heartbeat_timeout,omitempty"`
+	MachinesBouncersCleanupInterval *string    `yaml:"machines_bouncers_cleanup_interval,omitempty"`
+	ProtectedMachines               []string   `yaml:"protected_machines,omitempty"`
+	BouncersLastPullTimeout         *string    `yaml:"bouncers_last_pull_timeout,omitempty"`
 }
 
 func (c *Config) LoadDBConfig() error {
