@@ -3,10 +3,12 @@ package v1
 import (
 	"net/http"
 
+	"github.com/crowdsecurity/crowdsec/pkg/database"
 	"github.com/crowdsecurity/crowdsec/pkg/models"
 	"github.com/crowdsecurity/crowdsec/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/strfmt"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -32,37 +34,25 @@ func (c *Controller) CreateMachine(gctx *gin.Context) {
 }
 
 func (c *Controller) ValidateMachine(gctx *gin.Context) {
-	machineID := gctx.Query("machine_id")
-	password := gctx.Query("password")
-	
-	if machineID == "" {
-		var input struct {
-			MachineID *string `json:"machine_id"`
-			Password  *string `json:"password"`
-		}
-		if err := gctx.ShouldBindJSON(&input); err == nil {
-			if input.MachineID != nil {
-				machineID = *input.MachineID
-			}
-			if input.Password != nil {
-				password = *input.Password
-			}
-		}
+	var input struct {
+		MachineID *string `json:"machine_id" binding:"required"`
+		Password  *string `json:"password" binding:"required"`
 	}
-	
-	if machineID == "" {
-		gctx.JSON(http.StatusBadRequest, gin.H{"message": "machine_id is required"})
+	if err := gctx.ShouldBindJSON(&input); err != nil {
+		gctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request body"})
 		return
 	}
-	
-	if password == "" {
-		gctx.JSON(http.StatusBadRequest, gin.H{"message": "password is required"})
-		return
-	}
+	machineID := *input.MachineID
+	password := *input.Password
 
 	machine, err := c.DBClient.QueryMachineByID(machineID)
 	if err != nil {
 		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "machine not found"})
+		return
+	}
+
+	if machine.AuthType != types.PasswordAuthType {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "authentication failed"})
 		return
 	}
 
@@ -73,8 +63,8 @@ func (c *Controller) ValidateMachine(gctx *gin.Context) {
 
 	if machine.IsValidated {
 		gctx.JSON(http.StatusOK, gin.H{
-			"message": "machine is already validated",
-			"machine_id": machineID,
+			"message":      "machine is already validated",
+			"machine_id":   machineID,
 			"is_validated": true,
 		})
 		return
@@ -87,8 +77,50 @@ func (c *Controller) ValidateMachine(gctx *gin.Context) {
 	}
 
 	gctx.JSON(http.StatusOK, gin.H{
-		"message": "machine has been validated successfully",
-		"machine_id": machineID,
+		"message":      "machine has been validated successfully",
+		"machine_id":   machineID,
 		"is_validated": true,
 	})
+}
+
+type deleteMachineRequest struct {
+	MachineID *string `json:"machine_id" binding:"required"`
+	Password  *string `json:"password" binding:"required"`
+}
+
+func (c *Controller) DeleteMachine(gctx *gin.Context) {
+	var input deleteMachineRequest
+	if err := gctx.ShouldBindJSON(&input); err != nil {
+		gctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request body"})
+		return
+	}
+	machineID := *input.MachineID
+	password := *input.Password
+
+	machine, err := c.DBClient.QueryMachineByID(machineID)
+	if err != nil {
+		if errors.Cause(err) == database.UserNotExists {
+			gctx.JSON(http.StatusOK, gin.H{"message": "machine not registered"})
+			return
+		}
+		c.HandleDBErrors(gctx, err)
+		return
+	}
+
+	if machine.AuthType != types.PasswordAuthType {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "authentication failed"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(machine.Password), []byte(password)); err != nil {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "authentication failed"})
+		return
+	}
+
+	if err := c.DBClient.DeleteWatcher(machineID); err != nil {
+		gctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	gctx.JSON(http.StatusOK, gin.H{"message": "machine deleted"})
 }
