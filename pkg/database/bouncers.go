@@ -69,6 +69,14 @@ func (c *Client) DeleteBouncer(name string) error {
 	return nil
 }
 
+func (c *Client) DeleteBouncerAllowMissing(name string) error {
+	_, err := c.Ent.Bouncer.
+		Delete().
+		Where(bouncer.NameEQ(name)).
+		Exec(c.CTX)
+	return err
+}
+
 func (c *Client) BulkDeleteBouncers(bouncers []*ent.Bouncer) (int, error) {
 	ids := make([]int, len(bouncers))
 	for i, b := range bouncers {

@@ -95,7 +95,9 @@ func (c *Controller) NewV1() error {
 	groupV1.POST("/watchers", c.HandlerV1.AbortRemoteIf(c.DisableRemoteLapiRegistration), c.HandlerV1.CreateMachine)
 	groupV1.POST("/watchers/login", c.HandlerV1.Middlewares.JWT.Middleware.LoginHandler)
 	groupV1.POST("/watchers/validate", c.HandlerV1.ValidateMachine)
+	groupV1.POST("/watchers/delete", c.HandlerV1.DeleteMachine)
 	groupV1.POST("/bouncers/add", c.HandlerV1.AddBouncer)
+	groupV1.POST("/bouncers/delete", c.HandlerV1.DeleteBouncer)
 
 	jwtAuth := groupV1.Group("")
 	jwtAuth.GET("/refresh_token", c.HandlerV1.Middlewares.JWT.Middleware.RefreshHandler)
