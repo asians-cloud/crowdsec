@@ -205,6 +205,7 @@ func NewServer(config *csconfig.LocalApiServerCfg) (*APIServer, error) {
 		Log:                           clog,
 		ConsoleConfig:                 config.ConsoleConfig,
 		DisableRemoteLapiRegistration: config.DisableRemoteLapiRegistration,
+		RegistrationSecret:            strings.TrimSpace(config.RegistrationSecret),
 	}
 
 	var apiClient *apic
@@ -242,6 +243,10 @@ func NewServer(config *csconfig.LocalApiServerCfg) (*APIServer, error) {
 		controller.TrustedIPs = trustedIPs
 	} else {
 		return &APIServer{}, err
+	}
+
+	if controller.RegistrationSecret != "" {
+		log.Infof("LAPI registration_secret is set: remote registration routes require header %s", controllers.RegistrationSecretHeader)
 	}
 
 	return &APIServer{

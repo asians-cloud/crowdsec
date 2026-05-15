@@ -208,6 +208,7 @@ type LocalApiServerCfg struct {
 	TrustedIPs                    []string            `yaml:"trusted_ips,omitempty"`
 	PapiLogLevel                  *log.Level          `yaml:"papi_log_level"`
 	DisableRemoteLapiRegistration bool                `yaml:"disable_remote_lapi_registration,omitempty"`
+	RegistrationSecret            string              `yaml:"registration_secret,omitempty"`
 	CapiWhitelistsPath            string              `yaml:"capi_whitelists_path,omitempty"`
 	CapiWhitelists                *CapiWhitelist      `yaml:"-"`
 }
