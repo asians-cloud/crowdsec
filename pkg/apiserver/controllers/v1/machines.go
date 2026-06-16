@@ -8,7 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/strfmt"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 
+	"github.com/crowdsecurity/crowdsec/pkg/database"
 	"github.com/crowdsecurity/crowdsec/pkg/models"
 	"github.com/crowdsecurity/crowdsec/pkg/types"
 )
@@ -103,4 +105,124 @@ func (c *Controller) DeleteMachine(gctx *gin.Context) {
 	log.WithFields(log.Fields{"ip": gctx.ClientIP(), "machine_id": machineID}).Info("Deleted machine")
 
 	gctx.Status(http.StatusNoContent)
+}
+
+func (c *Controller) ValidateMachine(gctx *gin.Context) {
+	ctx := gctx.Request.Context()
+
+	var input struct {
+		MachineID *string `json:"machine_id" binding:"required"`
+		Password  *string `json:"password" binding:"required"`
+	}
+
+	if err := gctx.ShouldBindJSON(&input); err != nil {
+		gctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request body"})
+
+		return
+	}
+
+	machineID := *input.MachineID
+	password := *input.Password
+
+	machine, err := c.DBClient.QueryMachineByID(ctx, machineID)
+	if err != nil {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "machine not found"})
+
+		return
+	}
+
+	if machine.AuthType != types.PasswordAuthType {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "authentication failed"})
+
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(machine.Password), []byte(password)); err != nil {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "invalid password"})
+
+		return
+	}
+
+	if machine.IsValidated {
+		gctx.JSON(http.StatusOK, gin.H{
+			"message":      "machine is already validated",
+			"machine_id":   machineID,
+			"is_validated": true,
+		})
+
+		return
+	}
+
+	if err := c.DBClient.ValidateMachine(ctx, machineID); err != nil {
+		c.HandleDBErrors(gctx, err)
+
+		return
+	}
+
+	gctx.JSON(http.StatusOK, gin.H{
+		"message":      "machine has been validated successfully",
+		"machine_id":   machineID,
+		"is_validated": true,
+	})
+}
+
+type unregisterMachineRequest struct {
+	MachineID *string `json:"machine_id" binding:"required"`
+	Password  *string `json:"password" binding:"required"`
+}
+
+// UnregisterMachine deletes a machine using machine_id + password credentials.
+// Used by POST /v1/watchers/delete (remote registration flow).
+func (c *Controller) UnregisterMachine(gctx *gin.Context) {
+	ctx := gctx.Request.Context()
+
+	var input unregisterMachineRequest
+	if err := gctx.ShouldBindJSON(&input); err != nil {
+		gctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request body"})
+
+		return
+	}
+
+	machineID := *input.MachineID
+	password := *input.Password
+
+	machine, err := c.DBClient.QueryMachineByID(ctx, machineID)
+	if err != nil {
+		if errors.Is(err, database.UserNotExists) {
+			gctx.JSON(http.StatusOK, gin.H{"message": "machine not registered"})
+
+			return
+		}
+
+		c.HandleDBErrors(gctx, err)
+
+		return
+	}
+
+	if machine.AuthType != types.PasswordAuthType {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "authentication failed"})
+
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(machine.Password), []byte(password)); err != nil {
+		gctx.JSON(http.StatusUnauthorized, gin.H{"message": "authentication failed"})
+
+		return
+	}
+
+	if err := c.DBClient.DeleteWatcher(ctx, machineID); err != nil {
+		var notFound *database.MachineNotFoundError
+		if errors.As(err, &notFound) {
+			gctx.JSON(http.StatusOK, gin.H{"message": "machine not registered"})
+
+			return
+		}
+
+		c.HandleDBErrors(gctx, err)
+
+		return
+	}
+
+	gctx.JSON(http.StatusOK, gin.H{"message": "machine deleted"})
 }

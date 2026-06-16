@@ -187,6 +187,7 @@ func NewServer(ctx context.Context, config *csconfig.LocalApiServerCfg, accessLo
 		ConsoleConfig:                 config.ConsoleConfig,
 		DisableRemoteLapiRegistration: config.DisableRemoteLapiRegistration,
 		AutoRegisterCfg:               config.AutoRegister,
+		RegistrationSecret:            strings.TrimSpace(config.RegistrationSecret),
 	}
 
 	var (
@@ -546,6 +547,10 @@ func (s *APIServer) InitController() error {
 	err := s.controller.Init()
 	if err != nil {
 		return fmt.Errorf("controller init: %w", err)
+	}
+
+	if s.controller.RegistrationSecret != "" {
+		log.Infof("LAPI registration_secret is set: remote registration routes require header %s", controllers.RegistrationSecretHeader)
 	}
 
 	if s.cfg.TLS == nil {

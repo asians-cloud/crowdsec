@@ -115,6 +115,15 @@ func (c *Client) DeleteBouncer(ctx context.Context, name string) error {
 	return nil
 }
 
+func (c *Client) DeleteBouncerAllowMissing(ctx context.Context, name string) error {
+	_, err := c.Ent.Bouncer.
+		Delete().
+		Where(bouncer.NameEQ(name)).
+		Exec(ctx)
+
+	return err
+}
+
 func (c *Client) BulkDeleteBouncers(ctx context.Context, bouncers []*ent.Bouncer) (int, error) {
 	ids := make([]int, len(bouncers))
 	for i, b := range bouncers {

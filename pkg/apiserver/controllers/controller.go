@@ -30,6 +30,7 @@ type Controller struct {
 	HandlerV1                     *v1.Controller
 	AutoRegisterCfg               *csconfig.LocalAPIAutoRegisterCfg
 	DisableRemoteLapiRegistration bool
+	RegistrationSecret            string
 }
 
 func (c *Controller) Init() error {
@@ -115,8 +116,15 @@ func (c *Controller) NewV1() error {
 	authBodyLimit := middlewaresv1.BodyLimit(middlewaresv1.AuthenticatedBodyLimit)
 
 	groupV1 := c.Router.Group("/v1")
-	groupV1.POST("/watchers", unauthBodyLimit, c.HandlerV1.AbortRemoteIf(c.DisableRemoteLapiRegistration), c.HandlerV1.CreateMachine)
 	groupV1.POST("/watchers/login", unauthBodyLimit, c.HandlerV1.Middlewares.JWT.Middleware.LoginHandler)
+
+	remoteReg := groupV1.Group("")
+	remoteReg.Use(RegistrationSecretMiddleware(c.RegistrationSecret))
+	remoteReg.POST("/watchers", unauthBodyLimit, c.HandlerV1.AbortRemoteIf(c.DisableRemoteLapiRegistration), c.HandlerV1.CreateMachine)
+	remoteReg.POST("/watchers/validate", unauthBodyLimit, c.HandlerV1.ValidateMachine)
+	remoteReg.POST("/watchers/delete", unauthBodyLimit, c.HandlerV1.UnregisterMachine)
+	remoteReg.POST("/bouncers/add", unauthBodyLimit, c.HandlerV1.AddBouncer)
+	remoteReg.POST("/bouncers/delete", unauthBodyLimit, c.HandlerV1.DeleteBouncer)
 
 	jwtAuth := groupV1.Group("")
 	jwtAuth.GET("/refresh_token", c.HandlerV1.Middlewares.JWT.Middleware.RefreshHandler)
